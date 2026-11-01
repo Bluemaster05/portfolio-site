@@ -9,6 +9,7 @@ import { isImageSrc } from '@/lib/images';
 import { MediaSourceField } from '@/components/admin/MediaSourceField';
 import { Button, TextInput } from '@/components/admin/ui';
 import { AlignedImage } from './extensions/aligned-image';
+import { HighlightedCodeBlock } from './extensions/code-block/code-block';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
 import { imageAlign, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
@@ -30,9 +31,12 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
     extensions: [
       StarterKit.configure({
         heading: { levels: [2, 3, 4] },
+        // Replaced by HighlightedCodeBlock (language field + colors)
+        codeBlock: false,
         link: { openOnClick: false, autolink: true, protocols: ['http', 'https', 'mailto'] },
       }),
       AlignedImage,
+      HighlightedCodeBlock,
       Placeholder.configure({ placeholder: placeholder ?? 'Start writing…' }),
       CodeTabsExtension,
     ],
