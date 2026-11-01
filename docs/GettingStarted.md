@@ -20,6 +20,7 @@ docker compose up -d        # PostgreSQL on localhost:5433
 cd server
 yarn install
 yarn migration:up           # create tables
+                            # (no migrations yet? `yarn migration:create --initial` first)
 yarn db:seed                # admin user, default settings, dev API token
 yarn start:dev              # http://localhost:4000, Swagger at http://localhost:4000/api/docs
 ```

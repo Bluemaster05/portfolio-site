@@ -1,0 +1,3663 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/api/health": {
+      "get": {
+        "operationId": "HealthController_check",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Liveness check",
+        "tags": [
+          "health"
+        ]
+      }
+    },
+    "/api/auth/login": {
+      "post": {
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Wrong email or password",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign in as an admin; sets access and refresh cookies",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/refresh": {
+      "post": {
+        "operationId": "AuthController_refresh",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, expired or revoked refresh token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "refresh_token": []
+          }
+        ],
+        "summary": "Rotate the refresh cookie and issue a new access cookie",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/logout": {
+      "post": {
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Sign out; revokes the refresh token and clears cookies",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/me": {
+      "get": {
+        "operationId": "AuthController_me",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "The signed-in admin",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/auth/csrf-token": {
+      "get": {
+        "operationId": "AuthController_csrfToken",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CsrfTokenResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Get a CSRF token for the X-CSRF-Token header",
+        "tags": [
+          "auth"
+        ]
+      }
+    },
+    "/api/admin/api-tokens": {
+      "get": {
+        "operationId": "ApiTokensAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ApiTokenResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List API tokens (without their secret values)",
+        "tags": [
+          "admin: api tokens"
+        ]
+      },
+      "post": {
+        "operationId": "ApiTokensAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateApiTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTokenCreatedResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create a read-only API token; the token value is returned only here",
+        "tags": [
+          "admin: api tokens"
+        ]
+      }
+    },
+    "/api/admin/api-tokens/{id}/revoke": {
+      "post": {
+        "operationId": "ApiTokensAdminController_revoke",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiTokenResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Revoke an API token; it stops working immediately",
+        "tags": [
+          "admin: api tokens"
+        ]
+      }
+    },
+    "/api/admin/api-tokens/{id}": {
+      "delete": {
+        "operationId": "ApiTokensAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete an API token",
+        "tags": [
+          "admin: api tokens"
+        ]
+      }
+    },
+    "/api/admin/site": {
+      "get": {
+        "operationId": "SiteAdminController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettingsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Site settings, profile, and section toggles",
+        "tags": [
+          "admin: site"
+        ]
+      },
+      "patch": {
+        "operationId": "SiteAdminController_update",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateSiteSettingsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettingsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update site settings, profile, or section toggles",
+        "tags": [
+          "admin: site"
+        ]
+      }
+    },
+    "/api/public/site": {
+      "get": {
+        "operationId": "SitePublicController_get",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/SiteSettingsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Site settings, profile, and which sections are enabled",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/admin/projects": {
+      "get": {
+        "operationId": "ProjectsAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List all projects, drafts included",
+        "tags": [
+          "admin: projects"
+        ]
+      },
+      "post": {
+        "operationId": "ProjectsAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Slug already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create a project",
+        "tags": [
+          "admin: projects"
+        ]
+      }
+    },
+    "/api/admin/projects/{id}": {
+      "get": {
+        "operationId": "ProjectsAdminController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Get a project",
+        "tags": [
+          "admin: projects"
+        ]
+      },
+      "patch": {
+        "operationId": "ProjectsAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateProjectDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Slug already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update a project",
+        "tags": [
+          "admin: projects"
+        ]
+      },
+      "delete": {
+        "operationId": "ProjectsAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete a project",
+        "tags": [
+          "admin: projects"
+        ]
+      }
+    },
+    "/api/admin/projects/order": {
+      "put": {
+        "operationId": "ProjectsAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of projects",
+        "tags": [
+          "admin: projects"
+        ]
+      }
+    },
+    "/api/public/projects": {
+      "get": {
+        "operationId": "ProjectsPublicController_findAll",
+        "parameters": [
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Only featured projects",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ProjectSummaryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Published projects in display order",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/public/projects/{slug}": {
+      "get": {
+        "operationId": "ProjectsPublicController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ProjectResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "A published project by slug",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/admin/experience": {
+      "get": {
+        "operationId": "ExperienceAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExperienceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List all experience entries, drafts included",
+        "tags": [
+          "admin: experience"
+        ]
+      },
+      "post": {
+        "operationId": "ExperienceAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateExperienceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create an experience entry",
+        "tags": [
+          "admin: experience"
+        ]
+      }
+    },
+    "/api/admin/experience/{id}": {
+      "get": {
+        "operationId": "ExperienceAdminController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Get an experience entry",
+        "tags": [
+          "admin: experience"
+        ]
+      },
+      "patch": {
+        "operationId": "ExperienceAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateExperienceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update an experience entry",
+        "tags": [
+          "admin: experience"
+        ]
+      },
+      "delete": {
+        "operationId": "ExperienceAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete an experience entry",
+        "tags": [
+          "admin: experience"
+        ]
+      }
+    },
+    "/api/admin/experience/order": {
+      "put": {
+        "operationId": "ExperienceAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExperienceResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of experience entries",
+        "tags": [
+          "admin: experience"
+        ]
+      }
+    },
+    "/api/public/experience": {
+      "get": {
+        "operationId": "ExperiencePublicController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/ExperienceResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Published experience entries in display order",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/admin/education": {
+      "get": {
+        "operationId": "EducationAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EducationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List all education entries, drafts included",
+        "tags": [
+          "admin: education"
+        ]
+      },
+      "post": {
+        "operationId": "EducationAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEducationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EducationResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create an education entry",
+        "tags": [
+          "admin: education"
+        ]
+      }
+    },
+    "/api/admin/education/{id}": {
+      "get": {
+        "operationId": "EducationAdminController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EducationResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Get an education entry",
+        "tags": [
+          "admin: education"
+        ]
+      },
+      "patch": {
+        "operationId": "EducationAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEducationDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EducationResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update an education entry",
+        "tags": [
+          "admin: education"
+        ]
+      },
+      "delete": {
+        "operationId": "EducationAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete an education entry",
+        "tags": [
+          "admin: education"
+        ]
+      }
+    },
+    "/api/admin/education/order": {
+      "put": {
+        "operationId": "EducationAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EducationResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of education entries",
+        "tags": [
+          "admin: education"
+        ]
+      }
+    },
+    "/api/public/education": {
+      "get": {
+        "operationId": "EducationPublicController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EducationResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Published education entries in display order",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/admin/honors": {
+      "get": {
+        "operationId": "HonorsAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HonorResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List all honors, drafts included",
+        "tags": [
+          "admin: honors"
+        ]
+      },
+      "post": {
+        "operationId": "HonorsAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateHonorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HonorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create an honor",
+        "tags": [
+          "admin: honors"
+        ]
+      }
+    },
+    "/api/admin/honors/{id}": {
+      "get": {
+        "operationId": "HonorsAdminController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HonorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Get an honor",
+        "tags": [
+          "admin: honors"
+        ]
+      },
+      "patch": {
+        "operationId": "HonorsAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateHonorDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HonorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update an honor",
+        "tags": [
+          "admin: honors"
+        ]
+      },
+      "delete": {
+        "operationId": "HonorsAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete an honor",
+        "tags": [
+          "admin: honors"
+        ]
+      }
+    },
+    "/api/admin/honors/order": {
+      "put": {
+        "operationId": "HonorsAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HonorResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of honors",
+        "tags": [
+          "admin: honors"
+        ]
+      }
+    },
+    "/api/public/honors": {
+      "get": {
+        "operationId": "HonorsPublicController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/HonorResponseDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Published honors in display order",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/admin/blog": {
+      "get": {
+        "operationId": "BlogAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlogPostResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List all blog posts, drafts included",
+        "tags": [
+          "admin: blog"
+        ]
+      },
+      "post": {
+        "operationId": "BlogAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateBlogPostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPostResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Slug already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create a blog post",
+        "tags": [
+          "admin: blog"
+        ]
+      }
+    },
+    "/api/admin/blog/{id}": {
+      "get": {
+        "operationId": "BlogAdminController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPostResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Get a blog post",
+        "tags": [
+          "admin: blog"
+        ]
+      },
+      "patch": {
+        "operationId": "BlogAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateBlogPostDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPostResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Slug already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update a blog post",
+        "tags": [
+          "admin: blog"
+        ]
+      },
+      "delete": {
+        "operationId": "BlogAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete a blog post",
+        "tags": [
+          "admin: blog"
+        ]
+      }
+    },
+    "/api/admin/blog/order": {
+      "put": {
+        "operationId": "BlogAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlogPostResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of blog posts",
+        "tags": [
+          "admin: blog"
+        ]
+      }
+    },
+    "/api/public/blog": {
+      "get": {
+        "operationId": "BlogPublicController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/BlogPostSummaryDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Published posts, newest first",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/public/blog/{slug}": {
+      "get": {
+        "operationId": "BlogPublicController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BlogPostResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "A published post by slug",
+        "tags": [
+          "public"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "Portfolio API",
+    "description": "Content API for the portfolio site.\n\n- `/api/public/*` — read-only, published content. Authenticate with an API token in `X-API-Key` (or `Authorization: Bearer`).\n- `/api/admin/*` — content management. Authenticate by signing in through `/api/auth/login` (httpOnly cookies) and send `X-CSRF-Token` from `/api/auth/csrf-token` on every non-GET request.",
+    "version": "1.0",
+    "contact": {}
+  },
+  "tags": [],
+  "servers": [],
+  "components": {
+    "securitySchemes": {
+      "access_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "access_token"
+      },
+      "refresh_token": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "refresh_token"
+      },
+      "api-key": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key"
+      }
+    },
+    "schemas": {
+      "MessageResponseDto": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Human readable result of the action"
+          }
+        },
+        "required": [
+          "message"
+        ]
+      },
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "maxLength": 320,
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "ErrorResponseDto": {
+        "type": "object",
+        "properties": {
+          "statusCode": {
+            "type": "number",
+            "description": "HTTP status code"
+          },
+          "message": {
+            "type": "object",
+            "description": "Error message, or a list of validation messages"
+          },
+          "error": {
+            "type": "string",
+            "description": "Short name of the error, e.g. \"Not Found\""
+          }
+        },
+        "required": [
+          "statusCode",
+          "message"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastLoginAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "name",
+          "createdAt"
+        ]
+      },
+      "CsrfTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Send this value in the `X-CSRF-Token` header of non-GET requests"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "ApiScope": {
+        "type": "string",
+        "enum": [
+          "site:read",
+          "projects:read",
+          "experience:read",
+          "education:read",
+          "honors:read",
+          "blog:read"
+        ]
+      },
+      "ApiTokenResponseDto": {
+        "type": "object",
+        "properties": {
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiScope"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "First characters of the token, to tell tokens apart"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "scopes",
+          "id",
+          "name",
+          "prefix",
+          "createdAt"
+        ]
+      },
+      "CreateApiTokenDto": {
+        "type": "object",
+        "properties": {
+          "scopes": {
+            "minItems": 1,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiScope"
+            }
+          },
+          "name": {
+            "type": "string",
+            "description": "What the token is for, e.g. \"Production site\"",
+            "minLength": 1,
+            "maxLength": 100
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Optional ISO date-time after which the token stops working"
+          }
+        },
+        "required": [
+          "scopes",
+          "name"
+        ]
+      },
+      "ApiTokenCreatedResponseDto": {
+        "type": "object",
+        "properties": {
+          "scopes": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ApiScope"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "prefix": {
+            "type": "string",
+            "description": "First characters of the token, to tell tokens apart"
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "lastUsedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "revokedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "token": {
+            "type": "string",
+            "description": "The full token. Shown only once — store it now."
+          }
+        },
+        "required": [
+          "scopes",
+          "id",
+          "name",
+          "prefix",
+          "createdAt",
+          "token"
+        ]
+      },
+      "LinkDto": {
+        "type": "object",
+        "properties": {
+          "label": {
+            "type": "string",
+            "description": "Text shown for the link, e.g. \"GitHub\"",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "url": {
+            "type": "string",
+            "description": "http(s) or mailto URL",
+            "maxLength": 2048
+          }
+        },
+        "required": [
+          "label",
+          "url"
+        ]
+      },
+      "SectionTogglesDto": {
+        "type": "object",
+        "properties": {
+          "home": {
+            "type": "boolean"
+          },
+          "projects": {
+            "type": "boolean"
+          },
+          "experience": {
+            "type": "boolean"
+          },
+          "education": {
+            "type": "boolean"
+          },
+          "blog": {
+            "type": "boolean"
+          },
+          "honors": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "home",
+          "projects",
+          "experience",
+          "education",
+          "blog",
+          "honors"
+        ]
+      },
+      "SiteSettingsResponseDto": {
+        "type": "object",
+        "properties": {
+          "bio": {
+            "type": "object",
+            "description": "Intro shown on the home page",
+            "additionalProperties": true
+          },
+          "siteTitle": {
+            "type": "string",
+            "description": "Browser tab / SEO title"
+          },
+          "siteDescription": {
+            "type": "string",
+            "description": "SEO meta description"
+          },
+          "ownerName": {
+            "type": "string"
+          },
+          "headline": {
+            "type": "string",
+            "description": "One line under the name, e.g. \"Full-stack developer\""
+          },
+          "location": {
+            "type": "string"
+          },
+          "contactEmail": {
+            "type": "string"
+          },
+          "avatarUrl": {
+            "type": "string"
+          },
+          "links": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkDto"
+            }
+          },
+          "sections": {
+            "$ref": "#/components/schemas/SectionTogglesDto"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "bio",
+          "siteTitle",
+          "siteDescription",
+          "ownerName",
+          "headline",
+          "links",
+          "sections",
+          "updatedAt"
+        ]
+      },
+      "UpdateSiteSettingsDto": {
+        "type": "object",
+        "properties": {
+          "bio": {
+            "type": "object",
+            "description": "Intro shown on the home page",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "siteTitle": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "siteDescription": {
+            "type": "string",
+            "maxLength": 300
+          },
+          "ownerName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "headline": {
+            "type": "string",
+            "maxLength": 200
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "contactEmail": {
+            "type": "string",
+            "maxLength": 320,
+            "format": "email"
+          },
+          "avatarUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "links": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/LinkDto"
+            }
+          },
+          "sections": {
+            "$ref": "#/components/schemas/SectionTogglesDto"
+          }
+        }
+      },
+      "ProjectResponseDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "Project write-up",
+            "additionalProperties": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "repoUrl": {
+            "type": "string"
+          },
+          "liveUrl": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "featured": {
+            "type": "boolean"
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "title",
+          "slug",
+          "summary",
+          "technologies",
+          "featured",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateProjectDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "Project write-up",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "description": "When work started",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "When work finished; empty if ongoing",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL segment; generated from the title when omitted",
+            "maxLength": 120,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short plain-text summary for cards and meta descriptions",
+            "maxLength": 500
+          },
+          "technologies": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "repoUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "liveUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page"
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "ReorderDto": {
+        "type": "object",
+        "properties": {
+          "ids": {
+            "description": "Item ids in their new display order; items not listed keep their place after these",
+            "uniqueItems": true,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        },
+        "required": [
+          "ids"
+        ]
+      },
+      "UpdateProjectDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "Project write-up",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "startDate": {
+            "type": "string",
+            "description": "When work started",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "When work finished; empty if ongoing",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL segment; generated from the title when omitted",
+            "maxLength": 120,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Short plain-text summary for cards and meta descriptions",
+            "maxLength": 500
+          },
+          "technologies": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "repoUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "liveUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "imageUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page"
+          }
+        }
+      },
+      "ProjectSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "summary": {
+            "type": "string"
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "repoUrl": {
+            "type": "string"
+          },
+          "liveUrl": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "featured": {
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt",
+          "title",
+          "slug",
+          "summary",
+          "technologies",
+          "featured"
+        ]
+      },
+      "ExperienceResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "object",
+            "description": "What the role involved",
+            "additionalProperties": true
+          },
+          "organization": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string"
+          },
+          "employmentType": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "organization",
+          "role",
+          "startDate",
+          "skills",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateExperienceDto": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "description": "When the role started",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "When the role ended; empty while current",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "description": {
+            "type": "object",
+            "description": "What the role involved",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "organization": {
+            "type": "string",
+            "description": "Company or organization",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "role": {
+            "type": "string",
+            "description": "Job title",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "employmentType": {
+            "type": "string",
+            "description": "e.g. \"Full-time\", \"Internship\", \"Contract\"",
+            "maxLength": 60
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "skills": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "startDate",
+          "organization",
+          "role"
+        ]
+      },
+      "UpdateExperienceDto": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "description": "When the role started",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "When the role ended; empty while current",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "description": {
+            "type": "object",
+            "description": "What the role involved",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "organization": {
+            "type": "string",
+            "description": "Company or organization",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "role": {
+            "type": "string",
+            "description": "Job title",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "employmentType": {
+            "type": "string",
+            "description": "e.g. \"Full-time\", \"Internship\", \"Contract\"",
+            "maxLength": 60
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "skills": {
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            }
+          }
+        }
+      },
+      "EducationResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "object",
+            "description": "Coursework, activities, thesis, …",
+            "additionalProperties": true
+          },
+          "institution": {
+            "type": "string"
+          },
+          "degree": {
+            "type": "string"
+          },
+          "fieldOfStudy": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "institution",
+          "degree",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateEducationDto": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "description": "When study started",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Expected or actual graduation",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "description": {
+            "type": "object",
+            "description": "Coursework, activities, thesis, …",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "institution": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "degree": {
+            "type": "string",
+            "description": "e.g. \"B.S. Computer Science\"",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "fieldOfStudy": {
+            "type": "string",
+            "description": "e.g. \"Minor in Mathematics\"",
+            "maxLength": 200
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "grade": {
+            "type": "string",
+            "description": "e.g. \"3.9 GPA\", \"First Class Honours\"",
+            "maxLength": 100
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "institution",
+          "degree"
+        ]
+      },
+      "UpdateEducationDto": {
+        "type": "object",
+        "properties": {
+          "startDate": {
+            "type": "string",
+            "description": "When study started",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "endDate": {
+            "type": "string",
+            "description": "Expected or actual graduation",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "description": {
+            "type": "object",
+            "description": "Coursework, activities, thesis, …",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "institution": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "degree": {
+            "type": "string",
+            "description": "e.g. \"B.S. Computer Science\"",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "fieldOfStudy": {
+            "type": "string",
+            "description": "e.g. \"Minor in Mathematics\"",
+            "maxLength": 200
+          },
+          "location": {
+            "type": "string",
+            "maxLength": 120
+          },
+          "url": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "grade": {
+            "type": "string",
+            "description": "e.g. \"3.9 GPA\", \"First Class Honours\"",
+            "maxLength": 100
+          }
+        }
+      },
+      "HonorResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "object",
+            "description": "What it was for",
+            "additionalProperties": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "title",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateHonorDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "When it was awarded",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "description": {
+            "type": "object",
+            "description": "What it was for",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "issuer": {
+            "type": "string",
+            "description": "Who awarded it",
+            "maxLength": 200
+          },
+          "url": {
+            "type": "string",
+            "description": "Link to a certificate or announcement",
+            "maxLength": 2048
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateHonorDto": {
+        "type": "object",
+        "properties": {
+          "date": {
+            "type": "string",
+            "description": "When it was awarded",
+            "example": "2024-06",
+            "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "description": {
+            "type": "object",
+            "description": "What it was for",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "issuer": {
+            "type": "string",
+            "description": "Who awarded it",
+            "maxLength": 200
+          },
+          "url": {
+            "type": "string",
+            "description": "Link to a certificate or announcement",
+            "maxLength": 2048
+          }
+        }
+      },
+      "BlogPostResponseDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "The post",
+            "additionalProperties": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "coverImageUrl": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Set the first time the post is published"
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "content",
+          "title",
+          "slug",
+          "excerpt",
+          "tags",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateBlogPostDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "The post",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL segment; generated from the title when omitted",
+            "maxLength": 120,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Short plain-text teaser for the list and meta description",
+            "maxLength": 500
+          },
+          "tags": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "maxLength": 2048
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "title"
+        ]
+      },
+      "UpdateBlogPostDto": {
+        "type": "object",
+        "properties": {
+          "content": {
+            "type": "object",
+            "description": "The post",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "published": {
+            "type": "boolean",
+            "description": "Visible on the public site. Defaults to false (draft)."
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are shown first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL segment; generated from the title when omitted",
+            "maxLength": 120,
+            "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$"
+          },
+          "excerpt": {
+            "type": "string",
+            "description": "Short plain-text teaser for the list and meta description",
+            "maxLength": 500
+          },
+          "tags": {
+            "maxItems": 20,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 40
+            }
+          },
+          "coverImageUrl": {
+            "type": "string",
+            "maxLength": 2048
+          }
+        }
+      },
+      "BlogPostSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "excerpt": {
+            "type": "string"
+          },
+          "tags": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "coverImageUrl": {
+            "type": "string"
+          },
+          "publishedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Set the first time the post is published"
+          }
+        },
+        "required": [
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt",
+          "title",
+          "slug",
+          "excerpt",
+          "tags"
+        ]
+      }
+    }
+  }
+}
