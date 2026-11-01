@@ -1,7 +1,8 @@
 import type { NextConfig } from "next";
 
+const apiUrl = process.env.API_URL ?? "http://localhost:4000";
+
 const nextConfig: NextConfig = {
-  /* config options here */
   cacheComponents: true,
   partialPrefetching: true,
   reactCompiler: true,
@@ -12,6 +13,13 @@ const nextConfig: NextConfig = {
         as: "*.css",
       },
     },
+  },
+  async rewrites() {
+    return [
+      // Uploaded images live on the API; serving them from this origin keeps content URLs
+      // ("/media/<key>") independent of where the API runs, and the API needn't be public.
+      { source: "/media/:key", destination: `${apiUrl}/api/media/:key` },
+    ];
   },
 };
 

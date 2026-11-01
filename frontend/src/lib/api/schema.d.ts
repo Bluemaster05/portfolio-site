@@ -582,6 +582,61 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/admin/media": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List uploaded images, newest first */
+        get: operations["MediaAdminController_findAll"];
+        put?: never;
+        /**
+         * Upload an image (PNG, JPEG, GIF, WebP, AVIF, or SVG)
+         * @description Send multipart/form-data with the image in a `file` field. Store the returned `url` in content.
+         */
+        post: operations["MediaAdminController_upload"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/media/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an uploaded image and its file */
+        delete: operations["MediaAdminController_remove"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/media/{key}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Serve an uploaded image */
+        get: operations["MediaPublicController_serve"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -723,18 +778,27 @@ export interface components {
             links?: components["schemas"]["LinkDto"][];
             sections?: components["schemas"]["SectionTogglesDto"];
         };
+        /** @enum {string} */
+        ProjectMediaLayout: "none" | "single" | "gallery";
+        ImageDto: {
+            /** @description Uploaded image (`/media/<key>`) or an http(s) URL */
+            url: string;
+            /** @description Alternative text; describe what the image shows */
+            alt?: string;
+        };
         ProjectResponseDto: {
             /** @description Project write-up */
             content: {
                 [key: string]: unknown;
             };
+            mediaLayout: components["schemas"]["ProjectMediaLayout"];
             title: string;
             slug: string;
             summary: string;
             technologies: string[];
             repoUrl?: string;
             liveUrl?: string;
-            imageUrl?: string;
+            images: components["schemas"]["ImageDto"][];
             startDate?: string;
             endDate?: string;
             featured: boolean;
@@ -767,6 +831,7 @@ export interface components {
             content?: {
                 [key: string]: unknown;
             };
+            mediaLayout?: components["schemas"]["ProjectMediaLayout"];
             /**
              * @description When work started
              * @example 2024-06
@@ -785,7 +850,8 @@ export interface components {
             technologies?: string[];
             repoUrl?: string;
             liveUrl?: string;
-            imageUrl?: string;
+            /** @description Header image (single layout) or gallery images; the first is the main image */
+            images?: components["schemas"]["ImageDto"][];
             /** @description Shown on the home page */
             featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
@@ -818,6 +884,7 @@ export interface components {
             content?: {
                 [key: string]: unknown;
             };
+            mediaLayout?: components["schemas"]["ProjectMediaLayout"];
             /**
              * @description When work started
              * @example 2024-06
@@ -840,11 +907,13 @@ export interface components {
             technologies?: string[];
             repoUrl?: string;
             liveUrl?: string;
-            imageUrl?: string;
+            /** @description Header image (single layout) or gallery images; the first is the main image */
+            images?: components["schemas"]["ImageDto"][];
             /** @description Shown on the home page */
             featured?: boolean;
         };
         ProjectSummaryDto: {
+            mediaLayout: components["schemas"]["ProjectMediaLayout"];
             id: number;
             published: boolean;
             sortOrder: number;
@@ -858,7 +927,7 @@ export interface components {
             technologies: string[];
             repoUrl?: string;
             liveUrl?: string;
-            imageUrl?: string;
+            images: components["schemas"]["ImageDto"][];
             startDate?: string;
             endDate?: string;
             featured: boolean;
@@ -1281,6 +1350,20 @@ export interface components {
              * @description Set the first time the post is published
              */
             publishedAt?: string;
+        };
+        MediaAssetResponseDto: {
+            id: number;
+            /** @description Random file name, e.g. "3f2b…c1.png" */
+            key: string;
+            /** @description Site-relative URL to store in content, e.g. "/media/3f2b…c1.png" */
+            url: string;
+            /** @description Name of the file that was uploaded */
+            originalName: string;
+            mimeType: string;
+            /** @description Size in bytes */
+            size: number;
+            /** Format: date-time */
+            createdAt: string;
         };
     };
     responses: never;
@@ -2671,6 +2754,132 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MediaAdminController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaAssetResponseDto"][];
+                };
+            };
+        };
+    };
+    MediaAdminController_upload: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "multipart/form-data": {
+                    /**
+                     * Format: binary
+                     * @description The image file
+                     */
+                    file?: string;
+                };
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["MediaAssetResponseDto"];
+                };
+            };
+            /** @description Missing file or unsupported type */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Larger than MAX_UPLOAD_MB */
+            413: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MediaAdminController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    MediaPublicController_serve: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                key: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The image file */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "image/png": components["schemas"]["ErrorResponseDto"];
+                    "image/jpeg": components["schemas"]["ErrorResponseDto"];
+                    "image/gif": components["schemas"]["ErrorResponseDto"];
+                    "image/webp": components["schemas"]["ErrorResponseDto"];
+                    "image/avif": components["schemas"]["ErrorResponseDto"];
+                    "image/svg+xml": components["schemas"]["ErrorResponseDto"];
                 };
             };
         };
