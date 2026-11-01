@@ -1,32 +1,41 @@
 @import "tailwindcss";
 
 /*
- * Design tokens. Personal branches re-theme by changing these values only.
+ * Design tokens: light-dark(<light>, <dark>). Personal branches re-theme by changing these values only.
  * Text colors meet WCAG AA against --background and --surface in both schemes.
- * See docs/DesignGuidelines.md.
+ * The scheme follows the system unless the visitor picks one (data-theme on <html>, set by
+ * THEME_SCRIPT in lib/theme.ts before first paint). See docs/DesignGuidelines.md.
  */
 :root {
-  --background: #fbfbfa;
-  --surface: #ffffff;
-  --foreground: #1b1c1e;
-  --muted: #565b63;
-  --border: #e2e3e5;
-  --accent: #2753b8;
-  --accent-soft: #e8eefb;
-  --code-background: #f4f5f6;
+  color-scheme: light dark;
+  --background: light-dark(#fbfbfa, #111214);
+  --surface: light-dark(#ffffff, #18191c);
+  --foreground: light-dark(#1b1c1e, #e7e8ea);
+  --muted: light-dark(#565b63, #a2a7af);
+  --border: light-dark(#e2e3e5, #2a2c30);
+  --accent: light-dark(#2753b8, #8db3ff);
+  --accent-soft: light-dark(#e8eefb, #1c2740);
+  --code-background: light-dark(#f4f5f6, #1d1f23);
   --radius: 0.625rem;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #111214;
-    --surface: #18191c;
-    --foreground: #e7e8ea;
-    --muted: #a2a7af;
-    --border: #2a2c30;
-    --accent: #8db3ff;
-    --accent-soft: #1c2740;
-    --code-background: #1d1f23;
+:root[data-theme="light"] {
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+}
+
+/* Tailwind's dark: variant follows the same rule: an explicit choice wins, else the system. */
+@custom-variant dark {
+  &:where([data-theme="dark"], [data-theme="dark"] *) {
+    @slot;
+  }
+  @media (prefers-color-scheme: dark) {
+    &:where(:not([data-theme="light"], [data-theme="light"] *)) {
+      @slot;
+    }
   }
 }
 
@@ -45,7 +54,6 @@
 }
 
 html {
-  color-scheme: light dark;
   -webkit-text-size-adjust: 100%;
 }
 
@@ -192,7 +200,7 @@ body {
   pointer-events: none;
 }
 
-/* ---------- Code blocks (Shiki, dual light/dark themes) ---------- */
+/* ---------- Code blocks (Shiki, colors are light-dark() pairs) ---------- */
 
 .code-block pre {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
@@ -209,11 +217,4 @@ body {
 .code-window pre {
   border: 0;
   border-radius: 0;
-}
-
-@media (prefers-color-scheme: dark) {
-  .code-block .shiki,
-  .code-block .shiki span {
-    color: var(--shiki-dark) !important;
-  }
 }

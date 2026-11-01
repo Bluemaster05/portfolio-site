@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Suspense } from 'react';
 import type { SectionInfo } from '@/lib/sections';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { NavLinks, NavList } from './NavLinks';
 
 interface SiteHeaderProps {
@@ -20,10 +21,13 @@ export function SiteHeader({ ownerName, sections }: SiteHeaderProps) {
         <Link href="/" className="font-semibold tracking-tight">
           {ownerName}
         </Link>
-        {/* The current path is only known at request time; the plain list ships in the static shell */}
-        <Suspense fallback={<NavList sections={navSections} />}>
-          <NavLinks sections={navSections} />
-        </Suspense>
+        <div className="flex items-center gap-x-5">
+          {/* The current path is only known at request time; the plain list ships in the static shell */}
+          <Suspense fallback={<NavList sections={navSections} />}>
+            <NavLinks sections={navSections} />
+          </Suspense>
+          <ThemeToggle className="-my-1.5" />
+        </div>
       </nav>
     </header>
   );

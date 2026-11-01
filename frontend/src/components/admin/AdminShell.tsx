@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import type { ReactNode } from 'react';
+import { ThemeToggle } from '@/components/ThemeToggle';
 import { Button } from './ui';
 
 export const ADMIN_NAV = [
@@ -57,6 +58,7 @@ export function AdminShell({ pathname, userEmail, onSignOut, children }: AdminSh
             <Button variant="ghost" onClick={onSignOut} className="justify-start px-0">
               Sign out
             </Button>
+            <ThemeToggle className="justify-self-start -mx-1.5" />
           </div>
         </nav>
       </aside>
