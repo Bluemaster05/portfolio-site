@@ -57,9 +57,17 @@ argon2 passwords, JWT access + rotating refresh tokens in httpOnly cookies, csrf
 helmet, scoped read-only API tokens (hashed at rest) for the public site, `/admin` gated by
 `ADMIN_ALLOWED_IPS` in `src/proxy.ts`.
 
+## Uploads ([docs/Uploads.md](docs/Uploads.md))
+
+Images are stored in content as URL strings: `/media/<key>` (upload) or http(s). New image fields:
+`@IsImageSource()` / `ImageDto[]` on the server, `ImageSourceField` / `ImageListField` (upload by
+default, URL toggle) in the admin, `isImageSrc()` before rendering, and always set `alt`.
+
 ## Common issues
 
 - Type errors on API data or unknown URL strings in the frontend → the schema is stale; regenerate
   as described above.
 - Public pages show empty states → check `PORTFOLIO_API_TOKEN` matches a token in the database and
   has the needed scopes, and that the section is enabled and items are published.
+- `yarn openapi:export` runs `nest build`, which wipes `dist/` — a running `yarn start:dev` can stop
+  picking up changes afterwards (new routes 404). Restart the dev server.

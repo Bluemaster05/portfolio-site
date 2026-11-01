@@ -56,6 +56,10 @@ resource's `fields`, `toValues`, and `toBody` (TypeScript flags any mismatch wit
 
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
+Image fields (`kind: 'image'` / `'images'`) upload by default with a URL toggle; presenters get an
+`onUpload` prop and containers pass `uploadImage` from `lib/admin/media.ts`. Uploaded images are
+served at `/media/<key>` through a rewrite in `next.config.ts`. See [Uploads.md](Uploads.md).
+
 ## Container / presenter pattern
 
 - **Containers** (`page.tsx`, or a `*Container.tsx` client component for admin pages) fetch data,

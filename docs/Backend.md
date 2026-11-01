@@ -21,6 +21,7 @@ server/src/
 ├── education/              │ PublicController (/api/public/...), service
 ├── honors/                 │
 ├── blog/                   ┘
+├── media/                  image uploads: POST /api/admin/media, GET /api/media/:key (see Uploads.md)
 ├── migrations/             MikroORM migrations
 └── seeders/                MikroORM seeders (admin user, default settings, dev API token)
 ```
@@ -42,7 +43,8 @@ Each content module follows the same pattern:
   `operationId`s (the default `Controller_method`) — the frontend relies on generated types.
 - Return **response DTOs**, never raw entities with secrets (password hashes, token hashes).
 - Validate input with `class-validator`. Rich text fields use `@IsRichTextDoc()`, dates use
-  `@IsPartialDate()` (`YYYY`, `YYYY-MM`, `YYYY-MM-DD`), links use `@IsSafeUrl()`.
+  `@IsPartialDate()` (`YYYY`, `YYYY-MM`, `YYYY-MM-DD`), links use `@IsSafeUrl()`, image fields use `@IsImageSource()` (`/media/…` or http(s)) or
+  `ImageDto[]` for lists with alt text.
 - Optional nullable text fields take `@IsOptional() @EmptyToNull()` so clients clear them by
   sending `''`. Don't use it on non-null columns (e.g. `summary`, which defaults to `''`).
 - DTO instances declare every field, so absent fields are `undefined`: apply updates with
@@ -77,4 +79,4 @@ Each content module follows the same pattern:
 ## Environment
 
 See `server/.env.example`. Key variables: `DB_*`, `JWT_SECRET`, `CSRF_SECRET`, `CORS_ORIGIN`,
-`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SEED_API_TOKEN`.
+`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SEED_API_TOKEN`, `UPLOAD_DIR`, `MAX_UPLOAD_MB`.

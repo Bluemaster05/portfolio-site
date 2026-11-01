@@ -61,6 +61,7 @@ your own branch and merge `main` into it for updates. See
 - [Architecture](docs/Architecture.md) — how the pieces talk to each other
 - [Backend](docs/Backend.md) · [Frontend](docs/Frontend.md)
 - [Rich content](docs/RichContent.md) — TipTap documents and custom blocks
+- [Uploads](docs/Uploads.md) — image uploads, storage, and serving
 - [Security](docs/Security.md) — auth, API tokens, CSRF, admin network restriction
 - [Design guidelines](docs/DesignGuidelines.md) — readability-first styling rules
 - [Original prompt](docs/OriginalPrompt.md) — the brief this project started from

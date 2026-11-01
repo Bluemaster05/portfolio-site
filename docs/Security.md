@@ -28,6 +28,13 @@ token are GET-only, so they are unaffected.
 - The frontend uses the token **only on the Next.js server** (`PORTFOLIO_API_TOKEN`, never
   `NEXT_PUBLIC_*`).
 
+## Uploads
+
+Admin-only (`POST /api/admin/media`, JWT + CSRF). File types are detected from contents; scripted
+SVGs are refused; files are stored under random UUID names and served with `nosniff`, a sandboxing
+CSP, and no directory access (keys are validated against a strict pattern). Served files are public
+to anyone with the key. Details: [Uploads.md](Uploads.md).
+
 ## HTTP hardening
 
 - `helmet` sets security headers on the API.

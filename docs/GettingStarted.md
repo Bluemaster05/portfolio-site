@@ -32,6 +32,8 @@ The seeder creates:
 - If `SEED_API_TOKEN` is set, a read-only API token with that exact value (development
   convenience — in production create tokens in the admin portal).
 
+Uploaded images are saved in `server/uploads/` (`UPLOAD_DIR`).
+
 ## 3. Frontend
 
 ```bash
