@@ -21,7 +21,7 @@ server/src/
 ├── education/              │ PublicController (/api/public/...), service
 ├── honors/                 │
 ├── blog/                   ┘
-├── media/                  image uploads: POST /api/admin/media, GET /api/media/:key (see Uploads.md)
+├── media/                  image/video uploads: POST /api/admin/media, GET /api/media/:key (see Uploads.md)
 ├── migrations/             MikroORM migrations
 └── seeders/                MikroORM seeders (admin user, default settings, dev API token)
 ```
@@ -79,4 +79,5 @@ Each content module follows the same pattern:
 ## Environment
 
 See `server/.env.example`. Key variables: `DB_*`, `JWT_SECRET`, `CSRF_SECRET`, `CORS_ORIGIN`,
-`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SEED_API_TOKEN`, `UPLOAD_DIR`, `MAX_UPLOAD_MB`.
+`ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SEED_API_TOKEN`, `UPLOAD_DIR`, `MAX_UPLOAD_MB`,
+`MAX_VIDEO_UPLOAD_MB`.

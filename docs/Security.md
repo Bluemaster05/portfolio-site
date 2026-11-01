@@ -30,8 +30,8 @@ token are GET-only, so they are unaffected.
 
 ## Uploads
 
-Admin-only (`POST /api/admin/media`, JWT + CSRF). File types are detected from contents; scripted
-SVGs are refused; files are stored under random UUID names and served with `nosniff`, a sandboxing
+Admin-only (`POST /api/admin/media`, JWT + CSRF). Images and MP4/WebM videos only, detected from
+file contents with per-kind size limits; scripted SVGs are refused; files are stored under random UUID names and served with `nosniff`, a sandboxing
 CSP, and no directory access (keys are validated against a strict pattern). Served files are public
 to anyone with the key. Details: [Uploads.md](Uploads.md).
 
