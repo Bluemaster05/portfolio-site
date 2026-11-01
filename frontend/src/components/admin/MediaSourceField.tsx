@@ -1,31 +1,48 @@
 'use client';
 
 import { useId, useRef, useState } from 'react';
-import { IMAGE_ACCEPT, type UploadImage } from '@/lib/admin/media';
+import { IMAGE_ACCEPT, VIDEO_ACCEPT, type UploadMedia } from '@/lib/admin/media';
 import { errorMessage } from '@/lib/admin/api-error';
-import { isImageSrc, isUploadedImage } from '@/lib/images';
+import { isImageSrc, isUploadedMedia, isVideoSrc } from '@/lib/images';
 import { ImageLightbox } from './ImageLightbox';
 import { Button, TextInput } from './ui';
 
 export type SourceMode = 'upload' | 'url';
 
-interface ImageSourceFieldProps {
-  /** Current image: '/media/<key>', an http(s) URL, or '' for none */
+export type MediaKind = 'image' | 'video';
+
+const KIND_TEXT: Record<MediaKind, { accept: string; noun: string; formats: string }> = {
+  image: { accept: IMAGE_ACCEPT, noun: 'image', formats: 'PNG, JPEG, WebP, GIF, AVIF, SVG' },
+  video: { accept: VIDEO_ACCEPT, noun: 'video', formats: 'MP4 or WebM' },
+};
+
+interface MediaSourceFieldProps {
+  /** Current file: '/media/<key>', an http(s) URL, or '' for none */
   value: string;
   onChange: (value: string) => void;
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
   /** Accessible name, e.g. "Avatar" */
   label: string;
   /** Show a smaller preview, e.g. for icons */
   compact?: boolean;
+  /** What the field holds; defaults to image */
+  kind?: MediaKind;
 }
 
 /**
- * Pick an image by uploading a file (default) or pasting a URL. Either way the value is a URL
- * string, so fields that hold an image need no other changes to support both.
+ * Pick an image or video by uploading a file (default) or pasting a URL. Either way the value is
+ * a URL string, so fields that hold media need no other changes to support both.
  */
-export function ImageSourceField({ value, onChange, onUpload, label, compact = false }: ImageSourceFieldProps) {
-  const [mode, setMode] = useState<SourceMode>(value && !isUploadedImage(value) ? 'url' : 'upload');
+export function MediaSourceField({
+  value,
+  onChange,
+  onUpload,
+  label,
+  compact = false,
+  kind = 'image',
+}: MediaSourceFieldProps) {
+  const text = KIND_TEXT[kind];
+  const [mode, setMode] = useState<SourceMode>(value && !isUploadedMedia(value) ? 'url' : 'upload');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string>();
   const [previewing, setPreviewing] = useState(false);
@@ -63,22 +80,22 @@ export function ImageSourceField({ value, onChange, onUpload, label, compact = f
             ref={inputRef}
             id={id}
             type="file"
-            accept={IMAGE_ACCEPT}
+            accept={text.accept}
             aria-label={`Upload ${label}`}
             onChange={(event) => void upload(event.target.files?.[0])}
             className="sr-only"
           />
           <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
-            {uploading ? 'Uploading…' : value ? 'Replace image' : 'Choose image'}
+            {uploading ? 'Uploading…' : value ? `Replace ${text.noun}` : `Choose ${text.noun}`}
           </Button>
-          <span className="text-sm text-muted">or drop a file here · PNG, JPEG, WebP, GIF, AVIF, SVG</span>
+          <span className="text-sm text-muted">or drop a file here · {text.formats}</span>
         </div>
       ) : (
         <TextInput
           type="url"
           aria-label={`${label} URL`}
           placeholder="https://…"
-          value={isUploadedImage(value) ? '' : value}
+          value={isUploadedMedia(value) ? '' : value}
           onChange={(event) => onChange(event.target.value.trim())}
         />
       )}
@@ -89,7 +106,21 @@ export function ImageSourceField({ value, onChange, onUpload, label, compact = f
         </p>
       )}
 
-      {isImageSrc(value) && (
+      {kind === 'video' && isVideoSrc(value) && (
+        <div className="flex items-center gap-3">
+          <video
+            src={value}
+            controls
+            preload="metadata"
+            className="max-h-48 max-w-full rounded-md border border-border bg-black"
+          />
+          <Button variant="ghost" onClick={() => onChange('')}>
+            Remove
+          </Button>
+        </div>
+      )}
+
+      {kind === 'image' && isImageSrc(value) && (
         <div className="flex items-center gap-3">
           <button
             type="button"
@@ -115,7 +146,7 @@ export function ImageSourceField({ value, onChange, onUpload, label, compact = f
   );
 }
 
-/** Upload / URL switch shared by the image fields. */
+/** Upload / URL switch shared by the media fields. */
 export function SourceModeToggle({
   label,
   mode,
@@ -126,7 +157,11 @@ export function SourceModeToggle({
   onChange: (mode: SourceMode) => void;
 }) {
   return (
-    <div role="radiogroup" aria-label={`${label} source`} className="inline-flex w-fit rounded-md border border-border p-0.5 text-sm">
+    <div
+      role="radiogroup"
+      aria-label={`${label} source`}
+      className="inline-flex w-fit rounded-md border border-border p-0.5 text-sm"
+    >
       {(['upload', 'url'] as const).map((option) => (
         <button
           key={option}

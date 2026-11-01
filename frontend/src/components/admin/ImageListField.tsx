@@ -1,18 +1,18 @@
 'use client';
 
 import { useRef, useState } from 'react';
-import { IMAGE_ACCEPT, type UploadImage } from '@/lib/admin/media';
+import { IMAGE_ACCEPT, type UploadMedia } from '@/lib/admin/media';
 import { errorMessage } from '@/lib/admin/api-error';
 import { isImageSrc } from '@/lib/images';
 import type { ImageItem } from '@/lib/admin/form-values';
 import { ImageLightbox } from './ImageLightbox';
-import { SourceModeToggle, type SourceMode } from './ImageSourceField';
+import { SourceModeToggle, type SourceMode } from './MediaSourceField';
 import { Button, TextInput } from './ui';
 
 interface ImageListFieldProps {
   value: ImageItem[];
   onChange: (value: ImageItem[]) => void;
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
   label: string;
   /** Explains how the first image is used, e.g. "Main image" */
   firstLabel?: string;

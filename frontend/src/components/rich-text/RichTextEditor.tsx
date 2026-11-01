@@ -5,9 +5,9 @@ import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Placeholder } from '@tiptap/extensions';
 import { useState, type ReactNode } from 'react';
-import type { UploadImage } from '@/lib/admin/media';
+import type { UploadMedia } from '@/lib/admin/media';
 import { isImageSrc } from '@/lib/images';
-import { ImageSourceField } from '@/components/admin/ImageSourceField';
+import { MediaSourceField } from '@/components/admin/MediaSourceField';
 import { Button, TextInput } from '@/components/admin/ui';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
 import { safeHref, toDoc, type RichTextValue } from './types';
@@ -19,7 +19,7 @@ interface RichTextEditorProps {
   /** Accessible name for the editing area */
   label: string;
   /** Stores an image and resolves to its URL, for inserted images */
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
 }
 
 /** TipTap editor for any rich text field. Emits TipTap JSON; see docs/RichContent.md. */
@@ -56,7 +56,7 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
   );
 }
 
-function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadImage }) {
+function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }) {
   const [imagePanelOpen, setImagePanelOpen] = useState(false);
   const state = useEditorState({
     editor,
@@ -159,7 +159,7 @@ function ImageInsertPanel({
   onInsert,
   onCancel,
 }: {
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
   onInsert: (src: string, alt: string) => void;
   onCancel: () => void;
 }) {
@@ -168,7 +168,7 @@ function ImageInsertPanel({
 
   return (
     <div className="grid gap-3 border-b border-border bg-background px-4 py-3">
-      <ImageSourceField label="Image" value={src} onChange={setSrc} onUpload={onUpload} />
+      <MediaSourceField label="Image" value={src} onChange={setSrc} onUpload={onUpload} />
       <TextInput
         aria-label="Image description"
         placeholder="Describe the image for screen readers (alt text)"

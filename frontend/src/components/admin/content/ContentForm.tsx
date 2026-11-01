@@ -3,10 +3,10 @@
 import { useState, type FormEvent } from 'react';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
 import type { FormValue, FormValues, ImageItem } from '@/lib/admin/form-values';
-import type { UploadImage } from '@/lib/admin/media';
+import type { UploadMedia } from '@/lib/admin/media';
 import type { FieldConfig } from '@/lib/admin/resources/resource';
 import { ImageListField } from '../ImageListField';
-import { ImageSourceField } from '../ImageSourceField';
+import { MediaSourceField } from '../MediaSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from '../ui';
 
 interface ContentFormProps {
@@ -18,7 +18,7 @@ interface ContentFormProps {
   onSubmit: (values: FormValues) => void;
   onCancel: () => void;
   /** Stores an image and resolves to its URL; used by image fields and the editor */
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
 }
 
 /** Form for any content type, built from its field configuration. */
@@ -89,7 +89,7 @@ export function ContentForm({
 }
 
 function isWide(field: FieldConfig): boolean {
-  return ['richtext', 'textarea', 'tags', 'images', 'image'].includes(field.kind);
+  return ['richtext', 'textarea', 'tags', 'images', 'image', 'video'].includes(field.kind);
 }
 
 interface FieldInputProps {
@@ -98,7 +98,7 @@ interface FieldInputProps {
   maxItems?: number;
   value: FormValue | undefined;
   onChange: (value: FormValue) => void;
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
 }
 
 function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldInputProps) {
@@ -115,7 +115,19 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldI
     case 'image':
       return (
         <Field {...common} htmlFor={undefined}>
-          <ImageSourceField
+          <MediaSourceField
+            label={field.label}
+            value={typeof value === 'string' ? value : ''}
+            onChange={onChange}
+            onUpload={onUpload}
+          />
+        </Field>
+      );
+    case 'video':
+      return (
+        <Field {...common} htmlFor={undefined}>
+          <MediaSourceField
+            kind="video"
             label={field.label}
             value={typeof value === 'string' ? value : ''}
             onChange={onChange}

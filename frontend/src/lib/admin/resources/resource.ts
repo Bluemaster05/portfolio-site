@@ -13,6 +13,8 @@ export type FieldKind =
   | 'image'
   /** An ordered list of images with alt text; the first is the main one */
   | 'images'
+  /** One video: upload (default) or URL, stored as a URL string */
+  | 'video'
   | 'select';
 
 export interface FieldConfig {

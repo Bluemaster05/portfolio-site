@@ -1,14 +1,15 @@
 import { adminClient } from '@/lib/api/admin-client';
 import { unwrap } from './api-error';
 
-/** Accepted by the API; the server checks file contents, this only filters the file picker. */
+/** Accepted by the API; the server checks file contents, these only filter the file picker. */
 export const IMAGE_ACCEPT = 'image/png,image/jpeg,image/gif,image/webp,image/avif,image/svg+xml';
+export const VIDEO_ACCEPT = 'video/mp4,video/webm';
 
 /**
- * Uploads an image and resolves to the site-relative URL to store in content (`/media/<key>`).
- * Presenters receive this as an `onUpload` prop rather than importing it.
+ * Uploads an image or video and resolves to the site-relative URL to store in content
+ * (`/media/<key>`). Presenters receive this as an `onUpload` prop rather than importing it.
  */
-export async function uploadImage(file: File): Promise<string> {
+export async function uploadMedia(file: File): Promise<string> {
   const asset = unwrap(
     await adminClient.POST('/api/admin/media', {
       body: {},
@@ -22,4 +23,4 @@ export async function uploadImage(file: File): Promise<string> {
   return asset.url;
 }
 
-export type UploadImage = (file: File) => Promise<string>;
+export type UploadMedia = (file: File) => Promise<string>;

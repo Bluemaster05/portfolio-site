@@ -5,7 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { errorMessage } from '@/lib/admin/api-error';
 import type { FormValues } from '@/lib/admin/form-values';
-import { uploadImage } from '@/lib/admin/media';
+import { uploadMedia } from '@/lib/admin/media';
 import type { ContentItemBase, ContentResource } from '@/lib/admin/resources/resource';
 import { ContentList } from '@/components/admin/content/ContentList';
 import { ContentForm } from '@/components/admin/content/ContentForm';
@@ -100,7 +100,7 @@ export function ContentEditContainer<Item extends ContentItemBase>({
         error={errorMessage(save.error)}
         onSubmit={(values) => save.mutate(values)}
         onCancel={() => router.push(`/admin/${resource.key}`)}
-        onUpload={uploadImage}
+        onUpload={uploadMedia}
       />
     </>
   );

@@ -589,12 +589,12 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List uploaded images, newest first */
+        /** List uploaded files, newest first */
         get: operations["MediaAdminController_findAll"];
         put?: never;
         /**
-         * Upload an image (PNG, JPEG, GIF, WebP, AVIF, or SVG)
-         * @description Send multipart/form-data with the image in a `file` field. Store the returned `url` in content.
+         * Upload an image (PNG, JPEG, GIF, WebP, AVIF, SVG) or video (MP4, WebM)
+         * @description Send multipart/form-data with the file in a `file` field. Store the returned `url` in content. Images are limited to MAX_UPLOAD_MB, videos to MAX_VIDEO_UPLOAD_MB.
          */
         post: operations["MediaAdminController_upload"];
         delete?: never;
@@ -613,7 +613,7 @@ export interface paths {
         get?: never;
         put?: never;
         post?: never;
-        /** Delete an uploaded image and its file */
+        /** Delete an uploaded file */
         delete: operations["MediaAdminController_remove"];
         options?: never;
         head?: never;
@@ -627,7 +627,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Serve an uploaded image */
+        /** Serve an uploaded image or video (supports Range requests) */
         get: operations["MediaPublicController_serve"];
         put?: never;
         post?: never;
@@ -799,6 +799,8 @@ export interface components {
             repoUrl?: string;
             liveUrl?: string;
             images: components["schemas"]["ImageDto"][];
+            /** @description Main item on the project page when set */
+            videoUrl?: string;
             startDate?: string;
             endDate?: string;
             featured: boolean;
@@ -852,6 +854,11 @@ export interface components {
             liveUrl?: string;
             /** @description Header image (single layout) or gallery images; the first is the main image */
             images?: components["schemas"]["ImageDto"][];
+            /**
+             * @description Video shown as the main item on the project page (layouts other than none). The first image
+             *     is its poster, and stays the project's cover everywhere else.
+             */
+            videoUrl?: string;
             /** @description Shown on the home page */
             featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
@@ -909,6 +916,11 @@ export interface components {
             liveUrl?: string;
             /** @description Header image (single layout) or gallery images; the first is the main image */
             images?: components["schemas"]["ImageDto"][];
+            /**
+             * @description Video shown as the main item on the project page (layouts other than none). The first image
+             *     is its poster, and stays the project's cover everywhere else.
+             */
+            videoUrl?: string;
             /** @description Shown on the home page */
             featured?: boolean;
         };
@@ -928,6 +940,8 @@ export interface components {
             repoUrl?: string;
             liveUrl?: string;
             images: components["schemas"]["ImageDto"][];
+            /** @description Main item on the project page when set */
+            videoUrl?: string;
             startDate?: string;
             endDate?: string;
             featured: boolean;
@@ -2789,7 +2803,7 @@ export interface operations {
                 "multipart/form-data": {
                     /**
                      * Format: binary
-                     * @description The image file
+                     * @description The image or video file
                      */
                     file?: string;
                 };
@@ -2813,7 +2827,7 @@ export interface operations {
                     "application/json": components["schemas"]["ErrorResponseDto"];
                 };
             };
-            /** @description Larger than MAX_UPLOAD_MB */
+            /** @description Over the size limit for its type */
             413: {
                 headers: {
                     [name: string]: unknown;
@@ -2862,7 +2876,7 @@ export interface operations {
         };
         requestBody?: never;
         responses: {
-            /** @description The image file */
+            /** @description The file */
             200: {
                 headers: {
                     [name: string]: unknown;
@@ -2880,6 +2894,8 @@ export interface operations {
                     "image/webp": components["schemas"]["ErrorResponseDto"];
                     "image/avif": components["schemas"]["ErrorResponseDto"];
                     "image/svg+xml": components["schemas"]["ErrorResponseDto"];
+                    "video/mp4": components["schemas"]["ErrorResponseDto"];
+                    "video/webm": components["schemas"]["ErrorResponseDto"];
                 };
             };
         };

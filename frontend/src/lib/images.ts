@@ -1,12 +1,20 @@
-/** Uploaded images are served from this site at /media/<key> (proxied to the API). */
+/** Uploaded files are served from this site at /media/<key> (proxied to the API). */
 export const MEDIA_PREFIX = '/media/';
 
-export function isUploadedImage(src: string): boolean {
+export function isUploadedMedia(src: string): boolean {
   return src.startsWith(MEDIA_PREFIX);
 }
 
-/** Image sources the site will render: uploads or absolute http(s) URLs. */
+const EXTERNAL = /^https?:\/\/\S+$/i;
+const UPLOADED_IMAGE = /^\/media\/[A-Za-z0-9_-]+\.(png|jpg|gif|webp|avif|svg)$/i;
+const UPLOADED_VIDEO = /^\/media\/[A-Za-z0-9_-]+\.(mp4|webm)$/i;
+
+/** Image sources the site will render: uploaded images or absolute http(s) URLs. */
 export function isImageSrc(src: string | undefined): src is string {
-  if (!src) return false;
-  return /^https?:\/\/\S+$/i.test(src) || /^\/media\/[A-Za-z0-9._-]+$/.test(src);
+  return !!src && (EXTERNAL.test(src) || UPLOADED_IMAGE.test(src));
+}
+
+/** Video sources the site will render: uploaded MP4/WebM or absolute http(s) URLs. */
+export function isVideoSrc(src: string | undefined): src is string {
+  return !!src && (EXTERNAL.test(src) || UPLOADED_VIDEO.test(src));
 }

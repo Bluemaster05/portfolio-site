@@ -30,6 +30,7 @@ function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
     mediaLayout: mediaLayout(values),
     // A single header shows one image; extras left over from a gallery aren't kept
     images: mediaLayout(values) === 'single' ? images(values, 'images').slice(0, 1) : images(values, 'images'),
+    videoUrl: mediaLayout(values) === 'none' ? '' : text(values, 'videoUrl'),
     startDate: text(values, 'startDate'),
     endDate: text(values, 'endDate'),
     featured: bool(values, 'featured'),
@@ -62,6 +63,13 @@ export const projectsResource: ContentResource<Project> = {
           ? 'One image, shown as a header above the write-up.'
           : 'The first image is shown large; the rest appear as smaller tiles below it.',
     },
+    {
+      name: 'videoUrl',
+      label: 'Main video (optional)',
+      kind: 'video',
+      visibleWhen: (values) => mediaLayout(values) !== 'none',
+      help: 'Shown as the main item on the project page. The first image above is its poster and stays the cover on cards and the home page.',
+    },
     { name: 'content', label: 'Write-up', kind: 'richtext' },
     { name: 'featured', label: 'Feature on the home page', kind: 'checkbox' },
     { name: 'published', label: 'Published', kind: 'checkbox' },
@@ -77,6 +85,7 @@ export const projectsResource: ContentResource<Project> = {
     liveUrl: optional(project?.liveUrl),
     mediaLayout: project?.mediaLayout ?? 'none',
     images: project?.images ?? [],
+    videoUrl: optional(project?.videoUrl),
     startDate: optional(project?.startDate),
     endDate: optional(project?.endDate),
     featured: project?.featured ?? false,

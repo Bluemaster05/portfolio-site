@@ -4,9 +4,9 @@ import { useState, type FormEvent } from 'react';
 import type { components } from '@/lib/api/schema';
 import type { SiteSettings, SiteLink } from '@/lib/api/types';
 import { SECTIONS } from '@/lib/sections';
-import type { UploadImage } from '@/lib/admin/media';
+import type { UploadMedia } from '@/lib/admin/media';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
-import { ImageSourceField } from './ImageSourceField';
+import { MediaSourceField } from './MediaSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from './ui';
 
 export type SiteSettingsUpdate = components['schemas']['UpdateSiteSettingsDto'];
@@ -17,7 +17,7 @@ interface SiteSettingsFormProps {
   saved: boolean;
   error?: string;
   onSubmit: (update: SiteSettingsUpdate) => void;
-  onUpload: UploadImage;
+  onUpload: UploadMedia;
 }
 
 export function SiteSettingsForm({ settings, saving, saved, error, onSubmit, onUpload }: SiteSettingsFormProps) {
@@ -85,7 +85,7 @@ export function SiteSettingsForm({ settings, saving, saved, error, onSubmit, onU
         </Field>
         <div className="sm:col-span-2">
           <Field label="Avatar" help="A square photo works best; shown next to your name on the home page">
-            <ImageSourceField
+            <MediaSourceField
               label="Avatar"
               value={draft.avatarUrl ?? ''}
               onChange={(avatarUrl) => set('avatarUrl', avatarUrl)}
