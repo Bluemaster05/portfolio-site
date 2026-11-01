@@ -1,11 +1,8 @@
-'use client';
+import { ResourceListPage } from './ResourceListPage';
 
-import { notFound, useParams } from 'next/navigation';
-import { isResourceKey, withResource } from '@/lib/admin/resources';
-import { ContentListContainer } from './ContentContainers';
+// The admin renders in the browser after sign-in, so instant-navigation validation can't render it
+export const instant = false;
 
 export default function AdminResourceListPage() {
-  const { resource } = useParams<{ resource: string }>();
-  if (!isResourceKey(resource)) notFound();
-  return withResource(resource, (definition) => <ContentListContainer resource={definition} />);
+  return <ResourceListPage />;
 }

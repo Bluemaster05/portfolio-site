@@ -1,36 +1,8 @@
-'use client';
+import { SiteSettingsPage } from './SiteSettingsPage';
 
-import { useQueryClient } from '@tanstack/react-query';
-import { $api } from '@/lib/api/admin-query';
-import { errorMessage } from '@/lib/admin/api-error';
-import { uploadMedia } from '@/lib/admin/media';
-import { AdminPageHeader, ErrorBanner } from '@/components/admin/ui';
-import { SiteSettingsForm } from '@/components/admin/SiteSettingsForm';
+// The admin renders in the browser after sign-in, so instant-navigation validation can't render it
+export const instant = false;
 
 export default function AdminSiteSettingsPage() {
-  const queryClient = useQueryClient();
-  const settings = $api.useQuery('get', '/api/admin/site');
-  const save = $api.useMutation('patch', '/api/admin/site', {
-    onSuccess: (updated) => queryClient.setQueryData($api.queryOptions('get', '/api/admin/site').queryKey, updated),
-  });
-
-  return (
-    <>
-      <AdminPageHeader title="Site settings" />
-      {settings.data ? (
-        <SiteSettingsForm
-          settings={settings.data}
-          saving={save.isPending}
-          saved={save.isSuccess}
-          error={errorMessage(save.error)}
-          onSubmit={(body) => save.mutate({ body })}
-          onUpload={uploadMedia}
-        />
-      ) : settings.isError ? (
-        <ErrorBanner message={errorMessage(settings.error)} />
-      ) : (
-        <p className="text-muted">Loading…</p>
-      )}
-    </>
-  );
+  return <SiteSettingsPage />;
 }
