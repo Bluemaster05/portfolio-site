@@ -20,7 +20,7 @@ the public site.
 | ---------------- | ------------------ | ------------------------------------------------------ |
 | Home             | `/`                | Profile intro, featured projects, links                |
 | Projects         | `/projects`        | List (filterable by technology, `?tech=<slug>`) + detail page (`/projects/[slug]`) |
-| Experience       | `/experience`      | Timeline of roles                                      |
+| Experience       | `/experience`      | One card per employer with its jobs + job page (`/experience/[slug]`) with a write-up |
 | Education        | `/education`       | Schools, degrees, coursework                           |
 | Blog             | `/blog`            | List + post page (`/blog/[slug]`); off by default      |
 | Honors / Awards  | `/honors`          | Awards, scholarships, certifications                   |

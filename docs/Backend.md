@@ -18,6 +18,7 @@ server/src/
 ├── site/                   SiteSettings singleton: site meta, profile, section toggles
 ├── projects/               ┐
 ├── experience/             │ content modules: entity, DTOs, AdminController (/api/admin/...),
+│                           │   (experience also owns employers: /api/admin/employers)
 ├── education/              │ PublicController (/api/public/...), service
 ├── honors/                 │
 ├── blog/                   ┘

@@ -72,7 +72,14 @@ on a hidden tab blocks it, the editor switches to that tab so the browser can po
 
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
-Technologies are managed on their own page (`/admin/technologies`) and picked in the project editor
+Experience entries are **jobs**: each belongs to an **employer** (managed at `/admin/employers`:
+name, website, logo, order; an employer with jobs can't be deleted) and is picked in the job editor
+with `kind: 'employer'` (`EmployerSelect`, with inline "New…"). A job has free-text skills,
+technologies, a short description and a longer write-up, and its own page at `/experience/[slug]`
+(slug generated from role + employer when left empty). The public list groups jobs by employer:
+manual employer order, then employers with a current job, then most recently active.
+
+Technologies are managed on their own page (`/admin/technologies`) and picked in the project and job editors
 with `kind: 'technologies'` (`TechnologyPicker`: ordered, searchable, quick-create). Shared lists a
 field needs are passed to `ContentForm` as `lookups` by the container. On the public site
 `TechPill` / `TechList` render technology pins with icons, and the Projects page filters by
