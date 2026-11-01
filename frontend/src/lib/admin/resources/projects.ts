@@ -2,8 +2,21 @@ import { adminClient } from '@/lib/api/admin-client';
 import type { Project } from '@/lib/api/types';
 import type { components } from '@/lib/api/schema';
 import { ensureOk, unwrap } from '../api-error';
-import { bool, list, optional, richText, text, type FormValues } from '../form-values';
+import { bool, images, list, optional, richText, text, type FormValues } from '../form-values';
 import { DATE_HELP, type ContentResource } from './resource';
+
+type MediaLayout = components['schemas']['ProjectMediaLayout'];
+
+const MEDIA_LAYOUTS: { value: MediaLayout; label: string }[] = [
+  { value: 'none', label: 'No images' },
+  { value: 'single', label: 'Single header image' },
+  { value: 'gallery', label: 'Gallery' },
+];
+
+function mediaLayout(values: FormValues): MediaLayout {
+  const value = text(values, 'mediaLayout');
+  return MEDIA_LAYOUTS.find((layout) => layout.value === value)?.value ?? 'none';
+}
 
 function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
   return {
@@ -14,7 +27,8 @@ function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
     technologies: list(values, 'technologies'),
     repoUrl: text(values, 'repoUrl'),
     liveUrl: text(values, 'liveUrl'),
-    imageUrl: text(values, 'imageUrl'),
+    mediaLayout: mediaLayout(values),
+    images: images(values, 'images'),
     startDate: text(values, 'startDate'),
     endDate: text(values, 'endDate'),
     featured: bool(values, 'featured'),
@@ -35,7 +49,17 @@ export const projectsResource: ContentResource<Project> = {
     { name: 'endDate', label: 'Finished', kind: 'date', help: 'Empty if ongoing' },
     { name: 'liveUrl', label: 'Live URL', kind: 'url' },
     { name: 'repoUrl', label: 'Source code URL', kind: 'url' },
-    { name: 'imageUrl', label: 'Image URL', kind: 'url' },
+    { name: 'mediaLayout', label: 'Images', kind: 'select', options: MEDIA_LAYOUTS },
+    {
+      name: 'images',
+      label: 'Project images',
+      kind: 'images',
+      visibleWhen: (values) => mediaLayout(values) !== 'none',
+      helpFor: (values) =>
+        mediaLayout(values) === 'single'
+          ? 'Only the first image is shown, as a header above the write-up.'
+          : 'The first image is shown large; the rest appear as smaller tiles below it.',
+    },
     { name: 'content', label: 'Write-up', kind: 'richtext' },
     { name: 'featured', label: 'Feature on the home page', kind: 'checkbox' },
     { name: 'published', label: 'Published', kind: 'checkbox' },
@@ -49,7 +73,8 @@ export const projectsResource: ContentResource<Project> = {
     technologies: project?.technologies ?? [],
     repoUrl: optional(project?.repoUrl),
     liveUrl: optional(project?.liveUrl),
-    imageUrl: optional(project?.imageUrl),
+    mediaLayout: project?.mediaLayout ?? 'none',
+    images: project?.images ?? [],
     startDate: optional(project?.startDate),
     endDate: optional(project?.endDate),
     featured: project?.featured ?? false,

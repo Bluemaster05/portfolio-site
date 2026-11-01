@@ -3,6 +3,7 @@
 import { useQueryClient } from '@tanstack/react-query';
 import { $api } from '@/lib/api/admin-query';
 import { errorMessage } from '@/lib/admin/api-error';
+import { uploadImage } from '@/lib/admin/media';
 import { AdminPageHeader, ErrorBanner } from '@/components/admin/ui';
 import { SiteSettingsForm } from '@/components/admin/SiteSettingsForm';
 
@@ -23,6 +24,7 @@ export default function AdminSiteSettingsPage() {
           saved={save.isSuccess}
           error={errorMessage(save.error)}
           onSubmit={(body) => save.mutate({ body })}
+          onUpload={uploadImage}
         />
       ) : settings.isError ? (
         <ErrorBanner message={errorMessage(settings.error)} />

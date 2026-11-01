@@ -4,7 +4,11 @@ import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/r
 import StarterKit from '@tiptap/starter-kit';
 import Image from '@tiptap/extension-image';
 import { Placeholder } from '@tiptap/extensions';
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
+import type { UploadImage } from '@/lib/admin/media';
+import { isImageSrc } from '@/lib/images';
+import { ImageSourceField } from '@/components/admin/ImageSourceField';
+import { Button, TextInput } from '@/components/admin/ui';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
 import { safeHref, toDoc, type RichTextValue } from './types';
 
@@ -14,10 +18,12 @@ interface RichTextEditorProps {
   placeholder?: string;
   /** Accessible name for the editing area */
   label: string;
+  /** Stores an image and resolves to its URL, for inserted images */
+  onUpload: UploadImage;
 }
 
 /** TipTap editor for any rich text field. Emits TipTap JSON; see docs/RichContent.md. */
-export function RichTextEditor({ value, onChange, placeholder, label }: RichTextEditorProps) {
+export function RichTextEditor({ value, onChange, placeholder, label, onUpload }: RichTextEditorProps) {
   const editor = useEditor({
     // Rendered on the client only, so there is no server markup to hydrate
     immediatelyRender: false,
@@ -44,13 +50,14 @@ export function RichTextEditor({ value, onChange, placeholder, label }: RichText
 
   return (
     <div className="rich-text-editor overflow-hidden rounded-card border border-border bg-surface focus-within:border-accent">
-      {editor && <Toolbar editor={editor} />}
+      {editor && <Toolbar editor={editor} onUpload={onUpload} />}
       <EditorContent editor={editor} />
     </div>
   );
 }
 
-function Toolbar({ editor }: { editor: Editor }) {
+function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadImage }) {
+  const [imagePanelOpen, setImagePanelOpen] = useState(false);
   const state = useEditorState({
     editor,
     selector: ({ editor: e }) => ({
@@ -80,14 +87,13 @@ function Toolbar({ editor }: { editor: Editor }) {
     if (href) chain().extendMarkRange('link').setLink({ href }).run();
   }
 
-  function insertImage() {
-    const src = window.prompt('Image URL (https://…)')?.trim();
-    if (!src || !/^https?:\/\//i.test(src)) return;
-    const alt = window.prompt('Describe the image for screen readers') ?? '';
+  function insertImage(src: string, alt: string) {
     chain().setImage({ src, alt }).run();
+    setImagePanelOpen(false);
   }
 
   return (
+    <>
     <div role="toolbar" aria-label="Formatting" className="flex flex-wrap gap-0.5 border-b border-border bg-background px-2 py-1.5">
       <ToolButton label="Bold" active={state.bold} onClick={() => chain().toggleBold().run()}>
         <strong>B</strong>
@@ -133,12 +139,48 @@ function Toolbar({ editor }: { editor: Editor }) {
       >
         Code tabs
       </ToolButton>
-      <ToolButton label="Image" onClick={insertImage}>
+      <ToolButton label="Image" active={imagePanelOpen} onClick={() => setImagePanelOpen((open) => !open)}>
         Image
       </ToolButton>
       <ToolButton label="Divider" onClick={() => chain().setHorizontalRule().run()}>
         ―
       </ToolButton>
+    </div>
+    {imagePanelOpen && (
+      <ImageInsertPanel onUpload={onUpload} onInsert={insertImage} onCancel={() => setImagePanelOpen(false)} />
+    )}
+    </>
+  );
+}
+
+/** Choose an image (upload by default, or URL) and its alt text, then insert it. */
+function ImageInsertPanel({
+  onUpload,
+  onInsert,
+  onCancel,
+}: {
+  onUpload: UploadImage;
+  onInsert: (src: string, alt: string) => void;
+  onCancel: () => void;
+}) {
+  const [src, setSrc] = useState('');
+  const [alt, setAlt] = useState('');
+
+  return (
+    <div className="grid gap-3 border-b border-border bg-background px-4 py-3">
+      <ImageSourceField label="Image" value={src} onChange={setSrc} onUpload={onUpload} />
+      <TextInput
+        aria-label="Image description"
+        placeholder="Describe the image for screen readers (alt text)"
+        value={alt}
+        onChange={(event) => setAlt(event.target.value)}
+      />
+      <div className="flex gap-2">
+        <Button variant="primary" disabled={!isImageSrc(src)} onClick={() => onInsert(src, alt.trim())}>
+          Insert image
+        </Button>
+        <Button onClick={onCancel}>Cancel</Button>
+      </div>
     </div>
   );
 }

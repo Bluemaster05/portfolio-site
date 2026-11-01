@@ -1,6 +1,19 @@
 import type { FormValues } from '../form-values';
 
-export type FieldKind = 'text' | 'textarea' | 'url' | 'date' | 'slug' | 'tags' | 'richtext' | 'checkbox';
+export type FieldKind =
+  | 'text'
+  | 'textarea'
+  | 'url'
+  | 'date'
+  | 'slug'
+  | 'tags'
+  | 'richtext'
+  | 'checkbox'
+  /** One image: upload (default) or URL, stored as a URL string */
+  | 'image'
+  /** An ordered list of images with alt text; the first is the main one */
+  | 'images'
+  | 'select';
 
 export interface FieldConfig {
   name: string;
@@ -9,6 +22,12 @@ export interface FieldConfig {
   required?: boolean;
   help?: string;
   placeholder?: string;
+  /** Choices for `select` fields */
+  options?: { value: string; label: string }[];
+  /** Hide the field unless this returns true for the current form values */
+  visibleWhen?: (values: FormValues) => boolean;
+  /** Overrides `help` from the current form values, e.g. to explain the chosen layout */
+  helpFor?: (values: FormValues) => string | undefined;
 }
 
 export interface ContentItemBase {

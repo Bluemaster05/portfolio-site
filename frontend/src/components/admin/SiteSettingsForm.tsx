@@ -4,7 +4,9 @@ import { useState, type FormEvent } from 'react';
 import type { components } from '@/lib/api/schema';
 import type { SiteSettings, SiteLink } from '@/lib/api/types';
 import { SECTIONS } from '@/lib/sections';
+import type { UploadImage } from '@/lib/admin/media';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
+import { ImageSourceField } from './ImageSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from './ui';
 
 export type SiteSettingsUpdate = components['schemas']['UpdateSiteSettingsDto'];
@@ -15,9 +17,10 @@ interface SiteSettingsFormProps {
   saved: boolean;
   error?: string;
   onSubmit: (update: SiteSettingsUpdate) => void;
+  onUpload: UploadImage;
 }
 
-export function SiteSettingsForm({ settings, saving, saved, error, onSubmit }: SiteSettingsFormProps) {
+export function SiteSettingsForm({ settings, saving, saved, error, onSubmit, onUpload }: SiteSettingsFormProps) {
   const [draft, setDraft] = useState<SiteSettingsUpdate>({
     siteTitle: settings.siteTitle,
     siteDescription: settings.siteDescription,
@@ -80,12 +83,19 @@ export function SiteSettingsForm({ settings, saving, saved, error, onSubmit }: S
         <Field label="Contact email" htmlFor="contactEmail" help="Shown in the footer">
           <TextInput id="contactEmail" type="email" value={draft.contactEmail ?? ''} onChange={(e) => set('contactEmail', e.target.value)} />
         </Field>
-        <Field label="Avatar URL" htmlFor="avatarUrl">
-          <TextInput id="avatarUrl" type="url" value={draft.avatarUrl ?? ''} onChange={(e) => set('avatarUrl', e.target.value)} />
-        </Field>
+        <div className="sm:col-span-2">
+          <Field label="Avatar" help="A square photo works best; shown next to your name on the home page">
+            <ImageSourceField
+              label="Avatar"
+              value={draft.avatarUrl ?? ''}
+              onChange={(avatarUrl) => set('avatarUrl', avatarUrl)}
+              onUpload={onUpload}
+            />
+          </Field>
+        </div>
         <div className="sm:col-span-2">
           <Field label="Introduction" help="Shown on the home page">
-            <RichTextEditor label="Introduction" value={draft.bio} onChange={(bio) => set('bio', bio)} />
+            <RichTextEditor label="Introduction" value={draft.bio} onChange={(bio) => set('bio', bio)} onUpload={onUpload} />
           </Field>
         </div>
       </fieldset>

@@ -27,7 +27,7 @@ export const blogResource: ContentResource<BlogPost> = {
     { name: 'slug', label: 'URL slug', kind: 'slug', help: 'Leave empty to generate from the title' },
     { name: 'excerpt', label: 'Excerpt', kind: 'textarea', help: 'Shown in the post list and search results' },
     { name: 'tags', label: 'Tags', kind: 'tags' },
-    { name: 'coverImageUrl', label: 'Cover image URL', kind: 'url' },
+    { name: 'coverImageUrl', label: 'Cover image', kind: 'image' },
     { name: 'content', label: 'Post', kind: 'richtext' },
     { name: 'published', label: 'Published', kind: 'checkbox' },
   ],
