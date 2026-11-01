@@ -12,8 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { ImageDto } from '../../common/dto/image.dto.js';
-import { IsVideoSource } from '../../common/validators/is-image-source.js';
+import { MediaItemDto } from '../../common/dto/media-item.dto.js';
 import { ProjectMediaLayout } from '../entities/project.entity.js';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
@@ -69,23 +68,16 @@ export class CreateProjectDto extends ContentItemFieldsDto {
   @IsEnum(ProjectMediaLayout)
   mediaLayout?: ProjectMediaLayout;
 
-  /** Header image (single layout) or gallery images; the first is the main image */
+  /**
+   * Images and videos in display order. The first item is the main one on the project page (single
+   * layout shows only it); cards and the home page use the first image.
+   */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(30)
   @ValidateNested({ each: true })
-  @Type(() => ImageDto)
-  images?: ImageDto[];
-
-  /**
-   * Video shown as the main item on the project page (layouts other than none). The first image
-   * is its poster, and stays the project's cover everywhere else.
-   */
-  @IsOptional()
-  @EmptyToNull()
-  @IsVideoSource()
-  @MaxLength(2048)
-  videoUrl?: string;
+  @Type(() => MediaItemDto)
+  media?: MediaItemDto[];
 
   @IsOptional()
   @EmptyToNull()
@@ -120,10 +112,8 @@ export class ProjectResponseDto extends ContentItemResponseDto {
   @ApiProperty({ enum: ProjectMediaLayout, enumName: 'ProjectMediaLayout' })
   mediaLayout!: ProjectMediaLayout;
 
-  images!: ImageDto[];
-
-  /** Main item on the project page when set */
-  videoUrl?: string;
+  /** Images and videos in display order; the first is the main item on the project page */
+  media!: MediaItemDto[];
   startDate?: string;
   endDate?: string;
   featured!: boolean;

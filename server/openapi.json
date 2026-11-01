@@ -2686,21 +2686,36 @@
           "gallery"
         ]
       },
-      "ImageDto": {
+      "MediaKind": {
+        "type": "string",
+        "enum": [
+          "image",
+          "video"
+        ]
+      },
+      "MediaItemDto": {
         "type": "object",
         "properties": {
+          "kind": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/MediaKind"
+              }
+            ]
+          },
           "url": {
             "type": "string",
-            "description": "Uploaded image (`/media/<key>`) or an http(s) URL",
+            "description": "Upload (`/media/<key>`, matching `kind`) or an http(s) URL",
             "maxLength": 2048
           },
           "alt": {
             "type": "string",
-            "description": "Alternative text; describe what the image shows",
+            "description": "Alternative text for an image, or a short description of a video",
             "maxLength": 300
           }
         },
         "required": [
+          "kind",
           "url"
         ]
       },
@@ -2740,15 +2755,12 @@
           "liveUrl": {
             "type": "string"
           },
-          "images": {
+          "media": {
+            "description": "Images and videos in display order; the first is the main item on the project page",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
-          },
-          "videoUrl": {
-            "type": "string",
-            "description": "Main item on the project page when set"
           },
           "startDate": {
             "type": "string"
@@ -2784,7 +2796,7 @@
           "slug",
           "summary",
           "technologies",
-          "images",
+          "media",
           "featured",
           "id",
           "published",
@@ -2866,18 +2878,13 @@
             "type": "string",
             "maxLength": 2048
           },
-          "images": {
-            "description": "Header image (single layout) or gallery images; the first is the main image",
+          "media": {
+            "description": "Images and videos in display order. The first item is the main one on the project page (single\nlayout shows only it); cards and the home page use the first image.",
             "maxItems": 30,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
-          },
-          "videoUrl": {
-            "type": "string",
-            "description": "Video shown as the main item on the project page (layouts other than none). The first image\nis its poster, and stays the project's cover everywhere else.",
-            "maxLength": 2048
           },
           "featured": {
             "type": "boolean",
@@ -2997,18 +3004,13 @@
             "type": "string",
             "maxLength": 2048
           },
-          "images": {
-            "description": "Header image (single layout) or gallery images; the first is the main image",
+          "media": {
+            "description": "Images and videos in display order. The first item is the main one on the project page (single\nlayout shows only it); cards and the home page use the first image.",
             "maxItems": 30,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
-          },
-          "videoUrl": {
-            "type": "string",
-            "description": "Video shown as the main item on the project page (layouts other than none). The first image\nis its poster, and stays the project's cover everywhere else.",
-            "maxLength": 2048
           },
           "featured": {
             "type": "boolean",
@@ -3064,15 +3066,12 @@
           "liveUrl": {
             "type": "string"
           },
-          "images": {
+          "media": {
+            "description": "Images and videos in display order; the first is the main item on the project page",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
-          },
-          "videoUrl": {
-            "type": "string",
-            "description": "Main item on the project page when set"
           },
           "startDate": {
             "type": "string"
@@ -3095,7 +3094,7 @@
           "slug",
           "summary",
           "technologies",
-          "images",
+          "media",
           "featured"
         ]
       },

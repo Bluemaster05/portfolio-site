@@ -141,14 +141,7 @@
           "default": null,
           "comment": null,
           "collation": null,
-          "enumItems": [
-            "site:read",
-            "projects:read",
-            "experience:read",
-            "education:read",
-            "honors:read",
-            "blog:read"
-          ],
+          "enumItems": [],
           "mappedType": "array"
         },
         "token_hash": {
@@ -194,8 +187,8 @@
       "checks": [
         {
           "name": "api_token_scopes_check",
-          "expression": "\"scopes\" <@ array['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]",
-          "definition": "check (\"scopes\" <@ array['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text])",
+          "expression": "scopes <@ ARRAY['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]",
+          "definition": "CHECK ((scopes <@ ARRAY['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]))",
           "columnName": "scopes"
         }
       ],
@@ -1374,23 +1367,6 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "images": {
-          "name": "images",
-          "type": "jsonb",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": false,
-          "unique": false,
-          "length": null,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "json"
-        },
         "live_url": {
           "name": "live_url",
           "type": "varchar(2048)",
@@ -1407,6 +1383,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "media": {
+          "name": "media",
+          "type": "jsonb",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "json"
         },
         "media_layout": {
           "name": "media_layout",
@@ -1427,7 +1420,7 @@
             "single",
             "gallery"
           ],
-          "mappedType": "enum",
+          "mappedType": "unknown",
           "nativeEnumName": "project_media_layout"
         },
         "published": {
@@ -1582,23 +1575,6 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
-        },
-        "video_url": {
-          "name": "video_url",
-          "type": "varchar(2048)",
-          "unsigned": false,
-          "autoincrement": false,
-          "primary": false,
-          "nullable": true,
-          "unique": false,
-          "length": 2048,
-          "precision": null,
-          "scale": null,
-          "default": null,
-          "comment": null,
-          "collation": null,
-          "enumItems": [],
-          "mappedType": "string"
         }
       },
       "indexes": [

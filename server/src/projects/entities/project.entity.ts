@@ -9,7 +9,8 @@ export enum ProjectMediaLayout {
   Gallery = 'gallery',
 }
 
-export interface ProjectImage {
+export interface ProjectMediaItem {
+  kind: 'image' | 'video';
   url: string;
   alt?: string;
 }
@@ -40,17 +41,16 @@ export class Project extends ContentItem {
   @Property({ length: 2048, nullable: true })
   liveUrl?: string;
 
-  /** How images show on the project page: none, one header image, or a gallery */
+  /** How media shows on the project page: none, one header item, or a gallery */
   @Enum({ items: () => ProjectMediaLayout, nativeEnumName: 'project_media_layout' })
   mediaLayout: ProjectMediaLayout & Opt = ProjectMediaLayout.None;
 
-  /** First image is the header (single) or the large main image (gallery) */
+  /**
+   * Images and videos in display order. The first item is the header (single) or the large main
+   * item (gallery); the first image is the cover on cards and the home page.
+   */
   @Property({ type: 'json' })
-  images: ProjectImage[] & Opt = [];
-
-  /** Main item on the project page when set; images still provide the poster and cover */
-  @Property({ length: 2048, nullable: true })
-  videoUrl?: string;
+  media: ProjectMediaItem[] & Opt = [];
 
   @Property({ length: 10, nullable: true })
   startDate?: string;

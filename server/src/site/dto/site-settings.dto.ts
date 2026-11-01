@@ -15,7 +15,7 @@ import { LinkDto } from '../../common/dto/link.dto.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
-import { IsImageSource } from '../../common/validators/is-image-source.js';
+import { IsImageSource } from '../../common/validators/is-media-source.js';
 import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 /** On/off switch for each public section */

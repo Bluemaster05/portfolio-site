@@ -4,7 +4,7 @@ import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/c
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
-import { IsImageSource } from '../../common/validators/is-image-source.js';
+import { IsImageSource } from '../../common/validators/is-media-source.js';
 import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 export class CreateBlogPostDto extends ContentItemFieldsDto {
