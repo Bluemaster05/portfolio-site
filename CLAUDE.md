@@ -15,8 +15,8 @@ Self-hosted portfolio: Next.js public site + admin portal (`/frontend`), NestJS 
 - **OpenAPI is the contract.** After changing any server controller or DTO, run
   `yarn openapi:export` in `server/` and `yarn openapi:generate` in `frontend/`, and commit both
   `server/openapi.json` and `frontend/src/lib/api/schema.d.ts`. Never hand-edit `schema.d.ts`.
-- **Typed API access only.** Frontend calls go through `publicApi` (server components) or `$api`
-  (admin client components). No hand-written `fetch` to the API.
+- **Typed API access only.** Frontend calls go through `publicApi` (server components) or
+  `$api` / `adminClient` (admin). No hand-written `fetch` to the API.
 - **Rich text is TipTap JSON**, never stored HTML. New block types need an editor extension and a
   renderer case — see [docs/RichContent.md](docs/RichContent.md).
 - **Section toggles.** Any new public section must be toggleable in `SiteSettings` and its public
@@ -44,7 +44,11 @@ Self-hosted portfolio: Next.js public site + admin portal (`/frontend`), NestJS 
   before using unfamiliar APIs. Middleware lives in `src/proxy.ts`.
 - Container / presenter: `page.tsx` (or a container component) fetches and owns state;
   components in `src/components/**` are pure and never import API clients.
-- Public pages are server components; keep client JS to interactive leaves.
+- Public pages are server components reading through `lib/api/public-data.ts` (`'use cache'`);
+  keep client JS to interactive leaves. Cache Components is on: request data (`params`,
+  `usePathname`) must be read inside `<Suspense>`.
+- Admin content editors are driven by `lib/admin/resources/*` definitions; new content fields go
+  in the resource's `fields`, `toValues`, and `toBody`.
 - `PORTFOLIO_API_TOKEN` is server-only. Never expose it via `NEXT_PUBLIC_*`.
 
 ## Security ([docs/Security.md](docs/Security.md))

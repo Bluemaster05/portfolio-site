@@ -24,12 +24,37 @@ frontend/src/
 ├── lib/
 │   ├── api/
 │   │   ├── schema.d.ts        GENERATED from server/openapi.json — do not edit
+│   │   ├── types.ts           friendly aliases for schema types (Project, SiteSettings, …)
 │   │   ├── public-client.ts   server-only client using PORTFOLIO_API_TOKEN
+│   │   ├── public-data.ts     cached ('use cache') readers used by public pages
 │   │   ├── admin-client.ts    browser client: cookies, CSRF header, refresh-on-401
 │   │   └── admin-query.ts     openapi-react-query hooks bound to admin-client
+│   ├── admin/
+│   │   └── resources/         one definition per content type (fields + typed API calls)
 │   └── ...
 └── proxy.ts                   admin network restriction
 ```
+
+## Public data and caching
+
+Public pages read through `lib/api/public-data.ts`. Each reader is a `'use cache'` function with
+`cacheLife('minutes')` and the `portfolio` tag, so pages are prerendered and then revalidated in the
+background — admin edits appear on the public site within a few minutes. Failed requests resolve to
+`undefined` / `[]`, so a build or request with the API down renders empty states instead of failing.
+
+This Next.js version runs with Cache Components: anything that reads request data (`params`,
+`usePathname`, …) must sit inside `<Suspense>`. Dynamic `[slug]` pages await `params` inside a
+Suspense boundary; don't add `generateStaticParams` unless it can always return at least one entry.
+
+## Admin content editors
+
+Projects, experience, education, honors, and blog share one list page and one editor
+(`app/admin/(portal)/[resource]/`). Each content type is described by a `ContentResource` in
+`lib/admin/resources/` — its form fields, conversion between API items and form values, and typed
+`adminClient` calls. To add a field: add it on the server, regenerate types, then add it to the
+resource's `fields`, `toValues`, and `toBody` (TypeScript flags any mismatch with the DTO).
+
+Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
 ## Container / presenter pattern
 

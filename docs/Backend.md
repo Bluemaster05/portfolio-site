@@ -41,7 +41,12 @@ Each content module follows the same pattern:
   from types + class-validator, add `@ApiProperty` where inference is not enough). Use stable
   `operationId`s (the default `Controller_method`) — the frontend relies on generated types.
 - Return **response DTOs**, never raw entities with secrets (password hashes, token hashes).
-- Validate input with `class-validator`. Rich text fields use `@IsRichTextDoc()`.
+- Validate input with `class-validator`. Rich text fields use `@IsRichTextDoc()`, dates use
+  `@IsPartialDate()` (`YYYY`, `YYYY-MM`, `YYYY-MM-DD`), links use `@IsSafeUrl()`.
+- Optional nullable text fields take `@IsOptional() @EmptyToNull()` so clients clear them by
+  sending `''`. Don't use it on non-null columns (e.g. `summary`, which defaults to `''`).
+- DTO instances declare every field, so absent fields are `undefined`: apply updates with
+  `definedOnly(dto)` (as `ContentService` does), never by assigning the DTO directly.
 - Content items have `published: boolean` and `sortOrder: number`. Public endpoints filter on
   `published` and order by `sortOrder`, then date.
 - After changing controllers/DTOs: `yarn openapi:export` and commit `server/openapi.json`, then
