@@ -1,26 +1,193 @@
 @import "tailwindcss";
 
+/*
+ * Design tokens. Personal branches re-theme by changing these values only.
+ * Text colors meet WCAG AA against --background and --surface in both schemes.
+ * See docs/DesignGuidelines.md.
+ */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+  --background: #fbfbfa;
+  --surface: #ffffff;
+  --foreground: #1b1c1e;
+  --muted: #565b63;
+  --border: #e2e3e5;
+  --accent: #2753b8;
+  --accent-soft: #e8eefb;
+  --code-background: #f4f5f6;
+  --radius: 0.625rem;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #111214;
+    --surface: #18191c;
+    --foreground: #e7e8ea;
+    --muted: #a2a7af;
+    --border: #2a2c30;
+    --accent: #8db3ff;
+    --accent-soft: #1c2740;
+    --code-background: #1d1f23;
   }
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-accent: var(--accent);
+  --color-accent-soft: var(--accent-soft);
+  --color-code: var(--code-background);
+  --radius-card: var(--radius);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+html {
+  color-scheme: light dark;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+  font-size: 1.0625rem; /* 17px */
+  line-height: 1.7;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+::selection {
+  background: var(--accent-soft);
+}
+
+/* ---------- Motion: short, subtle, and off for reduced-motion users ---------- */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 300ms ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ---------- Rich text (rendered TipTap documents) ---------- */
+
+.prose {
+  max-width: 70ch;
+}
+
+.prose > * + * {
+  margin-top: 1em;
+}
+
+.prose h2,
+.prose h3,
+.prose h4 {
+  font-weight: 600;
+  line-height: 1.3;
+  margin-top: 1.8em;
+}
+
+.prose h2 {
+  font-size: 1.45rem;
+}
+
+.prose h3 {
+  font-size: 1.2rem;
+}
+
+.prose h4 {
+  font-size: 1.05rem;
+}
+
+.prose a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.prose ul {
+  list-style: disc;
+  padding-left: 1.4em;
+}
+
+.prose ol {
+  list-style: decimal;
+  padding-left: 1.4em;
+}
+
+.prose li + li {
+  margin-top: 0.3em;
+}
+
+.prose blockquote {
+  border-left: 3px solid var(--border);
+  padding-left: 1em;
+  color: var(--muted);
+}
+
+.prose hr {
+  border: 0;
+  border-top: 1px solid var(--border);
+  margin: 2em 0;
+}
+
+.prose img {
+  border-radius: var(--radius);
+  max-width: 100%;
+  height: auto;
+}
+
+.prose :not(pre) > code {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875em;
+  background: var(--code-background);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 0.1em 0.35em;
+}
+
+/* ---------- Code blocks (Shiki, dual light/dark themes) ---------- */
+
+.code-block pre {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  line-height: 1.6;
+  overflow-x: auto;
+  padding: 1rem 1.125rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background-color: var(--code-background) !important;
+}
+
+@media (prefers-color-scheme: dark) {
+  .code-block .shiki,
+  .code-block .shiki span {
+    color: var(--shiki-dark) !important;
+  }
 }
