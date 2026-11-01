@@ -21,7 +21,7 @@ export function ProjectMedia({ layout, images }: ProjectMediaProps) {
         <img
           src={image.url}
           alt={image.alt ?? ''}
-          className="max-h-[min(40vh,22rem)] w-auto max-w-full rounded-card border border-border bg-surface object-contain"
+          className="max-h-[min(52vh,30rem)] w-auto max-w-full rounded-card border border-border bg-surface object-contain"
         />
       </figure>
     );

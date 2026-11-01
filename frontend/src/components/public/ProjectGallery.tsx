@@ -18,7 +18,7 @@ export function ProjectGallery({ images }: { images: ProjectImage[] }) {
         key={main.url}
         src={main.url}
         alt={main.alt ?? ''}
-        className="h-[min(36vh,20rem)] w-full rounded-card border border-border bg-surface object-contain animate-fade-up"
+        className="h-[min(48vh,28rem)] w-full rounded-card border border-border bg-surface object-contain animate-fade-up"
       />
       <ul className="grid max-w-xl grid-cols-5 gap-2">
         {images.map((image, index) => (
