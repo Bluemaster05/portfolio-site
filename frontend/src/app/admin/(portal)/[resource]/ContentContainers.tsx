@@ -79,7 +79,8 @@ export function ContentEditContainer<Item extends ContentItemBase>({
     mutationFn: (values: FormValues) => (id === undefined ? resource.api.create(values) : resource.api.update(id, values)),
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: [resource.key] });
-      router.push(`/admin/${resource.key}`);
+      // Editing stays on the page so other tabs can still be saved; creating returns to the list
+      if (id === undefined) router.push(`/admin/${resource.key}`);
     },
   });
 
@@ -107,10 +108,8 @@ export function ContentEditContainer<Item extends ContentItemBase>({
         key={id ?? 'new'}
         fields={resource.fields}
         initialValues={resource.toValues(item.data)}
-        submitLabel={id === undefined ? 'Create' : 'Save changes'}
-        submitting={save.isPending}
-        error={errorMessage(save.error)}
-        onSubmit={(values) => save.mutate(values)}
+        mode={id === undefined ? 'create' : 'edit'}
+        onSave={async (values) => resource.toValues(await save.mutateAsync(values))}
         onCancel={() => router.push(`/admin/${resource.key}`)}
         onUpload={uploadMedia}
         lookups={lookups}

@@ -1,8 +1,9 @@
 'use client';
 
-import { useId, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { useId, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
+import { errorMessage } from '@/lib/admin/api-error';
 import { isMediaItem, type FormValue, type FormValues, type MediaItem } from '@/lib/admin/form-values';
 import type { UploadMedia } from '@/lib/admin/media';
 import type { FieldConfig } from '@/lib/admin/resources/resource';
@@ -15,10 +16,14 @@ import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from '../ui
 interface ContentFormProps {
   fields: FieldConfig[];
   initialValues: FormValues;
-  submitLabel: string;
-  submitting: boolean;
-  error?: string;
-  onSubmit: (values: FormValues) => void;
+  /**
+   * 'create': one form with a Create button. 'edit': every tab is its own form that saves only its
+   * own fields; Save and Cancel show once that tab has changes, and Cancel puts it back.
+   */
+  mode: 'create' | 'edit';
+  /** Saves the values and resolves to the values as saved (the server may fill some in, e.g. the slug) */
+  onSave: (values: FormValues) => Promise<FormValues>;
+  /** Leaves without creating (create mode) */
   onCancel: () => void;
   /** Stores an image and resolves to its URL; used by image fields and the editor */
   onUpload: UploadMedia;
@@ -31,33 +36,81 @@ export interface FormLookups {
   createTechnology?: (name: string) => Promise<TechnologySummary>;
 }
 
+/** Fields saved together: one tab, or the fields outside the tabs. */
+interface FieldGroup {
+  key: string;
+  fields: FieldConfig[];
+}
+
+interface GroupStatus {
+  saving?: boolean;
+  error?: string;
+}
+
+const UNTABBED = '';
+
 /** Form for any content type, built from its field configuration. */
 export function ContentForm({
   fields,
   initialValues,
-  submitLabel,
-  submitting,
-  error,
-  onSubmit,
+  mode,
+  onSave,
   onCancel,
   onUpload,
   lookups = {},
 }: ContentFormProps) {
+  // Edits on every tab live here, so switching tabs never loses them
   const [values, setValues] = useState<FormValues>(initialValues);
+  // What the server has; a group is "changed" when its values differ from these
+  const [saved, setSaved] = useState<FormValues>(initialValues);
+  const [status, setStatus] = useState<Record<string, GroupStatus>>({});
+  // Bumped to remount a group's inputs when its values are replaced (editors keep their own state)
+  const [versions, setVersions] = useState<Record<string, number>>({});
   const [activeTab, setActiveTab] = useState(0);
   const tabsId = useId();
+
+  const tabs = [...new Set(fields.flatMap((field) => (field.tab ? [field.tab] : [])))];
+  const groups: FieldGroup[] = [
+    ...tabs.map((tab) => ({ key: tab, fields: fields.filter((field) => field.tab === tab) })),
+    { key: UNTABBED, fields: fields.filter((field) => !field.tab) },
+  ].filter((group) => group.fields.length > 0);
+  const untabbed = groups.find((group) => group.key === UNTABBED);
 
   function set(name: string, value: FormValue) {
     setValues((current) => ({ ...current, [name]: value }));
   }
 
-  function handleSubmit(event: FormEvent) {
-    event.preventDefault();
-    onSubmit(values);
+  function isChanged(group: FieldGroup): boolean {
+    return group.fields.some((field) => !sameValue(values[field.name], saved[field.name]));
   }
 
-  // A required or malformed field on a hidden tab can't be focused, so the browser would block
-  // the save without saying why. Show its tab first so the browser can point at it.
+  function replaceGroup(group: FieldGroup, source: FormValues) {
+    setValues((current) => ({ ...current, ...pick(source, group.fields) }));
+    setVersions((current) => ({ ...current, [group.key]: (current[group.key] ?? 0) + 1 }));
+  }
+
+  async function save(group: FieldGroup | undefined, event: FormEvent) {
+    event.preventDefault();
+    const key = group?.key ?? 'all';
+    setStatus((current) => ({ ...current, [key]: { saving: true } }));
+    try {
+      // Only this group's edits; other tabs keep their unsaved changes for their own Save
+      const next = await onSave(group ? { ...saved, ...pick(values, group.fields) } : values);
+      setSaved(next);
+      if (group) replaceGroup(group, next);
+      setStatus((current) => ({ ...current, [key]: {} }));
+    } catch (error) {
+      setStatus((current) => ({ ...current, [key]: { error: errorMessage(error) } }));
+    }
+  }
+
+  function reset(group: FieldGroup) {
+    replaceGroup(group, saved);
+    setStatus((current) => ({ ...current, [group.key]: {} }));
+  }
+
+  // Create mode is one form across tabs. A required or malformed field on a hidden tab can't be
+  // focused, so the browser would block the save without saying why: show its tab first.
   function revealInvalid(event: FormEvent<HTMLFormElement>) {
     const panel = event.currentTarget.querySelector(':invalid')?.closest<HTMLElement>('[data-tab-index]');
     const index = Number(panel?.dataset.tabIndex);
@@ -73,35 +126,70 @@ export function ContentForm({
     document.getElementById(`${tabsId}-tab-${next}`)?.focus();
   }
 
-  const visible = fields.filter((field) => field.visibleWhen?.(values) ?? true);
-  const checkboxes = visible.filter((field) => field.kind === 'checkbox');
-  const inputs = visible.filter((field) => field.kind !== 'checkbox');
-  const untabbed = inputs.filter((field) => !field.tab);
-  const tabs = [...new Set(fields.flatMap((field) => (field.tab ? [field.tab] : [])))];
-
-  function renderFields(list: FieldConfig[]) {
+  function renderFields(group: FieldGroup) {
+    const visible = group.fields.filter((field) => field.visibleWhen?.(values) ?? true);
+    const inputs = visible.filter((field) => field.kind !== 'checkbox');
+    const checkboxes = visible.filter((field) => field.kind === 'checkbox');
     return (
-      <div className="grid gap-5 sm:grid-cols-2">
-        {list.map((field) => (
-          <div key={field.name} className={isWide(field) ? 'sm:col-span-2' : undefined}>
-            <FieldInput
-              field={field}
-              help={field.helpFor?.(values) ?? field.help}
-              maxItems={field.maxItemsFor?.(values)}
-              value={values[field.name]}
-              onChange={(value) => set(field.name, value)}
-              onUpload={onUpload}
-              lookups={lookups}
-            />
+      <div key={versions[group.key] ?? 0} className="grid gap-6">
+        {inputs.length > 0 && (
+          <div className="grid gap-5 sm:grid-cols-2">
+            {inputs.map((field) => (
+              <div key={field.name} className={isWide(field) ? 'sm:col-span-2' : undefined}>
+                <FieldInput
+                  field={field}
+                  help={field.helpFor?.(values) ?? field.help}
+                  maxItems={field.maxItemsFor?.(values)}
+                  value={values[field.name]}
+                  onChange={(value) => set(field.name, value)}
+                  onUpload={onUpload}
+                  lookups={lookups}
+                />
+              </div>
+            ))}
           </div>
-        ))}
+        )}
+        {checkboxes.length > 0 && (
+          <div className="flex flex-wrap gap-6">
+            {checkboxes.map((field) => (
+              <Checkbox
+                key={field.name}
+                id={`field-${field.name}`}
+                label={field.label}
+                checked={values[field.name] === true}
+                onChange={(checked) => set(field.name, checked)}
+              />
+            ))}
+          </div>
+        )}
       </div>
     );
   }
 
-  return (
-    <form onSubmit={handleSubmit} onInvalidCapture={revealInvalid} className="grid gap-6">
-      <ErrorBanner message={error} />
+  /** In edit mode each group is its own form; in create mode the one outer form holds them all. */
+  function renderGroup(group: FieldGroup) {
+    if (mode === 'create') return renderFields(group);
+    const groupStatus = status[group.key] ?? {};
+    return (
+      <form onSubmit={(event) => save(group, event)} className="grid gap-6">
+        {renderFields(group)}
+        <ErrorBanner message={groupStatus.error} />
+        {isChanged(group) && (
+          <ActionBar>
+            <Button type="submit" variant="primary" disabled={groupStatus.saving}>
+              {groupStatus.saving ? 'Saving…' : 'Save changes'}
+            </Button>
+            <Button onClick={() => reset(group)} disabled={groupStatus.saving}>
+              Cancel
+            </Button>
+          </ActionBar>
+        )}
+      </form>
+    );
+  }
+
+  const body = (
+    <>
       {tabs.length > 0 && (
         <div className="grid gap-6">
           {/* The bottom line is an inset shadow, not a border, so the active underline can sit on it
@@ -111,64 +199,93 @@ export function ContentForm({
             aria-label="Editor sections"
             className="flex overflow-x-auto shadow-[inset_0_-1px_0_var(--border)]"
           >
-            {tabs.map((tab, index) => (
-              <button
-                key={tab}
-                id={`${tabsId}-tab-${index}`}
-                role="tab"
-                type="button"
-                aria-selected={index === activeTab}
-                aria-controls={`${tabsId}-panel-${index}`}
-                tabIndex={index === activeTab ? 0 : -1}
-                onClick={() => setActiveTab(index)}
-                onKeyDown={onTabKeyDown}
-                className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
-                  index === activeTab
-                    ? 'border-accent text-foreground'
-                    : 'border-transparent text-muted hover:text-foreground'
-                }`}
-              >
-                {tab}
-              </button>
-            ))}
+            {groups
+              .filter((group) => group.key !== UNTABBED)
+              .map((group, index) => {
+                const changed = mode === 'edit' && isChanged(group);
+                return (
+                  <button
+                    key={group.key}
+                    id={`${tabsId}-tab-${index}`}
+                    role="tab"
+                    type="button"
+                    aria-selected={index === activeTab}
+                    aria-controls={`${tabsId}-panel-${index}`}
+                    tabIndex={index === activeTab ? 0 : -1}
+                    onClick={() => setActiveTab(index)}
+                    onKeyDown={onTabKeyDown}
+                    className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                      index === activeTab
+                        ? 'border-accent text-foreground'
+                        : 'border-transparent text-muted hover:text-foreground'
+                    }`}
+                  >
+                    {group.key}
+                    {changed && (
+                      <>
+                        <span aria-hidden="true" className="ml-1.5 text-accent">
+                          •
+                        </span>
+                        <span className="sr-only"> (unsaved changes)</span>
+                      </>
+                    )}
+                  </button>
+                );
+              })}
           </div>
           {/* Every panel stays mounted so editors keep their state when switching tabs */}
-          {tabs.map((tab, index) => (
-            <div
-              key={tab}
-              id={`${tabsId}-panel-${index}`}
-              role="tabpanel"
-              aria-labelledby={`${tabsId}-tab-${index}`}
-              data-tab-index={index}
-              hidden={index !== activeTab}
-            >
-              {renderFields(inputs.filter((field) => field.tab === tab))}
-            </div>
-          ))}
+          {groups
+            .filter((group) => group.key !== UNTABBED)
+            .map((group, index) => (
+              <div
+                key={group.key}
+                id={`${tabsId}-panel-${index}`}
+                role="tabpanel"
+                aria-labelledby={`${tabsId}-tab-${index}`}
+                data-tab-index={index}
+                hidden={index !== activeTab}
+              >
+                {renderGroup(group)}
+              </div>
+            ))}
         </div>
       )}
-      {untabbed.length > 0 && renderFields(untabbed)}
-      {checkboxes.length > 0 && (
-        <div className="flex flex-wrap gap-6">
-          {checkboxes.map((field) => (
-            <Checkbox
-              key={field.name}
-              id={`field-${field.name}`}
-              label={field.label}
-              checked={values[field.name] === true}
-              onChange={(checked) => set(field.name, checked)}
-            />
-          ))}
-        </div>
-      )}
-      <div className="flex gap-2">
-        <Button type="submit" variant="primary" disabled={submitting}>
-          {submitting ? 'Saving…' : submitLabel}
+      {untabbed && renderGroup(untabbed)}
+    </>
+  );
+
+  if (mode === 'edit') return <div className="grid gap-6">{body}</div>;
+
+  const createStatus = status.all ?? {};
+  return (
+    <form onSubmit={(event) => save(undefined, event)} onInvalidCapture={revealInvalid} className="grid gap-6">
+      {body}
+      <ErrorBanner message={createStatus.error} />
+      <ActionBar>
+        <Button type="submit" variant="primary" disabled={createStatus.saving}>
+          {createStatus.saving ? 'Saving…' : 'Create'}
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
-      </div>
+      </ActionBar>
     </form>
   );
+}
+
+/** Save/Cancel row; sticks to the bottom of the window so it's reachable from a long tab. */
+function ActionBar({ children }: { children: ReactNode }) {
+  return (
+    <div className="sticky bottom-0 z-10 -mx-1 flex gap-2 border-t border-border bg-background px-1 py-3">
+      {children}
+    </div>
+  );
+}
+
+function pick(values: FormValues, fields: FieldConfig[]): FormValues {
+  return Object.fromEntries(fields.flatMap((field) => (field.name in values ? [[field.name, values[field.name]]] : [])));
+}
+
+function sameValue(a: FormValue | undefined, b: FormValue | undefined): boolean {
+  return JSON.stringify(a) === JSON.stringify(b);
 }
 
 function isWide(field: FieldConfig): boolean {
