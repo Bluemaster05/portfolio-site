@@ -172,6 +172,26 @@ body {
   padding: 0.1em 0.35em;
 }
 
+/* ---------- Admin rich text editor ---------- */
+
+.rich-text-editor .ProseMirror pre {
+  font-family: var(--font-geist-mono), ui-monospace, monospace;
+  font-size: 0.875rem;
+  background: var(--code-background);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.75rem 1rem;
+  overflow-x: auto;
+}
+
+.rich-text-editor .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  color: var(--muted);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
 /* ---------- Code blocks (Shiki, dual light/dark themes) ---------- */
 
 .code-block pre {
