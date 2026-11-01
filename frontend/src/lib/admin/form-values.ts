@@ -5,6 +5,8 @@ export interface MediaItem {
   kind: 'image' | 'video';
   url: string;
   alt?: string;
+  /** Marked as the main image or main video */
+  main?: boolean;
 }
 
 /** Values held by the generic content form, keyed by field name. */
@@ -32,7 +34,9 @@ export function isMediaItem(item: unknown): item is MediaItem {
 export function mediaItems(values: FormValues, name: string): MediaItem[] {
   const value = values[name];
   if (!Array.isArray(value)) return [];
-  return value.filter(isMediaItem).map((item) => ({ kind: item.kind, url: item.url, alt: item.alt?.trim() ?? '' }));
+  return value
+    .filter(isMediaItem)
+    .map((item) => ({ kind: item.kind, url: item.url, alt: item.alt?.trim() ?? '', main: item.main === true }));
 }
 
 export function richText(values: FormValues, name: string): RichTextValue {

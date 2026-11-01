@@ -5,8 +5,10 @@ import type { ProjectMediaItem } from '@/lib/api/types';
 import { firstFrame } from '@/lib/images';
 
 interface ProjectGalleryProps {
-  /** Images and videos in display order; the first is shown large to start */
+  /** Images and videos in tile order */
   items: ProjectMediaItem[];
+  /** Item shown large to start: the main video, else the main image */
+  initialIndex: number;
   /** Accessible name for videos without a description */
   title: string;
 }
@@ -15,8 +17,8 @@ interface ProjectGalleryProps {
  * The selected item large with every item as a smaller tile below. Videos preview their first
  * frame and never autoplay; choosing a tile shows it in the large spot.
  */
-export function ProjectGallery({ items, title }: ProjectGalleryProps) {
-  const [selected, setSelected] = useState(0);
+export function ProjectGallery({ items, initialIndex, title }: ProjectGalleryProps) {
+  const [selected, setSelected] = useState(initialIndex);
   const main = items[selected] ?? items[0];
   const mainClass = 'h-[min(48vh,28rem)] w-full rounded-card border border-border object-contain animate-fade-up';
   let imageNumber = 0;

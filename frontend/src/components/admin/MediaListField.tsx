@@ -3,7 +3,7 @@
 import { useRef, useState } from 'react';
 import { IMAGE_ACCEPT, VIDEO_ACCEPT, type UploadMedia } from '@/lib/admin/media';
 import { errorMessage } from '@/lib/admin/api-error';
-import { firstFrame, isImageSrc, isVideoSrc, looksLikeVideo } from '@/lib/images';
+import { firstFrame, isImageSrc, isVideoSrc, looksLikeVideo, mainIndexOf } from '@/lib/images';
 import type { MediaItem } from '@/lib/admin/form-values';
 import { MediaLightbox } from './MediaLightbox';
 import { SourceModeToggle, type SourceMode } from './MediaSourceField';
@@ -19,8 +19,9 @@ interface MediaListFieldProps {
 }
 
 /**
- * One ordered list of images and videos with descriptions. Several files can be uploaded at once;
- * the first item is the main one.
+ * One ordered list of images and videos with descriptions; the order is the gallery order.
+ * Several files can be uploaded at once. One image is the main image (the cover on cards and the
+ * home page) and one video the main video (leads the project page); unmarked, the first of each.
  */
 export function MediaListField({ value, onChange, onUpload, label, maxItems }: MediaListFieldProps) {
   const [mode, setMode] = useState<SourceMode>('upload');
@@ -33,6 +34,8 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
   const single = maxItems === 1;
   const remaining = maxItems === undefined ? Infinity : Math.max(0, maxItems - value.length);
   const urlValid = urlKind === 'video' ? isVideoSrc(urlDraft) : isImageSrc(urlDraft);
+  const mainImageIndex = mainIndexOf(value, 'image');
+  const mainVideoIndex = mainIndexOf(value, 'video');
 
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -70,6 +73,12 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
     onChange(value.map((item, i) => (i === index ? { ...item, ...patch } : item)));
   }
 
+  /** Marks one item as the main of its kind and clears the mark on the others of that kind. */
+  function makeMain(index: number) {
+    const { kind } = value[index];
+    onChange(value.map((item, i) => (item.kind === kind ? { ...item, main: i === index } : item)));
+  }
+
   function move(from: number, to: number) {
     const next = [...value];
     const [item] = next.splice(from, 1);
@@ -97,7 +106,11 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
               <div className="grid min-w-48 flex-1 gap-1">
                 <span className="text-xs font-medium text-muted">
                   {item.kind === 'video' ? 'Video' : 'Image'}
-                  {index === 0 && !single && <span className="text-accent"> · Main</span>}
+                  {!single && index === (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
+                    <span className="text-accent">
+                      {item.kind === 'video' ? ' · Main video (leads the project page)' : ' · Main image (cover)'}
+                    </span>
+                  )}
                 </span>
                 {maxItems !== undefined && index >= maxItems && (
                   <span className="text-xs font-medium text-red-700 dark:text-red-400">
@@ -112,9 +125,9 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
                 />
               </div>
               <div className="flex gap-1">
-                {index > 0 && !single && (
-                  <Button variant="ghost" onClick={() => move(index, 0)}>
-                    Make main
+                {!single && index !== (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
+                  <Button variant="ghost" onClick={() => makeMain(index)}>
+                    {item.kind === 'video' ? 'Make main video' : 'Make main image'}
                   </Button>
                 )}
                 <Button

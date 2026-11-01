@@ -60,7 +60,7 @@ export const projectsResource: ContentResource<Project> = {
       helpFor: (values) =>
         mediaLayout(values) === 'single'
           ? 'One image or video, shown as a header above the write-up. Cards use it only if it is an image.'
-          : 'The first item is shown large on the project page; the rest appear as tiles below it. Cards and the home page always use the first image.',
+          : 'Tiles follow this order. The main video (or the main image if there is no video) is shown large first; the main image is the cover on cards and the home page.',
     },
     { name: 'content', label: 'Write-up', kind: 'richtext' },
     { name: 'featured', label: 'Feature on the home page', kind: 'checkbox' },

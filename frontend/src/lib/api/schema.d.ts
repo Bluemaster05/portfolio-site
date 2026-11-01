@@ -788,6 +788,11 @@ export interface components {
             url: string;
             /** @description Alternative text for an image, or a short description of a video */
             alt?: string;
+            /**
+             * @description The main item of its kind: the main image is the cover on cards and the home page; the main
+             *     video leads the project page. Without one, the first item of that kind is used.
+             */
+            main?: boolean;
         };
         ProjectResponseDto: {
             /** @description Project write-up */
@@ -801,7 +806,7 @@ export interface components {
             technologies: string[];
             repoUrl?: string;
             liveUrl?: string;
-            /** @description Images and videos in display order; the first is the main item on the project page */
+            /** @description Images and videos in gallery order; see `main` on each item */
             media: components["schemas"]["MediaItemDto"][];
             startDate?: string;
             endDate?: string;
@@ -855,8 +860,8 @@ export interface components {
             repoUrl?: string;
             liveUrl?: string;
             /**
-             * @description Images and videos in display order. The first item is the main one on the project page (single
-             *     layout shows only it); cards and the home page use the first image.
+             * @description Images and videos in gallery order (single layout shows only the first). The main video, else
+             *     the main image, leads the project page; cards and the home page use the main image.
              */
             media?: components["schemas"]["MediaItemDto"][];
             /** @description Shown on the home page */
@@ -915,8 +920,8 @@ export interface components {
             repoUrl?: string;
             liveUrl?: string;
             /**
-             * @description Images and videos in display order. The first item is the main one on the project page (single
-             *     layout shows only it); cards and the home page use the first image.
+             * @description Images and videos in gallery order (single layout shows only the first). The main video, else
+             *     the main image, leads the project page; cards and the home page use the main image.
              */
             media?: components["schemas"]["MediaItemDto"][];
             /** @description Shown on the home page */
@@ -937,7 +942,7 @@ export interface components {
             technologies: string[];
             repoUrl?: string;
             liveUrl?: string;
-            /** @description Images and videos in display order; the first is the main item on the project page */
+            /** @description Images and videos in gallery order; see `main` on each item */
             media: components["schemas"]["MediaItemDto"][];
             startDate?: string;
             endDate?: string;

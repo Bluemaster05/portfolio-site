@@ -1,13 +1,13 @@
 import Link from 'next/link';
 import type { ProjectSummary } from '@/lib/api/types';
 import { formatDateRange } from '@/lib/format';
-import { firstImage } from '@/lib/images';
+import { mainImage } from '@/lib/images';
 import { TagList } from './PageHeader';
 
 export function ProjectCard({ project }: { project: ProjectSummary }) {
   const dates = formatDateRange(project.startDate, project.endDate, 'Ongoing');
   // Cards always show an image, even when the project page leads with a video
-  const cover = project.mediaLayout !== 'none' ? firstImage(project.media) : undefined;
+  const cover = project.mediaLayout !== 'none' ? mainImage(project.media) : undefined;
 
   return (
     <article className="group relative flex h-full flex-col gap-3 rounded-card border border-border bg-surface p-5 transition-[border-color,transform] duration-200 hover:-translate-y-0.5 hover:border-accent">

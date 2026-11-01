@@ -1,5 +1,5 @@
 import type { ProjectMediaItem, ProjectMediaLayout } from '@/lib/api/types';
-import { firstFrame, renderableMedia } from '@/lib/images';
+import { firstFrame, leadIndex, renderableMedia } from '@/lib/images';
 import { ProjectGallery } from './ProjectGallery';
 
 interface ProjectMediaProps {
@@ -13,7 +13,9 @@ interface ProjectMediaProps {
 export function ProjectMedia({ layout, media, title }: ProjectMediaProps) {
   const items = renderableMedia(media);
   if (layout === 'none' || items.length === 0) return null;
-  if (layout === 'gallery' && items.length > 1) return <ProjectGallery items={items} title={title} />;
+  if (layout === 'gallery' && items.length > 1) {
+    return <ProjectGallery items={items} initialIndex={leadIndex(items)} title={title} />;
+  }
 
   const [item] = items;
   return (

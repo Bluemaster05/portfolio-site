@@ -36,6 +36,7 @@ export function firstFrame(src: string): string {
 interface MediaLike {
   kind: 'image' | 'video';
   url: string;
+  main?: boolean;
 }
 
 /** Items the site can render: each URL checked against its kind. */
@@ -43,7 +44,23 @@ export function renderableMedia<T extends MediaLike>(media: T[]): T[] {
   return media.filter((item) => (item.kind === 'video' ? isVideoSrc(item.url) : isImageSrc(item.url)));
 }
 
-/** The cover for cards and the home page: always the first image, never a video. */
-export function firstImage<T extends MediaLike>(media: T[]): T | undefined {
-  return renderableMedia(media).find((item) => item.kind === 'image');
+/**
+ * Index of the main item of a kind: the one marked main, else the first of that kind.
+ * Works on any list, so the admin and the public site agree on which item is main.
+ */
+export function mainIndexOf<T extends MediaLike>(media: T[], kind: T['kind']): number {
+  const marked = media.findIndex((item) => item.kind === kind && item.main);
+  return marked !== -1 ? marked : media.findIndex((item) => item.kind === kind);
+}
+
+/** The cover for cards and the home page: always the main image, never a video. */
+export function mainImage<T extends MediaLike>(media: T[]): T | undefined {
+  const items = renderableMedia(media);
+  return items[mainIndexOf(items, 'image')];
+}
+
+/** Which item the project page shows large first: the main video, else the main image. */
+export function leadIndex<T extends MediaLike>(media: T[]): number {
+  const video = mainIndexOf(media, 'video');
+  return video !== -1 ? video : Math.max(0, mainIndexOf(media, 'image'));
 }
