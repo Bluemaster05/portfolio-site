@@ -1,5 +1,6 @@
 import type { ProjectMediaItem, ProjectMediaLayout } from '@/lib/api/types';
-import { firstFrame, leadIndex, renderableMedia } from '@/lib/images';
+import { leadIndex, renderableMedia } from '@/lib/images';
+import { LeadVideo } from './LeadVideo';
 import { ProjectGallery } from './ProjectGallery';
 
 interface ProjectMediaProps {
@@ -21,12 +22,9 @@ export function ProjectMedia({ layout, media, title }: ProjectMediaProps) {
   return (
     <figure className="mb-8">
       {item.kind === 'video' ? (
-        <video
-          src={firstFrame(item.url)}
-          controls
-          playsInline
-          preload="metadata"
-          aria-label={item.alt || `${title} video`}
+        <LeadVideo
+          src={item.url}
+          label={item.alt || `${title} video`}
           className="h-[min(48vh,28rem)] w-full rounded-card border border-border bg-black object-contain"
         />
       ) : (

@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import type { ProjectMediaItem } from '@/lib/api/types';
 import { firstFrame } from '@/lib/images';
+import { LeadVideo } from './LeadVideo';
 
 interface ProjectGalleryProps {
   /** Images and videos in tile order */
@@ -14,8 +15,8 @@ interface ProjectGalleryProps {
 }
 
 /**
- * The selected item large with every item as a smaller tile below. Videos preview their first
- * frame and never autoplay; choosing a tile shows it in the large spot.
+ * The selected item large with every item as a smaller tile below; choosing a tile shows it in the
+ * large spot. The main video plays muted on a loop; other videos show their first frame and wait.
  */
 export function ProjectGallery({ items, initialIndex, title }: ProjectGalleryProps) {
   const [selected, setSelected] = useState(initialIndex);
@@ -26,7 +27,14 @@ export function ProjectGallery({ items, initialIndex, title }: ProjectGalleryPro
 
   return (
     <section aria-label="Project media" className="mb-8 grid gap-2">
-      {main.kind === 'video' ? (
+      {main.kind === 'video' && selected === initialIndex ? (
+        <LeadVideo
+          key={main.url}
+          src={main.url}
+          label={main.alt || `${title} video`}
+          className={`${mainClass} bg-black`}
+        />
+      ) : main.kind === 'video' ? (
         <video
           key={main.url}
           src={firstFrame(main.url)}
