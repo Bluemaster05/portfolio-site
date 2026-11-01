@@ -141,14 +141,7 @@
           "default": null,
           "comment": null,
           "collation": null,
-          "enumItems": [
-            "site:read",
-            "projects:read",
-            "experience:read",
-            "education:read",
-            "honors:read",
-            "blog:read"
-          ],
+          "enumItems": [],
           "mappedType": "array"
         },
         "token_hash": {
@@ -194,8 +187,8 @@
       "checks": [
         {
           "name": "api_token_scopes_check",
-          "expression": "\"scopes\" <@ array['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]",
-          "definition": "check (\"scopes\" <@ array['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text])",
+          "expression": "scopes <@ ARRAY['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]",
+          "definition": "CHECK ((scopes <@ ARRAY['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]))",
           "columnName": "scopes"
         }
       ],
@@ -1152,6 +1145,140 @@
       "comment": null
     },
     {
+      "name": "media_asset",
+      "schema": "public",
+      "columns": {
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamptz(6)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 6,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "datetime"
+        },
+        "id": {
+          "name": "id",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": true,
+          "primary": true,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        },
+        "key": {
+          "name": "key",
+          "type": "varchar(64)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": true,
+          "length": 64,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "mime_type": {
+          "name": "mime_type",
+          "type": "varchar(40)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 40,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "original_name": {
+          "name": "original_name",
+          "type": "varchar(255)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": 255,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
+        },
+        "size": {
+          "name": "size",
+          "type": "int",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "integer"
+        }
+      },
+      "indexes": [
+        {
+          "columnNames": [
+            "key"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "media_asset_key_unique",
+          "primary": false,
+          "unique": true
+        },
+        {
+          "columnNames": [
+            "id"
+          ],
+          "composite": false,
+          "constraint": true,
+          "keyName": "media_asset_pkey",
+          "primary": true,
+          "unique": true
+        }
+      ],
+      "checks": [],
+      "triggers": [],
+      "foreignKeys": {},
+      "comment": null
+    },
+    {
       "name": "project",
       "schema": "public",
       "columns": {
@@ -1240,22 +1367,22 @@
           "enumItems": [],
           "mappedType": "integer"
         },
-        "image_url": {
-          "name": "image_url",
-          "type": "varchar(2048)",
+        "images": {
+          "name": "images",
+          "type": "jsonb",
           "unsigned": false,
           "autoincrement": false,
           "primary": false,
-          "nullable": true,
+          "nullable": false,
           "unique": false,
-          "length": 2048,
+          "length": null,
           "precision": null,
           "scale": null,
           "default": null,
           "comment": null,
           "collation": null,
           "enumItems": [],
-          "mappedType": "string"
+          "mappedType": "json"
         },
         "live_url": {
           "name": "live_url",
@@ -1273,6 +1400,28 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "string"
+        },
+        "media_layout": {
+          "name": "media_layout",
+          "type": "project_media_layout",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": false,
+          "unique": false,
+          "length": null,
+          "precision": null,
+          "scale": null,
+          "default": "'none'",
+          "comment": null,
+          "collation": null,
+          "enumItems": [
+            "none",
+            "single",
+            "gallery"
+          ],
+          "mappedType": "unknown",
+          "nativeEnumName": "project_media_layout"
         },
         "published": {
           "name": "published",
@@ -1964,5 +2113,15 @@
     }
   ],
   "views": [],
-  "nativeEnums": {}
+  "nativeEnums": {
+    "project_media_layout": {
+      "name": "project_media_layout",
+      "schema": "public",
+      "items": [
+        "none",
+        "single",
+        "gallery"
+      ]
+    }
+  }
 }

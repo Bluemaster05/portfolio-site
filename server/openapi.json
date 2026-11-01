@@ -2053,6 +2053,197 @@
           "public"
         ]
       }
+    },
+    "/api/admin/media": {
+      "post": {
+        "description": "Send multipart/form-data with the image in a `file` field. Store the returned `url` in content.",
+        "operationId": "MediaAdminController_upload",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "multipart/form-data": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "file": {
+                    "type": "string",
+                    "format": "binary",
+                    "description": "The image file"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MediaAssetResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Missing file or unsupported type",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "413": {
+            "description": "Larger than MAX_UPLOAD_MB",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Upload an image (PNG, JPEG, GIF, WebP, AVIF, or SVG)",
+        "tags": [
+          "admin: media"
+        ]
+      },
+      "get": {
+        "operationId": "MediaAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MediaAssetResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List uploaded images, newest first",
+        "tags": [
+          "admin: media"
+        ]
+      }
+    },
+    "/api/admin/media/{id}": {
+      "delete": {
+        "operationId": "MediaAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete an uploaded image and its file",
+        "tags": [
+          "admin: media"
+        ]
+      }
+    },
+    "/api/media/{key}": {
+      "get": {
+        "operationId": "MediaPublicController_serve",
+        "parameters": [
+          {
+            "name": "key",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The image file"
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "image/png": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              },
+              "image/jpeg": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              },
+              "image/gif": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              },
+              "image/webp": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              },
+              "image/avif": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              },
+              "image/svg+xml": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Serve an uploaded image",
+        "tags": [
+          "media"
+        ]
+      }
     }
   },
   "info": {
@@ -2477,6 +2668,32 @@
           }
         }
       },
+      "ProjectMediaLayout": {
+        "type": "string",
+        "enum": [
+          "none",
+          "single",
+          "gallery"
+        ]
+      },
+      "ImageDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Uploaded image (`/media/<key>`) or an http(s) URL",
+            "maxLength": 2048
+          },
+          "alt": {
+            "type": "string",
+            "description": "Alternative text; describe what the image shows",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
       "ProjectResponseDto": {
         "type": "object",
         "properties": {
@@ -2484,6 +2701,13 @@
             "type": "object",
             "description": "Project write-up",
             "additionalProperties": true
+          },
+          "mediaLayout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
           },
           "title": {
             "type": "string"
@@ -2506,8 +2730,11 @@
           "liveUrl": {
             "type": "string"
           },
-          "imageUrl": {
-            "type": "string"
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageDto"
+            }
           },
           "startDate": {
             "type": "string"
@@ -2538,10 +2765,12 @@
         },
         "required": [
           "content",
+          "mediaLayout",
           "title",
           "slug",
           "summary",
           "technologies",
+          "images",
           "featured",
           "id",
           "published",
@@ -2571,6 +2800,13 @@
                 }
               ]
             }
+          },
+          "mediaLayout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
           },
           "startDate": {
             "type": "string",
@@ -2616,9 +2852,13 @@
             "type": "string",
             "maxLength": 2048
           },
-          "imageUrl": {
-            "type": "string",
-            "maxLength": 2048
+          "images": {
+            "description": "Header image (single layout) or gallery images; the first is the main image",
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageDto"
+            }
           },
           "featured": {
             "type": "boolean",
@@ -2677,6 +2917,13 @@
               ]
             }
           },
+          "mediaLayout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
+          },
           "startDate": {
             "type": "string",
             "description": "When work started",
@@ -2731,9 +2978,13 @@
             "type": "string",
             "maxLength": 2048
           },
-          "imageUrl": {
-            "type": "string",
-            "maxLength": 2048
+          "images": {
+            "description": "Header image (single layout) or gallery images; the first is the main image",
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageDto"
+            }
           },
           "featured": {
             "type": "boolean",
@@ -2744,6 +2995,13 @@
       "ProjectSummaryDto": {
         "type": "object",
         "properties": {
+          "mediaLayout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
+          },
           "id": {
             "type": "number"
           },
@@ -2782,8 +3040,11 @@
           "liveUrl": {
             "type": "string"
           },
-          "imageUrl": {
-            "type": "string"
+          "images": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageDto"
+            }
           },
           "startDate": {
             "type": "string"
@@ -2796,6 +3057,7 @@
           }
         },
         "required": [
+          "mediaLayout",
           "id",
           "published",
           "sortOrder",
@@ -2805,6 +3067,7 @@
           "slug",
           "summary",
           "technologies",
+          "images",
           "featured"
         ]
       },
@@ -3656,6 +3919,46 @@
           "slug",
           "excerpt",
           "tags"
+        ]
+      },
+      "MediaAssetResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "key": {
+            "type": "string",
+            "description": "Random file name, e.g. \"3f2b…c1.png\""
+          },
+          "url": {
+            "type": "string",
+            "description": "Site-relative URL to store in content, e.g. \"/media/3f2b…c1.png\""
+          },
+          "originalName": {
+            "type": "string",
+            "description": "Name of the file that was uploaded"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "size": {
+            "type": "number",
+            "description": "Size in bytes"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "key",
+          "url",
+          "originalName",
+          "mimeType",
+          "size",
+          "createdAt"
         ]
       }
     }

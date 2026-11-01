@@ -3,12 +3,17 @@ import {
   ArrayMaxSize,
   IsArray,
   IsBoolean,
+  IsEnum,
   IsOptional,
   IsString,
   Length,
   Matches,
   MaxLength,
+  ValidateNested,
 } from 'class-validator';
+import { Type } from 'class-transformer';
+import { ImageDto } from '../../common/dto/image.dto.js';
+import { ProjectMediaLayout } from '../entities/project.entity.js';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsPartialDate } from '../../common/validators/is-partial-date.js';
@@ -58,11 +63,18 @@ export class CreateProjectDto extends ContentItemFieldsDto {
   @MaxLength(2048)
   liveUrl?: string;
 
+  @ApiProperty({ enum: ProjectMediaLayout, enumName: 'ProjectMediaLayout', required: false })
   @IsOptional()
-  @EmptyToNull()
-  @IsSafeUrl()
-  @MaxLength(2048)
-  imageUrl?: string;
+  @IsEnum(ProjectMediaLayout)
+  mediaLayout?: ProjectMediaLayout;
+
+  /** Header image (single layout) or gallery images; the first is the main image */
+  @IsOptional()
+  @IsArray()
+  @ArrayMaxSize(30)
+  @ValidateNested({ each: true })
+  @Type(() => ImageDto)
+  images?: ImageDto[];
 
   @IsOptional()
   @EmptyToNull()
@@ -93,7 +105,11 @@ export class ProjectResponseDto extends ContentItemResponseDto {
   technologies!: string[];
   repoUrl?: string;
   liveUrl?: string;
-  imageUrl?: string;
+
+  @ApiProperty({ enum: ProjectMediaLayout, enumName: 'ProjectMediaLayout' })
+  mediaLayout!: ProjectMediaLayout;
+
+  images!: ImageDto[];
   startDate?: string;
   endDate?: string;
   featured!: boolean;

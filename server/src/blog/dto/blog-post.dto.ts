@@ -3,8 +3,8 @@ import { ArrayMaxSize, IsArray, IsOptional, IsString, Length, Matches, MaxLength
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
-import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
+import { IsImageSource } from '../../common/validators/is-image-source.js';
 import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 export class CreateBlogPostDto extends ContentItemFieldsDto {
@@ -38,7 +38,7 @@ export class CreateBlogPostDto extends ContentItemFieldsDto {
 
   @IsOptional()
   @EmptyToNull()
-  @IsSafeUrl()
+  @IsImageSource()
   @MaxLength(2048)
   coverImageUrl?: string;
 }

@@ -13,9 +13,9 @@ import {
 } from 'class-validator';
 import { LinkDto } from '../../common/dto/link.dto.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
-import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
+import { IsImageSource } from '../../common/validators/is-image-source.js';
 import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 /** On/off switch for each public section */
@@ -96,7 +96,7 @@ class SiteSettingsFieldsDto {
 
   @IsOptional()
   @EmptyToNull()
-  @IsSafeUrl()
+  @IsImageSource()
   @MaxLength(2048)
   avatarUrl?: string;
 

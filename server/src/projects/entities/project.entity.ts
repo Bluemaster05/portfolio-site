@@ -1,7 +1,18 @@
 import { type Opt } from '@mikro-orm/core';
-import { Entity, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Property, Unique } from '@mikro-orm/decorators/legacy';
 import { ContentItem } from '../../common/entities/content-item.entity.js';
 import { emptyDoc, type RichTextDoc } from '../../common/types/rich-text.js';
+
+export enum ProjectMediaLayout {
+  None = 'none',
+  Single = 'single',
+  Gallery = 'gallery',
+}
+
+export interface ProjectImage {
+  url: string;
+  alt?: string;
+}
 
 @Entity()
 export class Project extends ContentItem {
@@ -29,8 +40,13 @@ export class Project extends ContentItem {
   @Property({ length: 2048, nullable: true })
   liveUrl?: string;
 
-  @Property({ length: 2048, nullable: true })
-  imageUrl?: string;
+  /** How images show on the project page: none, one header image, or a gallery */
+  @Enum({ items: () => ProjectMediaLayout, nativeEnumName: 'project_media_layout' })
+  mediaLayout: ProjectMediaLayout & Opt = ProjectMediaLayout.None;
+
+  /** First image is the header (single) or the large main image (gallery) */
+  @Property({ type: 'json' })
+  images: ProjectImage[] & Opt = [];
 
   @Property({ length: 10, nullable: true })
   startDate?: string;
