@@ -11,6 +11,7 @@ import {
   Put,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
   ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
@@ -23,6 +24,7 @@ import {
 import { ProjectsService } from './projects.service.js';
 import { CreateProjectDto, ProjectResponseDto, UpdateProjectDto } from './dto/project.dto.js';
 import { ReorderDto } from '../common/dto/reorder.dto.js';
+import { toProjectResponse } from './project.mapper.js';
 import { ErrorResponseDto } from '../common/dto/error-response.dto.js';
 
 @ApiTags('admin: projects')
@@ -34,31 +36,32 @@ export class ProjectsAdminController {
   @Get()
   @ApiOperation({ summary: 'List all projects, drafts included' })
   @ApiOkResponse({ type: [ProjectResponseDto] })
-  findAll(): Promise<ProjectResponseDto[]> {
-    return this.projectsService.findAll();
+  async findAll(): Promise<ProjectResponseDto[]> {
+    return (await this.projectsService.findAll()).map(toProjectResponse);
   }
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a project' })
   @ApiOkResponse({ type: ProjectResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<ProjectResponseDto> {
-    return this.projectsService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ProjectResponseDto> {
+    return toProjectResponse(await this.projectsService.findOne(id));
   }
 
   @Post()
   @ApiOperation({ summary: 'Create a project' })
   @ApiCreatedResponse({ type: ProjectResponseDto })
   @ApiConflictResponse({ description: 'Slug already used', type: ErrorResponseDto })
-  create(@Body() dto: CreateProjectDto): Promise<ProjectResponseDto> {
-    return this.projectsService.create(dto);
+  @ApiBadRequestResponse({ description: 'Invalid fields or unknown technology ids', type: ErrorResponseDto })
+  async create(@Body() dto: CreateProjectDto): Promise<ProjectResponseDto> {
+    return toProjectResponse(await this.projectsService.createProject(dto));
   }
 
   @Put('order')
   @ApiOperation({ summary: 'Set the display order of projects' })
   @ApiOkResponse({ type: [ProjectResponseDto] })
-  reorder(@Body() dto: ReorderDto): Promise<ProjectResponseDto[]> {
-    return this.projectsService.reorder(dto.ids);
+  async reorder(@Body() dto: ReorderDto): Promise<ProjectResponseDto[]> {
+    return (await this.projectsService.reorder(dto.ids)).map(toProjectResponse);
   }
 
   @Patch(':id')
@@ -66,11 +69,11 @@ export class ProjectsAdminController {
   @ApiOkResponse({ type: ProjectResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })
   @ApiConflictResponse({ description: 'Slug already used', type: ErrorResponseDto })
-  update(
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateProjectDto,
   ): Promise<ProjectResponseDto> {
-    return this.projectsService.update(id, dto);
+    return toProjectResponse(await this.projectsService.updateProject(id, dto));
   }
 
   @Delete(':id')

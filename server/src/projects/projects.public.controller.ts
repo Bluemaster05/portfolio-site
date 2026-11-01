@@ -5,7 +5,8 @@ import { ProjectResponseDto, ProjectSummaryDto } from './dto/project.dto.js';
 import { ApiTokenAuth } from '../common/decorators/api-token-auth.decorator.js';
 import { ApiScope } from '../api-tokens/api-scope.enum.js';
 import { Section } from '../site/section.enum.js';
-import { toSummary } from '../common/utils/to-summary.js';
+import { toProjectResponse, toProjectSummary } from './project.mapper.js';
+import { TechnologyUsageDto } from '../technologies/dto/technology.dto.js';
 
 @ApiTags('public')
 @ApiTokenAuth(ApiScope.Projects, Section.Projects)
@@ -21,13 +22,21 @@ export class ProjectsPublicController {
     @Query('featured', new ParseBoolPipe({ optional: true })) featured?: boolean,
   ): Promise<ProjectSummaryDto[]> {
     const projects = await this.projectsService.findPublished(featured ? { featured: true } : {});
-    return projects.map((project) => toSummary(project, 'content'));
+    return projects.map(toProjectSummary);
+  }
+
+  // Declared before ':slug' so "technologies" isn't read as a project slug
+  @Get('technologies')
+  @ApiOperation({ summary: 'Technologies used by published projects, with counts, for filtering' })
+  @ApiOkResponse({ type: [TechnologyUsageDto] })
+  technologies(): Promise<TechnologyUsageDto[]> {
+    return this.projectsService.technologyUsage();
   }
 
   @Get(':slug')
   @ApiOperation({ summary: 'A published project by slug' })
   @ApiOkResponse({ type: ProjectResponseDto })
-  findOne(@Param('slug') slug: string): Promise<ProjectResponseDto> {
-    return this.projectsService.findPublishedOne({ slug });
+  async findOne(@Param('slug') slug: string): Promise<ProjectResponseDto> {
+    return toProjectResponse(await this.projectsService.findPublishedOne({ slug }));
   }
 }

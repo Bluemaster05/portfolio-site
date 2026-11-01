@@ -485,6 +485,16 @@
               }
             }
           },
+          "400": {
+            "description": "Invalid fields or unknown technology ids",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "409": {
             "description": "Slug already used",
             "content": {
@@ -754,6 +764,56 @@
         ]
       }
     },
+    "/api/public/projects/technologies": {
+      "get": {
+        "operationId": "ProjectsPublicController_technologies",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TechnologyUsageDto"
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Section disabled or item not found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "Technologies used by published projects, with counts, for filtering",
+        "tags": [
+          "public"
+        ]
+      }
+    },
     "/api/public/projects/{slug}": {
       "get": {
         "operationId": "ProjectsPublicController_findOne",
@@ -807,6 +867,234 @@
         "summary": "A published project by slug",
         "tags": [
           "public"
+        ]
+      }
+    },
+    "/api/admin/technologies": {
+      "get": {
+        "operationId": "TechnologiesAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TechnologyResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List technologies in display order",
+        "tags": [
+          "admin: technologies"
+        ]
+      },
+      "post": {
+        "operationId": "TechnologiesAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateTechnologyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechnologyResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create a technology",
+        "tags": [
+          "admin: technologies"
+        ]
+      }
+    },
+    "/api/admin/technologies/order": {
+      "put": {
+        "operationId": "TechnologiesAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/TechnologyResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of technologies",
+        "tags": [
+          "admin: technologies"
+        ]
+      }
+    },
+    "/api/admin/technologies/{id}": {
+      "patch": {
+        "operationId": "TechnologiesAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateTechnologyDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TechnologyResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update a technology",
+        "tags": [
+          "admin: technologies"
+        ]
+      },
+      "delete": {
+        "operationId": "TechnologiesAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete a technology; projects using it lose it",
+        "tags": [
+          "admin: technologies"
         ]
       }
     },
@@ -2686,6 +2974,29 @@
           "gallery"
         ]
       },
+      "TechnologySummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Used in the project filter: `/projects?tech=<slug>`"
+          },
+          "iconUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug"
+        ]
+      },
       "MediaKind": {
         "type": "string",
         "enum": [
@@ -2748,9 +3059,10 @@
             "type": "string"
           },
           "technologies": {
+            "description": "Technologies used, in display order",
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/TechnologySummaryDto"
             }
           },
           "repoUrl": {
@@ -2866,12 +3178,12 @@
             "description": "Short plain-text summary for cards and meta descriptions",
             "maxLength": 500
           },
-          "technologies": {
+          "technologyIds": {
+            "description": "Technologies used, by id, in display order (manage them under /api/admin/technologies)",
             "maxItems": 30,
             "type": "array",
             "items": {
-              "type": "string",
-              "maxLength": 40
+              "type": "number"
             }
           },
           "repoUrl": {
@@ -2992,12 +3304,12 @@
             "description": "Short plain-text summary for cards and meta descriptions",
             "maxLength": 500
           },
-          "technologies": {
+          "technologyIds": {
+            "description": "Technologies used, by id, in display order (manage them under /api/admin/technologies)",
             "maxItems": 30,
             "type": "array",
             "items": {
-              "type": "string",
-              "maxLength": 40
+              "type": "number"
             }
           },
           "repoUrl": {
@@ -3059,9 +3371,10 @@
             "type": "string"
           },
           "technologies": {
+            "description": "Technologies used, in display order",
             "type": "array",
             "items": {
-              "type": "string"
+              "$ref": "#/components/schemas/TechnologySummaryDto"
             }
           },
           "repoUrl": {
@@ -3101,6 +3414,130 @@
           "media",
           "featured"
         ]
+      },
+      "TechnologyUsageDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Used in the project filter: `/projects?tech=<slug>`"
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "projectCount": {
+            "type": "number"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "projectCount"
+        ]
+      },
+      "TechnologyResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Used in the project filter: `/projects?tech=<slug>`"
+          },
+          "iconUrl": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateTechnologyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name, e.g. \"TypeScript\"",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "iconUrl": {
+            "type": "string",
+            "description": "Icon for the pill (square works best; SVG ideal): an upload or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "url": {
+            "type": "string",
+            "description": "Link to the technology's own site",
+            "maxLength": 2048
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are listed first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateTechnologyDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Display name, e.g. \"TypeScript\"",
+            "minLength": 1,
+            "maxLength": 60
+          },
+          "iconUrl": {
+            "type": "string",
+            "description": "Icon for the pill (square works best; SVG ideal): an upload or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "url": {
+            "type": "string",
+            "description": "Link to the technology's own site",
+            "maxLength": 2048
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are listed first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        }
       },
       "ExperienceResponseDto": {
         "type": "object",

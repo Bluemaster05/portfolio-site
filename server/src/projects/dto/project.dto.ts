@@ -4,6 +4,7 @@ import {
   IsArray,
   IsBoolean,
   IsEnum,
+  IsInt,
   IsOptional,
   IsString,
   Length,
@@ -13,6 +14,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { HasOneMainPerKind, MediaItemDto } from '../../common/dto/media-item.dto.js';
+import { TechnologySummaryDto } from '../../technologies/dto/technology.dto.js';
 import { ProjectMediaLayout } from '../entities/project.entity.js';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
@@ -44,12 +46,12 @@ export class CreateProjectDto extends ContentItemFieldsDto {
   @IsRichTextDoc('Project write-up', false)
   content?: RichTextDoc;
 
+  /** Technologies used, by id, in display order (manage them under /api/admin/technologies) */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(30)
-  @IsString({ each: true })
-  @MaxLength(40, { each: true })
-  technologies?: string[];
+  @IsInt({ each: true })
+  technologyIds?: number[];
 
   @IsOptional()
   @EmptyToNull()
@@ -106,7 +108,8 @@ export class ProjectResponseDto extends ContentItemResponseDto {
   @ApiProperty(richTextSchema('Project write-up'))
   content!: RichTextDoc;
 
-  technologies!: string[];
+  /** Technologies used, in display order */
+  technologies!: TechnologySummaryDto[];
   repoUrl?: string;
   liveUrl?: string;
 

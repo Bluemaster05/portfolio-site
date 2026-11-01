@@ -1,5 +1,6 @@
-import { type Opt } from '@mikro-orm/core';
-import { Entity, Enum, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Collection, type Opt } from '@mikro-orm/core';
+import { Entity, Enum, ManyToMany, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Technology } from '../../technologies/entities/technology.entity.js';
 import { ContentItem } from '../../common/entities/content-item.entity.js';
 import { emptyDoc, type RichTextDoc } from '../../common/types/rich-text.js';
 
@@ -34,8 +35,9 @@ export class Project extends ContentItem {
   @Property({ type: 'json' })
   content: RichTextDoc & Opt = emptyDoc();
 
-  @Property({ type: 'json' })
-  technologies: string[] & Opt = [];
+  /** Technologies used, in the order the admin picked */
+  @ManyToMany(() => Technology, undefined, { fixedOrder: true })
+  technologies = new Collection<Technology>(this);
 
   @Property({ length: 2048, nullable: true })
   repoUrl?: string;
