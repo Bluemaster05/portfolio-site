@@ -58,12 +58,10 @@ export function ExperienceCard({ group }: { group: ExperienceGroup }) {
               <h3 className="text-lg font-semibold leading-snug">
                 <Link href={`/experience/${job.slug}`} className="hover:text-accent hover:underline underline-offset-4">
                   {job.role}
-                  <span aria-hidden="true" className="ml-1.5 text-muted">
-                    →
-                  </span>
                 </Link>
               </h3>
-              <p className="text-sm text-muted">{formatDateRange(job.startDate, job.endDate)}</p>
+              {/* A lone job's dates are already the employer's dates in the header */}
+              {jobs.length > 1 && <p className="text-sm text-muted">{formatDateRange(job.startDate, job.endDate)}</p>}
             </div>
             {jobMeta(job) && <p className="text-sm text-muted">{jobMeta(job)}</p>}
             {!isEmptyDoc(job.description) && <RichTextRenderer doc={job.description} className="mt-2" />}
