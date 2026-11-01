@@ -11,6 +11,7 @@ import { ExperienceModule } from './experience/experience.module.js';
 import { EducationModule } from './education/education.module.js';
 import { HonorsModule } from './honors/honors.module.js';
 import { BlogModule } from './blog/blog.module.js';
+import { MediaModule } from './media/media.module.js';
 import { HealthController } from './health/health.controller.js';
 
 @Module({
@@ -26,6 +27,7 @@ import { HealthController } from './health/health.controller.js';
     EducationModule,
     HonorsModule,
     BlogModule,
+    MediaModule,
   ],
   controllers: [HealthController],
 })

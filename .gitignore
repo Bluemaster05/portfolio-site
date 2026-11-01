@@ -3,6 +3,7 @@ dist/
 .next/
 out/
 coverage/
+server/uploads/
 *.tsbuildinfo
 next-env.d.ts
 
