@@ -1,0 +1,13 @@
+{
+  "name": "portfolio-site",
+  "private": true,
+  "description": "Self-hosted, content-managed developer portfolio (Next.js + NestJS)",
+  "scripts": {
+    "install:all": "yarn --cwd server install && yarn --cwd frontend install",
+    "dev:server": "yarn --cwd server start:dev",
+    "dev:frontend": "yarn --cwd frontend dev",
+    "build": "yarn --cwd server build && yarn --cwd frontend build",
+    "openapi": "yarn --cwd server openapi:export && yarn --cwd frontend openapi:generate",
+    "db:up": "docker compose -f server/docker-compose.yml up -d"
+  }
+}
