@@ -5,7 +5,7 @@ import { Suspense } from 'react';
 import { getProject } from '@/lib/api/public-data';
 import { formatDateRange } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
-import { TagList } from '@/components/public/PageHeader';
+import { TechList } from '@/components/public/TechPill';
 import { ProjectMedia } from '@/components/public/ProjectMedia';
 
 export async function generateMetadata(props: PageProps<'/projects/[slug]'>): Promise<Metadata> {
@@ -44,7 +44,8 @@ async function ProjectDetails({ params }: Pick<PageProps<'/projects/[slug]'>, 'p
         {dates && <p className="text-muted">{dates}</p>}
         {project.summary && <p className="max-w-[70ch] text-lg text-muted">{project.summary}</p>}
         <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-2">
-          <TagList tags={project.technologies} label="Technologies" />
+          {/* Each pin opens the project list filtered to that technology */}
+          <TechList technologies={project.technologies} linked />
           {links.length > 0 && (
             <ul className="flex gap-5">
               {links.map((link) => (

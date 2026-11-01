@@ -2,7 +2,7 @@ import Link from 'next/link';
 import type { ProjectSummary } from '@/lib/api/types';
 import { formatDateRange } from '@/lib/format';
 import { mainImage } from '@/lib/images';
-import { TagList } from './PageHeader';
+import { TechList } from './TechPill';
 
 export function ProjectCard({ project }: { project: ProjectSummary }) {
   const dates = formatDateRange(project.startDate, project.endDate, 'Ongoing');
@@ -31,7 +31,8 @@ export function ProjectCard({ project }: { project: ProjectSummary }) {
       </div>
       {project.summary && <p className="text-muted">{project.summary}</p>}
       <div className="mt-auto">
-        <TagList tags={project.technologies} label="Technologies" />
+        {/* Not links: the whole card already links to the project */}
+        <TechList technologies={project.technologies} />
       </div>
     </article>
   );
