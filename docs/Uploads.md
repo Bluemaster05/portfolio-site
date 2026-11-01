@@ -45,7 +45,7 @@ can be seeked, including through the Next.js `/media` proxy.
 | Projects              | `mediaLayout` + `media[]`  | select + `MediaListField`              |
 | Blog posts            | `coverImageUrl`            | `MediaSourceField`                     |
 | Rich text             | `image` node `src`         | editor Image button → upload panel     |
-| Technologies (next)   | icon                       | `MediaSourceField` with `compact`      |
+| Technologies          | `iconUrl`                  | `MediaSourceField` with `compact`      |
 
 Projects keep images and videos in **one ordered list**, `media[]` of `{ kind, url, alt, main }`,
 edited in a single `MediaListField` (upload several files of either kind at once; reorder). The order

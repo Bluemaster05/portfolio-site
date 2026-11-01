@@ -19,7 +19,7 @@ the public site.
 | Section          | Route              | Notes                                                  |
 | ---------------- | ------------------ | ------------------------------------------------------ |
 | Home             | `/`                | Profile intro, featured projects, links                |
-| Projects         | `/projects`        | List + detail page per project (`/projects/[slug]`)    |
+| Projects         | `/projects`        | List (filterable by technology, `?tech=<slug>`) + detail page (`/projects/[slug]`) |
 | Experience       | `/experience`      | Timeline of roles                                      |
 | Education        | `/education`       | Schools, degrees, coursework                           |
 | Blog             | `/blog`            | List + post page (`/blog/[slug]`); off by default      |
@@ -36,6 +36,8 @@ Lives under `/admin` in the frontend and `/api/admin/*` + `/api/auth/*` in the s
 - Sign in with email + password (argon2 hashed, JWT in httpOnly cookies, CSRF protected).
 - Edit site settings, profile, and section toggles.
 - Create / edit / reorder / publish items in each section.
+- Manage **technologies** (name, icon, link, order). Projects pick from this list; they show as
+  icon pins and power the technology filter on the Projects page.
 - Create and revoke the **read-only API tokens** the public site uses.
 
 In production the admin portal is meant to be reachable only from a trusted network. See

@@ -49,6 +49,8 @@ Self-hosted portfolio: Next.js public site + admin portal (`/frontend`), NestJS 
   `usePathname`) must be read inside `<Suspense>`.
 - Admin content editors are driven by `lib/admin/resources/*` definitions; new content fields go
   in the resource's `fields`, `toValues`, and `toBody`.
+- Projects reference **technologies** (`technologyIds` in, technology objects out); never store
+  technology names as free text. The Projects page filter uses `?tech=<slug>`.
 - `PORTFOLIO_API_TOKEN` is server-only. Never expose it via `NEXT_PUBLIC_*`.
 
 ## Security ([docs/Security.md](docs/Security.md))

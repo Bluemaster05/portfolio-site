@@ -56,6 +56,13 @@ resource's `fields`, `toValues`, and `toBody` (TypeScript flags any mismatch wit
 
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
+Technologies are managed on their own page (`/admin/technologies`) and picked in the project editor
+with `kind: 'technologies'` (`TechnologyPicker`: ordered, searchable, quick-create). Shared lists a
+field needs are passed to `ContentForm` as `lookups` by the container. On the public site
+`TechPill` / `TechList` render technology pins with icons, and the Projects page filters by
+`?tech=<slug>` in a client `ProjectsBrowser` (inside `<Suspense>`, with the unfiltered list as the
+static fallback).
+
 Image and media fields (`kind: 'image'` / `'media'`) upload by default with a URL toggle; presenters get an
 `onUpload` prop and containers pass `uploadMedia` from `lib/admin/media.ts`. Uploaded images are
 served at `/media/<key>` through a rewrite in `next.config.ts`. See [Uploads.md](Uploads.md).

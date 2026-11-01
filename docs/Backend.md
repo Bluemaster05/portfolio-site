@@ -21,6 +21,7 @@ server/src/
 ├── education/              │ PublicController (/api/public/...), service
 ├── honors/                 │
 ├── blog/                   ┘
+├── technologies/           technologies projects use: admin CRUD; public usage list for filtering
 ├── media/                  image/video uploads: POST /api/admin/media, GET /api/media/:key (see Uploads.md)
 ├── migrations/             MikroORM migrations
 └── seeders/                MikroORM seeders (admin user, default settings, dev API token)
