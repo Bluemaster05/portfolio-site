@@ -97,9 +97,10 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
   }
 
   return (
-    <>
-    {/* Sticks to the top of the window while scrolling through a long write-up */}
-    <div role="toolbar" aria-label="Formatting" className="sticky top-0 z-10 flex flex-wrap gap-0.5 border-b border-border bg-background px-2 py-1.5">
+    // The toolbar and the image panel stick to the top of the window together while scrolling
+    // through a long write-up
+    <div className="sticky top-0 z-10">
+    <div role="toolbar" aria-label="Formatting" className="flex flex-wrap gap-0.5 border-b border-border bg-background px-2 py-1.5">
       <ToolButton label="Bold" active={state.bold} onClick={() => chain().toggleBold().run()}>
         <strong>B</strong>
       </ToolButton>
@@ -169,7 +170,7 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
     {imagePanelOpen && (
       <ImageInsertPanel onUpload={onUpload} onInsert={insertImage} onCancel={() => setImagePanelOpen(false)} />
     )}
-    </>
+    </div>
   );
 }
 
@@ -193,7 +194,8 @@ function ImageInsertPanel({
   const [align, setAlign] = useState<ImageAlign>('left');
 
   return (
-    <div className="grid gap-3 border-b border-border bg-background px-4 py-3">
+    // Capped so a stuck panel never hides the write-up it's inserting into
+    <div className="grid max-h-[60dvh] gap-3 overflow-y-auto border-b border-border bg-background px-4 py-3">
       <MediaSourceField label="Image" value={src} onChange={setSrc} onUpload={onUpload} />
       <TextInput
         aria-label="Image description"
