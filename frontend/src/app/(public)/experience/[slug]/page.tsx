@@ -8,7 +8,8 @@ import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { isEmptyDoc } from '@/components/rich-text/types';
 import { TagList } from '@/components/public/PageHeader';
 import { TechList } from '@/components/public/TechPill';
-import { EmployerLogo, EmployerName, jobMeta } from '@/components/public/ExperienceCard';
+import { EmployerName, jobMeta } from '@/components/public/ExperienceCard';
+import { EmployerLogo } from '@/components/public/EmployerLogo';
 
 export async function generateMetadata(props: PageProps<'/experience/[slug]'>): Promise<Metadata> {
   const { slug } = await props.params;
@@ -40,7 +41,7 @@ async function JobDetails({ params }: Pick<PageProps<'/experience/[slug]'>, 'par
       <header className="mb-6 mt-3 grid gap-2">
         <h1 className="text-3xl font-semibold tracking-tight">{job.role}</h1>
         <p className="flex items-center gap-3 text-lg font-medium">
-          <EmployerLogo employer={job.employer} size="size-8" />
+          <EmployerLogo src={job.employer.logoUrl} height="h-10" />
           <EmployerName employer={job.employer} />
         </p>
         {meta && <p className="text-muted">{meta}</p>}

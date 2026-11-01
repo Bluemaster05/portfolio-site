@@ -3,7 +3,7 @@
 import { useState, type FormEvent } from 'react';
 import type { Employer } from '@/lib/api/types';
 import type { UploadMedia } from '@/lib/admin/media';
-import { isImageSrc } from '@/lib/images';
+import { EmployerLogo } from '@/components/public/EmployerLogo';
 import { MediaSourceField } from './MediaSourceField';
 import { Button, ErrorBanner, Field, TextInput } from './ui';
 
@@ -41,7 +41,8 @@ export function EmployersView({
     <div className="grid gap-8">
       <p className="max-w-[70ch] text-muted">
         Each job under Experience belongs to an employer, and the experience page shows one card per employer with
-        its jobs inside. Employers keep this order; ties go to the one with the most recent job.
+        its jobs inside. Employers keep this order; ties go to the one with a current job, then the most recently
+        active.
       </p>
       <ErrorBanner message={error} />
 
@@ -92,7 +93,7 @@ export function EmployersView({
                       ↓
                     </button>
                   </div>
-                  <EmployerLogo src={employer.logoUrl} />
+                  <EmployerLogo src={employer.logoUrl} height="h-10" maxWidth="max-w-28" />
                   <div className="min-w-0 flex-1">
                     <p className="font-medium">{employer.name}</p>
                     <p className="truncate text-sm text-muted">
@@ -121,13 +122,6 @@ export function EmployersView({
       )}
     </div>
   );
-}
-
-function EmployerLogo({ src }: { src?: string }) {
-  if (!isImageSrc(src)) return <span aria-hidden="true" className="size-9 shrink-0 rounded-md bg-accent-soft" />;
-  // Decorative: the name is shown next to it
-  // eslint-disable-next-line @next/next/no-img-element
-  return <img src={src} alt="" className="size-9 shrink-0 rounded-md object-contain" />;
 }
 
 interface EmployerFormProps {

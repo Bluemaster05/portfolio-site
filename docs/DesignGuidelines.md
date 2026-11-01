@@ -15,6 +15,10 @@ text harder to read, drop the idea.
   bounces, or follows the cursor. All motion is disabled under `prefers-reduced-motion: reduce`.
   The one exception is a project's main video, which plays muted on a loop with visible controls —
   and stays paused on its first frame for reduced-motion visitors.
+- **Tooltips.** `components/public/Tooltip` adds a short label to a link (e.g. "Read more" on a job,
+  "Employer’s site" on an employer). It fades and rises in on hover or keyboard focus, is pure CSS,
+  loses its motion under reduced motion, and is the link's `aria-describedby` (hidden from
+  surrounding text so it never becomes part of a heading's name).
 - **Light and dark.** Follows the visitor's system setting until they pick one with the theme toggle.
   Colors are CSS custom properties so a personal branch can re-theme by changing tokens only.
 - **Accessible by default.** Semantic HTML, visible focus rings, keyboard reachable controls,
