@@ -50,6 +50,12 @@ decoration plugin (`extensions/code-block/highlight-plugin.ts`), which never cha
 document. Code tabs draw the colored code behind a textarea with transparent text. Both use the
 language list in `languages.ts`.
 
+Languages are picked with a searchable box (`extensions/LanguagePicker.tsx`) over every language
+Shiki bundles, plus plain text. It matches ids, names and aliases (exact, then prefix, then
+contains, common languages first) and shows the top 8; an empty search lists the common ones. Only a
+picked language, or text that exactly names one, is stored, always as Shiki's id (`bash` becomes
+`shellscript`).
+
 In both, Tab indents by `CODE_INDENT` (four spaces) and Shift+Tab outdents, instead of moving
 focus. In a code tab's textarea, Escape then Tab moves on. Node view text boxes edit a local draft
 (`extensions/use-draft.ts`) so the caret doesn't jump when the node's attributes come back a render
