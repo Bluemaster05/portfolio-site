@@ -1,7 +1,7 @@
 import 'server-only';
 import { cacheLife, cacheTag } from 'next/cache';
 import { publicApi } from './public-client';
-import type { SectionKey } from './types';
+import type { ProjectSummary, SectionKey } from './types';
 
 /**
  * Cached reads for the public site. Each result lives for a few minutes, so admin edits show up
@@ -38,21 +38,30 @@ export async function isSectionEnabled(section: SectionKey) {
   return site?.sections[section] ?? false;
 }
 
+/**
+ * An API older than this frontend (e.g. mid-deploy) omits the project image fields even though the
+ * schema says they're always present; treat that as "no images" instead of crashing the page.
+ */
+function withMediaDefaults<T extends Pick<ProjectSummary, 'mediaLayout' | 'images'>>(project: T): T {
+  return { ...project, mediaLayout: project.mediaLayout ?? 'none', images: project.images ?? [] };
+}
+
 export async function getProjects(featured?: boolean) {
   'use cache';
   cachePublic();
   const data = await safely(() =>
     publicApi.GET('/api/public/projects', { params: { query: { featured } } }),
   );
-  return data ?? [];
+  return (data ?? []).map(withMediaDefaults);
 }
 
 export async function getProject(slug: string) {
   'use cache';
   cachePublic();
-  return safely(() =>
+  const project = await safely(() =>
     publicApi.GET('/api/public/projects/{slug}', { params: { path: { slug } } }),
   );
+  return project && withMediaDefaults(project);
 }
 
 export async function getExperience() {
