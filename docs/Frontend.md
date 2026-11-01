@@ -15,12 +15,13 @@ frontend/src/
 ├── app/
 │   ├── (public)/              public routes (layout with nav built from enabled sections)
 │   ├── admin/                 admin routes (login + dashboard + editors)
-│   ├── layout.tsx             root html/body, fonts, theme tokens
+│   ├── layout.tsx             root html/body, fonts, inline theme script
 │   └── globals.css            design tokens + base styles + prose styles
 ├── components/
 │   ├── public/                presentational components for the public site
 │   ├── admin/                 presentational components for the admin portal
-│   └── rich-text/             TipTap editor, custom extensions, server renderer
+│   ├── rich-text/             TipTap editor, custom extensions, server renderer
+│   └── ThemeToggle.tsx        light/dark switch (public header + admin sidebar)
 ├── lib/
 │   ├── api/
 │   │   ├── schema.d.ts        GENERATED from server/openapi.json — do not edit
@@ -31,6 +32,7 @@ frontend/src/
 │   │   └── admin-query.ts     openapi-react-query hooks bound to admin-client
 │   ├── admin/
 │   │   └── resources/         one definition per content type (fields + typed API calls)
+│   ├── theme.ts               stored light/dark choice + the pre-paint THEME_SCRIPT
 │   └── ...
 └── proxy.ts                   admin network restriction
 ```
