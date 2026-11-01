@@ -780,10 +780,13 @@ export interface components {
         };
         /** @enum {string} */
         ProjectMediaLayout: "none" | "single" | "gallery";
-        ImageDto: {
-            /** @description Uploaded image (`/media/<key>`) or an http(s) URL */
+        /** @enum {string} */
+        MediaKind: "image" | "video";
+        MediaItemDto: {
+            kind: components["schemas"]["MediaKind"];
+            /** @description Upload (`/media/<key>`, matching `kind`) or an http(s) URL */
             url: string;
-            /** @description Alternative text; describe what the image shows */
+            /** @description Alternative text for an image, or a short description of a video */
             alt?: string;
         };
         ProjectResponseDto: {
@@ -798,9 +801,8 @@ export interface components {
             technologies: string[];
             repoUrl?: string;
             liveUrl?: string;
-            images: components["schemas"]["ImageDto"][];
-            /** @description Main item on the project page when set */
-            videoUrl?: string;
+            /** @description Images and videos in display order; the first is the main item on the project page */
+            media: components["schemas"]["MediaItemDto"][];
             startDate?: string;
             endDate?: string;
             featured: boolean;
@@ -852,13 +854,11 @@ export interface components {
             technologies?: string[];
             repoUrl?: string;
             liveUrl?: string;
-            /** @description Header image (single layout) or gallery images; the first is the main image */
-            images?: components["schemas"]["ImageDto"][];
             /**
-             * @description Video shown as the main item on the project page (layouts other than none). The first image
-             *     is its poster, and stays the project's cover everywhere else.
+             * @description Images and videos in display order. The first item is the main one on the project page (single
+             *     layout shows only it); cards and the home page use the first image.
              */
-            videoUrl?: string;
+            media?: components["schemas"]["MediaItemDto"][];
             /** @description Shown on the home page */
             featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
@@ -914,13 +914,11 @@ export interface components {
             technologies?: string[];
             repoUrl?: string;
             liveUrl?: string;
-            /** @description Header image (single layout) or gallery images; the first is the main image */
-            images?: components["schemas"]["ImageDto"][];
             /**
-             * @description Video shown as the main item on the project page (layouts other than none). The first image
-             *     is its poster, and stays the project's cover everywhere else.
+             * @description Images and videos in display order. The first item is the main one on the project page (single
+             *     layout shows only it); cards and the home page use the first image.
              */
-            videoUrl?: string;
+            media?: components["schemas"]["MediaItemDto"][];
             /** @description Shown on the home page */
             featured?: boolean;
         };
@@ -939,9 +937,8 @@ export interface components {
             technologies: string[];
             repoUrl?: string;
             liveUrl?: string;
-            images: components["schemas"]["ImageDto"][];
-            /** @description Main item on the project page when set */
-            videoUrl?: string;
+            /** @description Images and videos in display order; the first is the main item on the project page */
+            media: components["schemas"]["MediaItemDto"][];
             startDate?: string;
             endDate?: string;
             featured: boolean;

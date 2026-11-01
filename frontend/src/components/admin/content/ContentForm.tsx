@@ -2,10 +2,10 @@
 
 import { useState, type FormEvent } from 'react';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
-import type { FormValue, FormValues, ImageItem } from '@/lib/admin/form-values';
+import { isMediaItem, type FormValue, type FormValues, type MediaItem } from '@/lib/admin/form-values';
 import type { UploadMedia } from '@/lib/admin/media';
 import type { FieldConfig } from '@/lib/admin/resources/resource';
-import { ImageListField } from '../ImageListField';
+import { MediaListField } from '../MediaListField';
 import { MediaSourceField } from '../MediaSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from '../ui';
 
@@ -89,7 +89,7 @@ export function ContentForm({
 }
 
 function isWide(field: FieldConfig): boolean {
-  return ['richtext', 'textarea', 'tags', 'images', 'image', 'video'].includes(field.kind);
+  return ['richtext', 'textarea', 'tags', 'media', 'image'].includes(field.kind);
 }
 
 interface FieldInputProps {
@@ -123,24 +123,12 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldI
           />
         </Field>
       );
-    case 'video':
+    case 'media':
       return (
         <Field {...common} htmlFor={undefined}>
-          <MediaSourceField
-            kind="video"
+          <MediaListField
             label={field.label}
-            value={typeof value === 'string' ? value : ''}
-            onChange={onChange}
-            onUpload={onUpload}
-          />
-        </Field>
-      );
-    case 'images':
-      return (
-        <Field {...common} htmlFor={undefined}>
-          <ImageListField
-            label={field.label}
-            value={imageItems(value)}
+            value={mediaItems(value)}
             onChange={onChange}
             onUpload={onUpload}
             maxItems={maxItems}
@@ -167,7 +155,11 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldI
     case 'textarea':
       return (
         <Field {...common}>
-          <TextArea id={id} value={typeof value === 'string' ? value : ''} onChange={(event) => onChange(event.target.value)} />
+          <TextArea
+            id={id}
+            value={typeof value === 'string' ? value : ''}
+            onChange={(event) => onChange(event.target.value)}
+          />
         </Field>
       );
     case 'tags':
@@ -184,7 +176,13 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldI
             type={field.kind === 'url' ? 'url' : 'text'}
             required={field.required}
             placeholder={field.placeholder ?? (field.kind === 'date' ? '2024-06' : undefined)}
-            pattern={field.kind === 'date' ? '\\d{4}(-\\d{2}(-\\d{2})?)?' : field.kind === 'slug' ? '[a-z0-9]+(-[a-z0-9]+)*' : undefined}
+            pattern={
+              field.kind === 'date'
+                ? '\\d{4}(-\\d{2}(-\\d{2})?)?'
+                : field.kind === 'slug'
+                  ? '[a-z0-9]+(-[a-z0-9]+)*'
+                  : undefined
+            }
             value={typeof value === 'string' ? value : ''}
             onChange={(event) => onChange(event.target.value)}
             className={field.kind === 'slug' || field.kind === 'date' ? 'font-mono' : undefined}
@@ -199,9 +197,9 @@ function tagItems(value: FormValue | undefined): string[] {
   return value.filter((item): item is string => typeof item === 'string');
 }
 
-function imageItems(value: FormValue | undefined): ImageItem[] {
+function mediaItems(value: FormValue | undefined): MediaItem[] {
   if (!Array.isArray(value)) return [];
-  return value.filter((item): item is ImageItem => typeof item === 'object' && item !== null && 'url' in item);
+  return value.filter(isMediaItem);
 }
 
 /** Comma-separated text that becomes a list when the field loses focus. */
@@ -219,7 +217,14 @@ function TagsInput({
   const [draft, setDraft] = useState(value.join(', '));
 
   function commit(text: string) {
-    onChange([...new Set(text.split(',').map((tag) => tag.trim()).filter(Boolean))]);
+    onChange([
+      ...new Set(
+        text
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter(Boolean),
+      ),
+    ]);
   }
 
   return (

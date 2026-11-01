@@ -39,11 +39,11 @@ export async function isSectionEnabled(section: SectionKey) {
 }
 
 /**
- * An API older than this frontend (e.g. mid-deploy) omits the project image fields even though the
- * schema says they're always present; treat that as "no images" instead of crashing the page.
+ * An API older than this frontend (e.g. mid-deploy) omits the project media fields even though the
+ * schema says they're always present; treat that as "no media" instead of crashing the page.
  */
-function withMediaDefaults<T extends Pick<ProjectSummary, 'mediaLayout' | 'images'>>(project: T): T {
-  return { ...project, mediaLayout: project.mediaLayout ?? 'none', images: project.images ?? [] };
+function withMediaDefaults<T extends Pick<ProjectSummary, 'mediaLayout' | 'media'>>(project: T): T {
+  return { ...project, mediaLayout: project.mediaLayout ?? 'none', media: project.media ?? [] };
 }
 
 export async function getProjects(featured?: boolean) {

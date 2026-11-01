@@ -2,14 +2,14 @@ import { adminClient } from '@/lib/api/admin-client';
 import type { Project } from '@/lib/api/types';
 import type { components } from '@/lib/api/schema';
 import { ensureOk, unwrap } from '../api-error';
-import { bool, images, list, optional, richText, text, type FormValues } from '../form-values';
+import { bool, list, mediaItems, optional, richText, text, type FormValues } from '../form-values';
 import { DATE_HELP, type ContentResource } from './resource';
 
 type MediaLayout = components['schemas']['ProjectMediaLayout'];
 
 const MEDIA_LAYOUTS: { value: MediaLayout; label: string }[] = [
-  { value: 'none', label: 'No images' },
-  { value: 'single', label: 'Single header image' },
+  { value: 'none', label: 'None' },
+  { value: 'single', label: 'Single header (one image or video)' },
   { value: 'gallery', label: 'Gallery' },
 ];
 
@@ -28,9 +28,8 @@ function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
     repoUrl: text(values, 'repoUrl'),
     liveUrl: text(values, 'liveUrl'),
     mediaLayout: mediaLayout(values),
-    // A single header shows one image; extras left over from a gallery aren't kept
-    images: mediaLayout(values) === 'single' ? images(values, 'images').slice(0, 1) : images(values, 'images'),
-    videoUrl: mediaLayout(values) === 'none' ? '' : text(values, 'videoUrl'),
+    // A single header shows one item; extras left over from a gallery aren't kept
+    media: mediaLayout(values) === 'single' ? mediaItems(values, 'media').slice(0, 1) : mediaItems(values, 'media'),
     startDate: text(values, 'startDate'),
     endDate: text(values, 'endDate'),
     featured: bool(values, 'featured'),
@@ -51,24 +50,17 @@ export const projectsResource: ContentResource<Project> = {
     { name: 'endDate', label: 'Finished', kind: 'date', help: 'Empty if ongoing' },
     { name: 'liveUrl', label: 'Live URL', kind: 'url' },
     { name: 'repoUrl', label: 'Source code URL', kind: 'url' },
-    { name: 'mediaLayout', label: 'Images', kind: 'select', options: MEDIA_LAYOUTS },
+    { name: 'mediaLayout', label: 'Images & videos', kind: 'select', options: MEDIA_LAYOUTS },
     {
-      name: 'images',
-      label: 'Project images',
-      kind: 'images',
+      name: 'media',
+      label: 'Project images & videos',
+      kind: 'media',
       visibleWhen: (values) => mediaLayout(values) !== 'none',
       maxItemsFor: (values) => (mediaLayout(values) === 'single' ? 1 : undefined),
       helpFor: (values) =>
         mediaLayout(values) === 'single'
-          ? 'One image, shown as a header above the write-up.'
-          : 'The first image is shown large; the rest appear as smaller tiles below it.',
-    },
-    {
-      name: 'videoUrl',
-      label: 'Main video (optional)',
-      kind: 'video',
-      visibleWhen: (values) => mediaLayout(values) !== 'none',
-      help: 'Shown as the main item on the project page. The first image above is its poster and stays the cover on cards and the home page.',
+          ? 'One image or video, shown as a header above the write-up. Cards use it only if it is an image.'
+          : 'The first item is shown large on the project page; the rest appear as tiles below it. Cards and the home page always use the first image.',
     },
     { name: 'content', label: 'Write-up', kind: 'richtext' },
     { name: 'featured', label: 'Feature on the home page', kind: 'checkbox' },
@@ -84,8 +76,7 @@ export const projectsResource: ContentResource<Project> = {
     repoUrl: optional(project?.repoUrl),
     liveUrl: optional(project?.liveUrl),
     mediaLayout: project?.mediaLayout ?? 'none',
-    images: project?.images ?? [],
-    videoUrl: optional(project?.videoUrl),
+    media: project?.media ?? [],
     startDate: optional(project?.startDate),
     endDate: optional(project?.endDate),
     featured: project?.featured ?? false,

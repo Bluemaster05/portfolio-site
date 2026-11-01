@@ -11,10 +11,8 @@ export type FieldKind =
   | 'checkbox'
   /** One image: upload (default) or URL, stored as a URL string */
   | 'image'
-  /** An ordered list of images with alt text; the first is the main one */
-  | 'images'
-  /** One video: upload (default) or URL, stored as a URL string */
-  | 'video'
+  /** One ordered list of images and videos with descriptions; the first is the main one */
+  | 'media'
   | 'select';
 
 export interface FieldConfig {
@@ -28,7 +26,7 @@ export interface FieldConfig {
   options?: { value: string; label: string }[];
   /** Hide the field unless this returns true for the current form values */
   visibleWhen?: (values: FormValues) => boolean;
-  /** Most items an `images` field accepts for the current form values */
+  /** Most items a `media` field accepts for the current form values */
   maxItemsFor?: (values: FormValues) => number | undefined;
   /** Overrides `help` from the current form values, e.g. to explain the chosen layout */
   helpFor?: (values: FormValues) => string | undefined;
