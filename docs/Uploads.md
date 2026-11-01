@@ -1,6 +1,6 @@
 # Uploads
 
-Images (and, for projects, a video) can be uploaded from the admin portal or linked by URL. Upload
+Images (and, for projects, videos) can be uploaded from the admin portal or linked by URL. Upload
 is the default; a toggle switches a field to URL mode.
 
 ## How it works
@@ -42,31 +42,33 @@ can be seeked, including through the Next.js `/media` proxy.
 | Place                 | Field                      | UI                                     |
 | --------------------- | -------------------------- | -------------------------------------- |
 | Site settings         | `avatarUrl`                | `MediaSourceField`                     |
-| Projects              | `mediaLayout` + `images[]` | select + `ImageListField`              |
-| Projects              | `videoUrl`                 | `MediaSourceField kind="video"`        |
+| Projects              | `mediaLayout` + `media[]`  | select + `MediaListField`              |
 | Blog posts            | `coverImageUrl`            | `MediaSourceField`                     |
 | Rich text             | `image` node `src`         | editor Image button → upload panel     |
 | Technologies (next)   | icon                       | `MediaSourceField` with `compact`      |
 
+Projects keep images and videos in **one ordered list**, `media[]` of `{ kind, url, alt }`, edited
+in a single `MediaListField` (upload several files of either kind at once; reorder; "Make main").
+The order there is the order everywhere.
+
 Project `mediaLayout`:
 
-- `none` — no images.
-- `single` — the first image is a header above the write-up.
-- `gallery` — the first image is shown large, with all images as smaller tiles (5 per row on wide
-  screens); choosing a tile shows it large. The first image is also the project card's cover.
+- `none` — no media.
+- `single` — one item (image or video) as a header above the write-up.
+- `gallery` — the first item is shown large, with every item as a smaller tile (5 per row on wide
+  screens); choosing a tile shows it large.
 
-Project video (`videoUrl`, optional, for `single` and `gallery`): on the **project page only** it
-takes the main spot — replacing the header image in `single`, and as the first (default) item in
-`gallery`, with a ▶ tile. The first image is its poster. Everywhere else (cards, home) the main
-item is always the first **image**. Videos never autoplay.
+On the **project page** the main item may be a video. Everywhere else (cards, home) the cover is
+always the first **image** in the list, never a video. Videos show their own first frame (a `#t=0.1`
+media fragment, no separate poster image), have controls, and never autoplay.
 
 ## Adding an image to a new feature
 
-1. **Server:** an image URL field uses `@IsOptional() @EmptyToNull() @IsImageSource()` (videos:
-   `@IsVideoSource()`; each only accepts uploads of its own kind) (single) or
-   `ImageDto[]` with `@ValidateNested({ each: true }) @Type(() => ImageDto)` (list with alt text).
-2. **Admin:** use `kind: 'image'` / `'images'` / `'video'` in a content resource, or `MediaSourceField`
-   / `ImageListField` directly. Presenters take an `onUpload` prop; containers pass `uploadMedia`.
+1. **Server:** a single image URL field uses `@IsOptional() @EmptyToNull() @IsImageSource()`; a
+   list of images/videos uses `MediaItemDto[]` with `@ValidateNested({ each: true })
+   @Type(() => MediaItemDto)` (each URL is checked against its item's `kind`).
+2. **Admin:** use `kind: 'image'` / `'media'` in a content resource, or `MediaSourceField` /
+   `MediaListField` directly. Presenters take an `onUpload` prop; containers pass `uploadMedia`.
 3. **Public:** check sources with `isImageSrc()` / `isVideoSrc()` from `lib/images.ts` before rendering, and always
    give meaningful `alt` text (or `alt=""` when the image is decorative).
 

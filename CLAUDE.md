@@ -60,9 +60,10 @@ helmet, scoped read-only API tokens (hashed at rest) for the public site, `/admi
 ## Uploads ([docs/Uploads.md](docs/Uploads.md))
 
 Images and videos are stored in content as URL strings: `/media/<key>` (upload) or http(s). New
-fields: `@IsImageSource()` / `@IsVideoSource()` / `ImageDto[]` on the server, `MediaSourceField` /
-`ImageListField` (upload by default, URL toggle) in the admin, `isImageSrc()` / `isVideoSrc()`
-before rendering, and always set `alt`. Cards and the home page only ever show images.
+fields: `@IsImageSource()` / `MediaItemDto[]` (ordered images + videos) on the server,
+`MediaSourceField` / `MediaListField` (upload by default, URL toggle) in the admin,
+`renderableMedia()` / `firstImage()` / `isImageSrc()` before rendering, and always set `alt`. Cards
+and the home page only ever show images; videos use their own first frame, never autoplay.
 
 ## Common issues
 

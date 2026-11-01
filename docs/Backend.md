@@ -44,7 +44,7 @@ Each content module follows the same pattern:
 - Return **response DTOs**, never raw entities with secrets (password hashes, token hashes).
 - Validate input with `class-validator`. Rich text fields use `@IsRichTextDoc()`, dates use
   `@IsPartialDate()` (`YYYY`, `YYYY-MM`, `YYYY-MM-DD`), links use `@IsSafeUrl()`, image fields use `@IsImageSource()` (`/media/…` or http(s)) or
-  `ImageDto[]` for lists with alt text.
+  `MediaItemDto[]` for ordered image/video lists with descriptions.
 - Optional nullable text fields take `@IsOptional() @EmptyToNull()` so clients clear them by
   sending `''`. Don't use it on non-null columns (e.g. `summary`, which defaults to `''`).
 - DTO instances declare every field, so absent fields are `undefined`: apply updates with
