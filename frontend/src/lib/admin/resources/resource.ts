@@ -32,8 +32,6 @@ export interface FieldConfig {
   visibleWhen?: (values: FormValues) => boolean;
   /** Most items a `media` field accepts for the current form values */
   maxItemsFor?: (values: FormValues) => number | undefined;
-  /** `media` fields: images only, without main-item marking */
-  imagesOnly?: boolean;
   /** Overrides `help` from the current form values, e.g. to explain the chosen layout */
   helpFor?: (values: FormValues) => string | undefined;
   /**

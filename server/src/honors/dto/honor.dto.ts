@@ -1,13 +1,13 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { ArrayMaxSize, IsArray, IsBoolean, IsOptional, IsString, Length, Matches, MaxLength, ValidateNested } from 'class-validator';
-import { ImageItemDto } from '../../common/dto/image-item.dto.js';
+import { ArrayMaxSize, IsArray, IsBoolean, IsEnum, IsOptional, IsString, Length, Matches, MaxLength, ValidateNested } from 'class-validator';
+import { HasOneMainPerKind, MediaItemDto } from '../../common/dto/media-item.dto.js';
+import { ProjectMediaLayout } from '../../projects/entities/project.entity.js';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsPartialDate } from '../../common/validators/is-partial-date.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
-import { IsImageSource } from '../../common/validators/is-media-source.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
 import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
@@ -42,27 +42,23 @@ export class CreateHonorDto extends ContentItemFieldsDto {
   @MaxLength(2048)
   url?: string;
 
-  /** Main image (e.g. the award or certificate): an upload or an http(s) image URL */
+  /** How media shows on the honor's page: none, one header item, or a gallery */
+  @ApiProperty({ enum: ProjectMediaLayout, enumName: 'ProjectMediaLayout', required: false })
   @IsOptional()
-  @EmptyToNull()
-  @IsImageSource()
-  @MaxLength(2048)
-  imageUrl?: string;
+  @IsEnum(ProjectMediaLayout)
+  mediaLayout?: ProjectMediaLayout;
 
-  /** Describes the main image for screen readers; the title is used when empty */
-  @IsOptional()
-  @EmptyToNull()
-  @IsString()
-  @MaxLength(300)
-  imageAlt?: string;
-
-  /** More images, in carousel order, shown on the honor's page */
+  /**
+   * Images and videos in gallery order (single layout shows only the first). The main image is the
+   * picture on the honor's card; the main video, else the main image, leads its page.
+   */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(30)
+  @HasOneMainPerKind()
   @ValidateNested({ each: true })
-  @Type(() => ImageItemDto)
-  images?: ImageItemDto[];
+  @Type(() => MediaItemDto)
+  media?: MediaItemDto[];
 
   @IsOptional()
   @IsRichTextDoc('Short summary of what it was for', false)
@@ -87,10 +83,12 @@ export class HonorSummaryDto extends ContentItemResponseDto {
   issuer?: string;
   date?: string;
   url?: string;
-  imageUrl?: string;
-  imageAlt?: string;
-  /** More images, in carousel order */
-  images!: ImageItemDto[];
+
+  @ApiProperty({ enum: ProjectMediaLayout, enumName: 'ProjectMediaLayout' })
+  mediaLayout!: ProjectMediaLayout;
+
+  /** Images and videos in gallery order; see `main` on each item */
+  media!: MediaItemDto[];
   /** Shown on the home page (at most one honor) */
   featured!: boolean;
 

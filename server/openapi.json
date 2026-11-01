@@ -4891,27 +4891,16 @@
           "updatedAt"
         ]
       },
-      "ImageItemDto": {
-        "type": "object",
-        "properties": {
-          "url": {
-            "type": "string",
-            "description": "Upload (`/media/<key>`) or an http(s) image URL",
-            "maxLength": 2048
-          },
-          "alt": {
-            "type": "string",
-            "description": "Alternative text for the image",
-            "maxLength": 300
-          }
-        },
-        "required": [
-          "url"
-        ]
-      },
       "HonorResponseDto": {
         "type": "object",
         "properties": {
+          "mediaLayout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
+          },
           "description": {
             "type": "object",
             "description": "Short summary of what it was for",
@@ -4937,17 +4926,11 @@
           "url": {
             "type": "string"
           },
-          "imageUrl": {
-            "type": "string"
-          },
-          "imageAlt": {
-            "type": "string"
-          },
-          "images": {
-            "description": "More images, in carousel order",
+          "media": {
+            "description": "Images and videos in gallery order; see `main` on each item",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageItemDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
           },
           "featured": {
@@ -4973,11 +4956,12 @@
           }
         },
         "required": [
+          "mediaLayout",
           "description",
           "writeup",
           "title",
           "slug",
-          "images",
+          "media",
           "featured",
           "id",
           "published",
@@ -4994,6 +4978,14 @@
             "description": "When it was awarded",
             "example": "2024-06",
             "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
+          },
+          "mediaLayout": {
+            "description": "How media shows on the honor's page: none, one header item, or a gallery",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
           },
           "description": {
             "type": "object",
@@ -5054,22 +5046,12 @@
             "description": "Link to a certificate or announcement",
             "maxLength": 2048
           },
-          "imageUrl": {
-            "type": "string",
-            "description": "Main image (e.g. the award or certificate): an upload or an http(s) image URL",
-            "maxLength": 2048
-          },
-          "imageAlt": {
-            "type": "string",
-            "description": "Describes the main image for screen readers; the title is used when empty",
-            "maxLength": 300
-          },
-          "images": {
-            "description": "More images, in carousel order, shown on the honor's page",
+          "media": {
+            "description": "Images and videos in gallery order (single layout shows only the first). The main image is the\npicture on the honor's card; the main video, else the main image, leads its page.",
             "maxItems": 30,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageItemDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
           },
           "featured": {
@@ -5100,6 +5082,14 @@
             "example": "2024-06",
             "pattern": "^\\d{4}(-(0[1-9]|1[0-2])(-(0[1-9]|[12]\\d|3[01]))?)?$"
           },
+          "mediaLayout": {
+            "description": "How media shows on the honor's page: none, one header item, or a gallery",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
+          },
           "description": {
             "type": "object",
             "description": "Short summary of what it was for",
@@ -5169,22 +5159,12 @@
             "description": "Link to a certificate or announcement",
             "maxLength": 2048
           },
-          "imageUrl": {
-            "type": "string",
-            "description": "Main image (e.g. the award or certificate): an upload or an http(s) image URL",
-            "maxLength": 2048
-          },
-          "imageAlt": {
-            "type": "string",
-            "description": "Describes the main image for screen readers; the title is used when empty",
-            "maxLength": 300
-          },
-          "images": {
-            "description": "More images, in carousel order, shown on the honor's page",
+          "media": {
+            "description": "Images and videos in gallery order (single layout shows only the first). The main image is the\npicture on the honor's card; the main video, else the main image, leads its page.",
             "maxItems": 30,
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageItemDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
           },
           "featured": {
@@ -5196,6 +5176,13 @@
       "HonorSummaryDto": {
         "type": "object",
         "properties": {
+          "mediaLayout": {
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/ProjectMediaLayout"
+              }
+            ]
+          },
           "description": {
             "type": "object",
             "description": "Short summary of what it was for",
@@ -5216,17 +5203,11 @@
           "url": {
             "type": "string"
           },
-          "imageUrl": {
-            "type": "string"
-          },
-          "imageAlt": {
-            "type": "string"
-          },
-          "images": {
-            "description": "More images, in carousel order",
+          "media": {
+            "description": "Images and videos in gallery order; see `main` on each item",
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/ImageItemDto"
+              "$ref": "#/components/schemas/MediaItemDto"
             }
           },
           "featured": {
@@ -5252,10 +5233,11 @@
           }
         },
         "required": [
+          "mediaLayout",
           "description",
           "title",
           "slug",
-          "images",
+          "media",
           "featured",
           "id",
           "published",

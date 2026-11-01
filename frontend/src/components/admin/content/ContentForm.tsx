@@ -380,7 +380,6 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload, lookups 
             onChange={onChange}
             onUpload={onUpload}
             maxItems={maxItems}
-            imagesOnly={field.imagesOnly}
           />
         </Field>
       );

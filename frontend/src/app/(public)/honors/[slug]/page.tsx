@@ -6,9 +6,8 @@ import { getHonor } from '@/lib/api/public-data';
 import { formatPartialDate } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { isEmptyDoc } from '@/components/rich-text/types';
-import { CredentialLink, HonorImage } from '@/components/public/HonorCard';
-import { ImageCarousel } from '@/components/public/ImageCarousel';
-import { isImageSrc } from '@/lib/images';
+import { CredentialLink } from '@/components/public/HonorCard';
+import { ProjectMedia } from '@/components/public/ProjectMedia';
 
 export async function generateMetadata(props: PageProps<'/honors/[slug]'>): Promise<Metadata> {
   const { slug } = await props.params;
@@ -47,14 +46,10 @@ async function HonorDetails({ params }: Pick<PageProps<'/honors/[slug]'>, 'param
         )}
       </header>
 
-      <HonorImage
-        honor={honor}
-        className="mb-8 max-h-[min(50vh,28rem)] w-full rounded-card border border-border bg-surface object-contain"
-      />
+      {/* The same header or gallery as a project page, per the honor's layout */}
+      <ProjectMedia layout={honor.mediaLayout} media={honor.media} title={honor.title} />
 
       {!isEmptyDoc(honor.description) && <RichTextRenderer doc={honor.description} className="text-lg" />}
-
-      <ImageCarousel label="More images" images={honor.images.filter((image) => isImageSrc(image.url))} />
 
       {!isEmptyDoc(honor.writeup) && (
         <div className="mt-10 border-t border-border pt-8">

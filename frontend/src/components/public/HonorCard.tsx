@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import type { HonorSummary } from '@/lib/api/types';
 import { formatPartialDate } from '@/lib/format';
-import { isImageSrc } from '@/lib/images';
+import { mainImage } from '@/lib/images';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { isEmptyDoc } from '@/components/rich-text/types';
 import { Tooltip } from './Tooltip';
@@ -18,19 +18,14 @@ export function CredentialLink({ url }: { url?: string }) {
   );
 }
 
-/** The honor's main image; nothing when it has none. Alt falls back to the title. */
-export function HonorImage({
-  honor,
-  className,
-}: {
-  honor: Pick<HonorSummary, 'imageUrl' | 'imageAlt' | 'title'>;
-  className: string;
-}) {
-  if (!isImageSrc(honor.imageUrl)) return null;
+/** The honor's main image (as for project covers); nothing when it has none. Alt falls back to the title. */
+function HonorCover({ honor, className }: { honor: HonorSummary; className: string }) {
+  const cover = honor.mediaLayout !== 'none' ? mainImage(honor.media) : undefined;
+  if (!cover) return null;
   return (
     // Uploads or any http(s) host, so next/image's allow-list doesn't fit
     // eslint-disable-next-line @next/next/no-img-element
-    <img src={honor.imageUrl} alt={honor.imageAlt || honor.title} loading="lazy" className={className} />
+    <img src={cover.url} alt={cover.alt || honor.title} loading="lazy" className={className} />
   );
 }
 
@@ -41,7 +36,7 @@ export function HonorImage({
 export function HonorCard({ honor }: { honor: HonorSummary }) {
   return (
     <article className="flex flex-col gap-5 rounded-card border border-border bg-surface p-5 animate-fade-up sm:flex-row sm:p-6">
-      <HonorImage
+      <HonorCover
         honor={honor}
         className="aspect-[4/3] w-full shrink-0 rounded-md border border-border bg-background object-cover sm:w-44"
       />

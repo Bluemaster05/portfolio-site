@@ -1,12 +1,9 @@
 import { type Opt } from '@mikro-orm/core';
-import { Entity, Property, Unique } from '@mikro-orm/decorators/legacy';
+import { Entity, Enum, Property, Unique } from '@mikro-orm/decorators/legacy';
 import { ContentItem } from '../../common/entities/content-item.entity.js';
 import { emptyDoc, type RichTextDoc } from '../../common/types/rich-text.js';
 
-export interface HonorImage {
-  url: string;
-  alt?: string;
-}
+import { ProjectMediaLayout, type ProjectMediaItem } from '../../projects/entities/project.entity.js';
 
 /** An honor, award, scholarship, or certification. */
 @Entity()
@@ -29,17 +26,16 @@ export class Honor extends ContentItem {
   @Property({ length: 2048, nullable: true })
   url?: string;
 
-  /** Main image (e.g. the award or certificate): an upload or an http(s) image URL */
-  @Property({ length: 2048, nullable: true })
-  imageUrl?: string;
+  /** How media shows on the honor's page: none, one header item, or a gallery (as for projects) */
+  @Enum({ items: () => ProjectMediaLayout, nativeEnumName: 'project_media_layout' })
+  mediaLayout: ProjectMediaLayout & Opt = ProjectMediaLayout.None;
 
-  /** Describes the main image for screen readers; the title is used when empty */
-  @Property({ length: 300, nullable: true })
-  imageAlt?: string;
-
-  /** More images, shown in a carousel on the honor's page */
+  /**
+   * Images and videos in gallery order, as for projects. The main image is the picture on the honor's
+   * card; the main video, else the main image, leads its page. Unmarked: first of each kind.
+   */
   @Property({ type: 'json' })
-  images: HonorImage[] & Opt = [];
+  media: ProjectMediaItem[] & Opt = [];
 
   /** Shown on the home page; only one honor can be featured at a time */
   @Property()

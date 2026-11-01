@@ -1602,13 +1602,8 @@ export interface components {
             /** Format: date-time */
             updatedAt: string;
         };
-        ImageItemDto: {
-            /** @description Upload (`/media/<key>`) or an http(s) image URL */
-            url: string;
-            /** @description Alternative text for the image */
-            alt?: string;
-        };
         HonorResponseDto: {
+            mediaLayout: components["schemas"]["ProjectMediaLayout"];
             /** @description Short summary of what it was for */
             description: {
                 [key: string]: unknown;
@@ -1622,10 +1617,8 @@ export interface components {
             issuer?: string;
             date?: string;
             url?: string;
-            imageUrl?: string;
-            imageAlt?: string;
-            /** @description More images, in carousel order */
-            images: components["schemas"]["ImageItemDto"][];
+            /** @description Images and videos in gallery order; see `main` on each item */
+            media: components["schemas"]["MediaItemDto"][];
             /** @description Shown on the home page (at most one honor) */
             featured: boolean;
             id: number;
@@ -1642,6 +1635,8 @@ export interface components {
              * @example 2024-06
              */
             date?: string;
+            /** @description How media shows on the honor's page: none, one header item, or a gallery */
+            mediaLayout?: components["schemas"]["ProjectMediaLayout"];
             /**
              * @description Short summary of what it was for
              * @example {
@@ -1689,12 +1684,11 @@ export interface components {
             issuer?: string;
             /** @description Link to a certificate or announcement */
             url?: string;
-            /** @description Main image (e.g. the award or certificate): an upload or an http(s) image URL */
-            imageUrl?: string;
-            /** @description Describes the main image for screen readers; the title is used when empty */
-            imageAlt?: string;
-            /** @description More images, in carousel order, shown on the honor's page */
-            images?: components["schemas"]["ImageItemDto"][];
+            /**
+             * @description Images and videos in gallery order (single layout shows only the first). The main image is the
+             *     picture on the honor's card; the main video, else the main image, leads its page.
+             */
+            media?: components["schemas"]["MediaItemDto"][];
             /** @description Show on the home page; featuring this honor unfeatures any other */
             featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
@@ -1708,6 +1702,8 @@ export interface components {
              * @example 2024-06
              */
             date?: string;
+            /** @description How media shows on the honor's page: none, one header item, or a gallery */
+            mediaLayout?: components["schemas"]["ProjectMediaLayout"];
             /**
              * @description Short summary of what it was for
              * @example {
@@ -1759,16 +1755,16 @@ export interface components {
             issuer?: string;
             /** @description Link to a certificate or announcement */
             url?: string;
-            /** @description Main image (e.g. the award or certificate): an upload or an http(s) image URL */
-            imageUrl?: string;
-            /** @description Describes the main image for screen readers; the title is used when empty */
-            imageAlt?: string;
-            /** @description More images, in carousel order, shown on the honor's page */
-            images?: components["schemas"]["ImageItemDto"][];
+            /**
+             * @description Images and videos in gallery order (single layout shows only the first). The main image is the
+             *     picture on the honor's card; the main video, else the main image, leads its page.
+             */
+            media?: components["schemas"]["MediaItemDto"][];
             /** @description Show on the home page; featuring this honor unfeatures any other */
             featured?: boolean;
         };
         HonorSummaryDto: {
+            mediaLayout: components["schemas"]["ProjectMediaLayout"];
             /** @description Short summary of what it was for */
             description: {
                 [key: string]: unknown;
@@ -1778,10 +1774,8 @@ export interface components {
             issuer?: string;
             date?: string;
             url?: string;
-            imageUrl?: string;
-            imageAlt?: string;
-            /** @description More images, in carousel order */
-            images: components["schemas"]["ImageItemDto"][];
+            /** @description Images and videos in gallery order; see `main` on each item */
+            media: components["schemas"]["MediaItemDto"][];
             /** @description Shown on the home page (at most one honor) */
             featured: boolean;
             id: number;

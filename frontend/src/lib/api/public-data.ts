@@ -109,15 +109,16 @@ export async function getEducationEntry(slug: string) {
 export async function getHonors(featured?: boolean) {
   'use cache';
   cachePublic();
-  return (await safely(() => publicApi.GET('/api/public/honors', { params: { query: { featured } } }))) ?? [];
+  const honors = (await safely(() => publicApi.GET('/api/public/honors', { params: { query: { featured } } }))) ?? [];
+  return honors.map(withMediaDefaults);
 }
 
-/** One published honor, with its write-up. An older API (or cached result) without `images` gets none. */
+/** One published honor, with its write-up. */
 export async function getHonor(slug: string) {
   'use cache';
   cachePublic();
   const honor = await safely(() => publicApi.GET('/api/public/honors/{slug}', { params: { path: { slug } } }));
-  return honor && { ...honor, images: honor.images ?? [] };
+  return honor && withMediaDefaults(honor);
 }
 
 export async function getBlogPosts() {

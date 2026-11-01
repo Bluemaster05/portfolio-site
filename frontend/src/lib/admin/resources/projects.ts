@@ -2,21 +2,9 @@ import { adminClient } from '@/lib/api/admin-client';
 import type { Project } from '@/lib/api/types';
 import type { components } from '@/lib/api/schema';
 import { ensureOk, unwrap } from '../api-error';
-import { bool, ids, mediaItems, optional, richText, text, type FormValues } from '../form-values';
+import { bool, ids, optional, richText, text, type FormValues } from '../form-values';
+import { mediaBody, mediaFields } from './media-fields';
 import { DATE_HELP, type ContentResource } from './resource';
-
-type MediaLayout = components['schemas']['ProjectMediaLayout'];
-
-const MEDIA_LAYOUTS: { value: MediaLayout; label: string }[] = [
-  { value: 'none', label: 'None' },
-  { value: 'single', label: 'Single header (one image or video)' },
-  { value: 'gallery', label: 'Gallery' },
-];
-
-function mediaLayout(values: FormValues): MediaLayout {
-  const value = text(values, 'mediaLayout');
-  return MEDIA_LAYOUTS.find((layout) => layout.value === value)?.value ?? 'none';
-}
 
 function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
   return {
@@ -27,9 +15,7 @@ function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
     technologyIds: ids(values, 'technologyIds'),
     repoUrl: text(values, 'repoUrl'),
     liveUrl: text(values, 'liveUrl'),
-    mediaLayout: mediaLayout(values),
-    // A single header shows one item; extras left over from a gallery aren't kept
-    media: mediaLayout(values) === 'single' ? mediaItems(values, 'media').slice(0, 1) : mediaItems(values, 'media'),
+    ...mediaBody(values),
     startDate: text(values, 'startDate'),
     endDate: text(values, 'endDate'),
     featured: bool(values, 'featured'),
@@ -62,19 +48,7 @@ export const projectsResource: ContentResource<Project> = {
       help: 'Shown as pins on the project and used for filtering. Manage icons under Technologies.',
       tab: 'Technologies',
     },
-    { name: 'mediaLayout', label: 'Layout', kind: 'select', options: MEDIA_LAYOUTS, tab: 'Images & videos' },
-    {
-      name: 'media',
-      label: 'Project images & videos',
-      kind: 'media',
-      tab: 'Images & videos',
-      visibleWhen: (values) => mediaLayout(values) !== 'none',
-      maxItemsFor: (values) => (mediaLayout(values) === 'single' ? 1 : undefined),
-      helpFor: (values) =>
-        mediaLayout(values) === 'single'
-          ? 'One image or video, shown as a header above the write-up. Cards use it only if it is an image.'
-          : 'Tiles follow this order. The main video (or the main image if there is no video) is shown large first; the main image is the cover on cards and the home page.',
-    },
+    ...mediaFields('project', 'the cover on cards and the home page'),
     { name: 'content', label: 'Write-up', kind: 'richtext', tab: 'Write-up' },
     { name: 'featured', label: 'Feature on the home page', kind: 'checkbox', tab: 'Details' },
     { name: 'published', label: 'Published', kind: 'checkbox', tab: 'Details' },

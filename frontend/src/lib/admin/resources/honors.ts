@@ -3,7 +3,8 @@ import type { Honor } from '@/lib/api/types';
 import type { components } from '@/lib/api/schema';
 import { formatPartialDate } from '@/lib/format';
 import { ensureOk, unwrap } from '../api-error';
-import { bool, mediaItems, optional, richText, text, type FormValues } from '../form-values';
+import { bool, optional, richText, text, type FormValues } from '../form-values';
+import { mediaBody, mediaFields } from './media-fields';
 import { DATE_HELP, type ContentResource } from './resource';
 
 function toBody(values: FormValues): components['schemas']['CreateHonorDto'] {
@@ -13,9 +14,7 @@ function toBody(values: FormValues): components['schemas']['CreateHonorDto'] {
     issuer: text(values, 'issuer'),
     date: text(values, 'date'),
     url: text(values, 'url'),
-    imageUrl: text(values, 'imageUrl'),
-    imageAlt: text(values, 'imageAlt'),
-    images: mediaItems(values, 'images').map(({ url, alt }) => ({ url, alt })),
+    ...mediaBody(values),
     description: richText(values, 'description'),
     writeup: richText(values, 'writeup'),
     published: bool(values, 'published'),
@@ -45,29 +44,7 @@ export const honorsResource: ContentResource<Honor> = {
       tab: 'Details',
     },
     { name: 'published', label: 'Published', kind: 'checkbox', tab: 'Details' },
-    {
-      name: 'imageUrl',
-      label: 'Main image',
-      kind: 'image',
-      help: 'Optional, e.g. the award, medal or certificate. Shown on the card and at the top of the honor’s page.',
-      tab: 'Image',
-    },
-    {
-      name: 'imageAlt',
-      label: 'Image description',
-      kind: 'text',
-      placeholder: 'Gold medal on a blue ribbon',
-      help: 'Describes the image for screen readers. Leave empty to use the title.',
-      tab: 'Image',
-    },
-    {
-      name: 'images',
-      label: 'More images',
-      kind: 'media',
-      imagesOnly: true,
-      help: 'Optional. Shown in a carousel on the honor’s page, in this order.',
-      tab: 'Image',
-    },
+    ...mediaFields('honor', 'the picture on the honor’s card'),
     {
       name: 'description',
       label: 'Description',
@@ -98,9 +75,8 @@ export const honorsResource: ContentResource<Honor> = {
     issuer: optional(honor?.issuer),
     date: optional(honor?.date),
     url: optional(honor?.url),
-    imageUrl: optional(honor?.imageUrl),
-    imageAlt: optional(honor?.imageAlt),
-    images: honor?.images.map(({ url, alt }) => ({ kind: 'image' as const, url, alt: alt ?? '' })) ?? [],
+    mediaLayout: honor?.mediaLayout ?? 'none',
+    media: honor?.media ?? [],
     description: honor?.description ?? { type: 'doc', content: [] },
     writeup: honor?.writeup ?? { type: 'doc', content: [] },
     published: honor?.published ?? false,

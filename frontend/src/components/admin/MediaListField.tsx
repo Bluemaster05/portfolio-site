@@ -116,7 +116,7 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems, ima
                   {item.kind === 'video' ? 'Video' : 'Image'}
                   {showMain && index === (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
                     <span className="text-accent">
-                      {item.kind === 'video' ? ' · Main video (leads the project page)' : ' · Main image (cover)'}
+                      {item.kind === 'video' ? ' · Main video (leads the page)' : ' · Main image (cover)'}
                     </span>
                   )}
                 </span>
