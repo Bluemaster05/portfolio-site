@@ -64,7 +64,8 @@ fields: `@IsImageSource()` / `MediaItemDto[]` (ordered images + videos) on the s
 `MediaSourceField` / `MediaListField` (upload by default, URL toggle) in the admin,
 `renderableMedia()` / `mainImage()` / `leadIndex()` / `isImageSrc()` before rendering, and always set
 `alt`. Project media has a main image (cover on cards/home, never a video) and a main video (leads
-the project page); videos use their own first frame and never autoplay.
+the project page, autoplays muted on a loop unless reduced motion is on); other videos show their
+own first frame and don't autoplay.
 
 ## Common issues
 

@@ -13,6 +13,8 @@ text harder to read, drop the idea.
 - **Clear hierarchy.** A small type scale, generous whitespace, and obvious headings beat decoration.
 - **Light motion.** Short (150–300ms), subtle fades/slides on page entry and hover. Nothing loops,
   bounces, or follows the cursor. All motion is disabled under `prefers-reduced-motion: reduce`.
+  The one exception is a project's main video, which plays muted on a loop with visible controls —
+  and stays paused on its first frame for reduced-motion visitors.
 - **Light and dark.** Follows the visitor's system setting. Colors are CSS custom properties so a
   personal branch can re-theme by changing tokens only.
 - **Accessible by default.** Semantic HTML, visible focus rings, keyboard reachable controls,

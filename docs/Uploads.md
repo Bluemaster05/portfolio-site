@@ -64,8 +64,10 @@ Project `mediaLayout`:
 - `gallery` — the main video (else main image) is shown large, with every item as a smaller tile
   (5 per row on wide screens) in list order; choosing a tile shows it large.
 
-Videos show their own first frame (a `#t=0.1` media fragment, no separate poster image), have
-controls, and never autoplay. Helpers in `frontend/src/lib/images.ts`: `mainImage()`, `leadIndex()`,
+The **main video** on the project page autoplays **muted** on a **loop** (with controls to pause or
+unmute); visitors with `prefers-reduced-motion` get it paused instead (`LeadVideo`). Every other
+video shows its own first frame (a `#t=0.1` media fragment, no separate poster image) and waits for
+the visitor to press play. Helpers in `frontend/src/lib/images.ts`: `mainImage()`, `leadIndex()`,
 `mainIndexOf()`.
 
 ## Adding an image to a new feature
