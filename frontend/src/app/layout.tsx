@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import { THEME_SCRIPT } from "@/lib/theme";
+import { InlineScript } from "@/components/InlineScript";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -17,7 +18,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     // suppressHydrationWarning: THEME_SCRIPT may set data-theme before React hydrates
     <html lang="en" className={`${geistSans.variable} ${geistMono.variable} antialiased`} suppressHydrationWarning>
       <head>
-        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+        <InlineScript html={THEME_SCRIPT} />
       </head>
       <body className="min-h-dvh">{children}</body>
     </html>
