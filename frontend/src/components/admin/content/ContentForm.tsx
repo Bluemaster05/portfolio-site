@@ -93,11 +93,17 @@ export function ContentForm({
     event.preventDefault();
     const key = group?.key ?? 'all';
     setStatus((current) => ({ ...current, [key]: { saving: true } }));
+    // Tabs without edits take the values exactly as saved below, so anything the server
+    // normalises (e.g. the key order of stored JSON) can't make them look edited afterwards
+    const untouched = groups.filter((other) => other !== group && !isChanged(other));
     try {
       // Only this group's edits; other tabs keep their unsaved changes for their own Save
       const next = await onSave(group ? { ...saved, ...pick(values, group.fields) } : values);
       setSaved(next);
-      if (group) replaceGroup(group, next);
+      if (group) {
+        replaceGroup(group, next);
+        setValues((current) => ({ ...current, ...pick(next, untouched.flatMap((other) => other.fields)) }));
+      }
       setStatus((current) => ({ ...current, [key]: {} }));
     } catch (error) {
       setStatus((current) => ({ ...current, [key]: { error: errorMessage(error) } }));
@@ -284,8 +290,21 @@ function pick(values: FormValues, fields: FieldConfig[]): FormValues {
   return Object.fromEntries(fields.flatMap((field) => (field.name in values ? [[field.name, values[field.name]]] : [])));
 }
 
+/** Equal by content: object key order doesn't matter, and null is the same as a missing key. */
 function sameValue(a: FormValue | undefined, b: FormValue | undefined): boolean {
-  return JSON.stringify(a) === JSON.stringify(b);
+  return JSON.stringify(canonical(a)) === JSON.stringify(canonical(b));
+}
+
+/** Objects with sorted keys and no null/undefined entries, recursively; arrays keep their order. */
+function canonical(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(canonical);
+  if (typeof value !== 'object' || value === null) return value;
+  return Object.fromEntries(
+    Object.entries(value)
+      .filter(([, entry]) => entry !== null && entry !== undefined)
+      .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+      .map(([key, entry]) => [key, canonical(entry)]),
+  );
 }
 
 function isWide(field: FieldConfig): boolean {
