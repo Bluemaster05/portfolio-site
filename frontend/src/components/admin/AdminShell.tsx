@@ -27,7 +27,8 @@ interface AdminShellProps {
 export function AdminShell({ pathname, userEmail, onSignOut, children }: AdminShellProps) {
   return (
     <div className="min-h-dvh md:grid md:grid-cols-[15rem_1fr]">
-      <aside className="border-b border-border bg-surface md:min-h-dvh md:border-b-0 md:border-r">
+      {/* On wide screens the sidebar stays in view: one screen tall, stuck to the top, its own scroll */}
+      <aside className="border-b border-border bg-surface md:sticky md:top-0 md:h-dvh md:self-start md:overflow-y-auto md:border-b-0 md:border-r">
         <div className="flex items-center justify-between px-5 py-4 md:block">
           <p className="font-semibold tracking-tight">Portfolio admin</p>
           {userEmail && <p className="truncate text-xs text-muted md:mt-1">{userEmail}</p>}
