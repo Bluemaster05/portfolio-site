@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, type FormEvent } from 'react';
+import { useId, useState, type FormEvent, type KeyboardEvent } from 'react';
+import { flushSync } from 'react-dom';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
 import { isMediaItem, type FormValue, type FormValues, type MediaItem } from '@/lib/admin/form-values';
 import type { UploadMedia } from '@/lib/admin/media';
@@ -43,6 +44,8 @@ export function ContentForm({
   lookups = {},
 }: ContentFormProps) {
   const [values, setValues] = useState<FormValues>(initialValues);
+  const [activeTab, setActiveTab] = useState(0);
+  const tabsId = useId();
 
   function set(name: string, value: FormValue) {
     setValues((current) => ({ ...current, [name]: value }));
@@ -53,29 +56,98 @@ export function ContentForm({
     onSubmit(values);
   }
 
+  // A required or malformed field on a hidden tab can't be focused, so the browser would block
+  // the save without saying why. Show its tab first so the browser can point at it.
+  function revealInvalid(event: FormEvent<HTMLFormElement>) {
+    const panel = event.currentTarget.querySelector(':invalid')?.closest<HTMLElement>('[data-tab-index]');
+    const index = Number(panel?.dataset.tabIndex);
+    if (panel && index !== activeTab) flushSync(() => setActiveTab(index));
+  }
+
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
+    const step = event.key === 'ArrowRight' ? 1 : event.key === 'ArrowLeft' ? -1 : 0;
+    if (!step) return;
+    event.preventDefault();
+    const next = (activeTab + step + tabs.length) % tabs.length;
+    setActiveTab(next);
+    document.getElementById(`${tabsId}-tab-${next}`)?.focus();
+  }
+
   const visible = fields.filter((field) => field.visibleWhen?.(values) ?? true);
   const checkboxes = visible.filter((field) => field.kind === 'checkbox');
+  const inputs = visible.filter((field) => field.kind !== 'checkbox');
+  const untabbed = inputs.filter((field) => !field.tab);
+  const tabs = [...new Set(fields.flatMap((field) => (field.tab ? [field.tab] : [])))];
+
+  function renderFields(list: FieldConfig[]) {
+    return (
+      <div className="grid gap-5 sm:grid-cols-2">
+        {list.map((field) => (
+          <div key={field.name} className={isWide(field) ? 'sm:col-span-2' : undefined}>
+            <FieldInput
+              field={field}
+              help={field.helpFor?.(values) ?? field.help}
+              maxItems={field.maxItemsFor?.(values)}
+              value={values[field.name]}
+              onChange={(value) => set(field.name, value)}
+              onUpload={onUpload}
+              lookups={lookups}
+            />
+          </div>
+        ))}
+      </div>
+    );
+  }
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6">
+    <form onSubmit={handleSubmit} onInvalidCapture={revealInvalid} className="grid gap-6">
       <ErrorBanner message={error} />
-      <div className="grid gap-5 sm:grid-cols-2">
-        {visible
-          .filter((field) => field.kind !== 'checkbox')
-          .map((field) => (
-            <div key={field.name} className={isWide(field) ? 'sm:col-span-2' : undefined}>
-              <FieldInput
-                field={field}
-                help={field.helpFor?.(values) ?? field.help}
-                maxItems={field.maxItemsFor?.(values)}
-                value={values[field.name]}
-                onChange={(value) => set(field.name, value)}
-                onUpload={onUpload}
-                lookups={lookups}
-              />
+      {tabs.length > 0 && (
+        <div className="grid gap-6">
+          {/* The bottom line is an inset shadow, not a border, so the active underline can sit on it
+              without the tabs overflowing (which would add a scrollbar to this scroll container) */}
+          <div
+            role="tablist"
+            aria-label="Editor sections"
+            className="flex overflow-x-auto shadow-[inset_0_-1px_0_var(--border)]"
+          >
+            {tabs.map((tab, index) => (
+              <button
+                key={tab}
+                id={`${tabsId}-tab-${index}`}
+                role="tab"
+                type="button"
+                aria-selected={index === activeTab}
+                aria-controls={`${tabsId}-panel-${index}`}
+                tabIndex={index === activeTab ? 0 : -1}
+                onClick={() => setActiveTab(index)}
+                onKeyDown={onTabKeyDown}
+                className={`whitespace-nowrap border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                  index === activeTab
+                    ? 'border-accent text-foreground'
+                    : 'border-transparent text-muted hover:text-foreground'
+                }`}
+              >
+                {tab}
+              </button>
+            ))}
+          </div>
+          {/* Every panel stays mounted so editors keep their state when switching tabs */}
+          {tabs.map((tab, index) => (
+            <div
+              key={tab}
+              id={`${tabsId}-panel-${index}`}
+              role="tabpanel"
+              aria-labelledby={`${tabsId}-tab-${index}`}
+              data-tab-index={index}
+              hidden={index !== activeTab}
+            >
+              {renderFields(inputs.filter((field) => field.tab === tab))}
             </div>
           ))}
-      </div>
+        </div>
+      )}
+      {untabbed.length > 0 && renderFields(untabbed)}
       {checkboxes.length > 0 && (
         <div className="flex flex-wrap gap-6">
           {checkboxes.map((field) => (

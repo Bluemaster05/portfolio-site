@@ -32,6 +32,11 @@ export interface FieldConfig {
   maxItemsFor?: (values: FormValues) => number | undefined;
   /** Overrides `help` from the current form values, e.g. to explain the chosen layout */
   helpFor?: (values: FormValues) => string | undefined;
+  /**
+   * Editor tab the field sits on; tabs appear in the order their first field is listed. Fields
+   * without one (e.g. Published) stay below the tabs. A resource with no tabs is one long form.
+   */
+  tab?: string;
 }
 
 export interface ContentItemBase {
