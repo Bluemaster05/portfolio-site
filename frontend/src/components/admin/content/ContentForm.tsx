@@ -57,6 +57,7 @@ export function ContentForm({
               <FieldInput
                 field={field}
                 help={field.helpFor?.(values) ?? field.help}
+                maxItems={field.maxItemsFor?.(values)}
                 value={values[field.name]}
                 onChange={(value) => set(field.name, value)}
                 onUpload={onUpload}
@@ -94,12 +95,13 @@ function isWide(field: FieldConfig): boolean {
 interface FieldInputProps {
   field: FieldConfig;
   help?: string;
+  maxItems?: number;
   value: FormValue | undefined;
   onChange: (value: FormValue) => void;
   onUpload: UploadImage;
 }
 
-function FieldInput({ field, help, value, onChange, onUpload }: FieldInputProps) {
+function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldInputProps) {
   const id = `field-${field.name}`;
   const common = { label: field.label, htmlFor: id, help, required: field.required };
 
@@ -124,7 +126,13 @@ function FieldInput({ field, help, value, onChange, onUpload }: FieldInputProps)
     case 'images':
       return (
         <Field {...common} htmlFor={undefined}>
-          <ImageListField label={field.label} value={imageItems(value)} onChange={onChange} onUpload={onUpload} />
+          <ImageListField
+            label={field.label}
+            value={imageItems(value)}
+            onChange={onChange}
+            onUpload={onUpload}
+            maxItems={maxItems}
+          />
         </Field>
       );
     case 'select':

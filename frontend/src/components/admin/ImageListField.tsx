@@ -5,6 +5,7 @@ import { IMAGE_ACCEPT, type UploadImage } from '@/lib/admin/media';
 import { errorMessage } from '@/lib/admin/api-error';
 import { isImageSrc } from '@/lib/images';
 import type { ImageItem } from '@/lib/admin/form-values';
+import { ImageLightbox } from './ImageLightbox';
 import { SourceModeToggle, type SourceMode } from './ImageSourceField';
 import { Button, TextInput } from './ui';
 
@@ -15,15 +16,27 @@ interface ImageListFieldProps {
   label: string;
   /** Explains how the first image is used, e.g. "Main image" */
   firstLabel?: string;
+  /** Most images allowed, e.g. 1 for a single header image */
+  maxItems?: number;
 }
 
 /** An ordered list of images with alt text. Several files can be uploaded at once. */
-export function ImageListField({ value, onChange, onUpload, label, firstLabel = 'Main image' }: ImageListFieldProps) {
+export function ImageListField({
+  value,
+  onChange,
+  onUpload,
+  label,
+  firstLabel = 'Main image',
+  maxItems,
+}: ImageListFieldProps) {
   const [mode, setMode] = useState<SourceMode>('upload');
   const [urlDraft, setUrlDraft] = useState('');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string>();
+  const [previewIndex, setPreviewIndex] = useState<number>();
   const inputRef = useRef<HTMLInputElement>(null);
+  const single = maxItems === 1;
+  const remaining = maxItems === undefined ? Infinity : Math.max(0, maxItems - value.length);
 
   async function uploadFiles(files: FileList | null) {
     if (!files?.length) return;
@@ -32,7 +45,7 @@ export function ImageListField({ value, onChange, onUpload, label, firstLabel = 
     const added: ImageItem[] = [];
     try {
       // One at a time keeps the order the admin picked and stops at the first failure
-      for (const file of Array.from(files)) {
+      for (const file of Array.from(files).slice(0, remaining)) {
         added.push({ url: await onUpload(file), alt: '' });
       }
     } catch (uploadError) {
@@ -45,7 +58,7 @@ export function ImageListField({ value, onChange, onUpload, label, firstLabel = 
   }
 
   function addUrl() {
-    if (!isImageSrc(urlDraft)) return;
+    if (!isImageSrc(urlDraft) || remaining === 0) return;
     onChange([...value, { url: urlDraft, alt: '' }]);
     setUrlDraft('');
   }
@@ -66,11 +79,26 @@ export function ImageListField({ value, onChange, onUpload, label, firstLabel = 
       {value.length > 0 && (
         <ol className="grid gap-2">
           {value.map((image, index) => (
-            <li key={`${image.url}-${index}`} className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface p-2">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={image.url} alt="" className="h-16 w-24 rounded object-cover" />
+            <li
+              key={`${image.url}-${index}`}
+              className="flex flex-wrap items-center gap-3 rounded-md border border-border bg-surface p-2"
+            >
+              <button
+                type="button"
+                onClick={() => setPreviewIndex(index)}
+                aria-label={`View image ${index + 1} full screen`}
+                className="cursor-zoom-in overflow-hidden rounded"
+              >
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={image.url} alt="" className="h-16 w-24 object-cover transition-opacity hover:opacity-85" />
+              </button>
               <div className="grid min-w-48 flex-1 gap-1">
-                {index === 0 && <span className="text-xs font-medium text-accent">{firstLabel}</span>}
+                {index === 0 && !single && <span className="text-xs font-medium text-accent">{firstLabel}</span>}
+                {maxItems !== undefined && index >= maxItems && (
+                  <span className="text-xs font-medium text-red-700 dark:text-red-400">
+                    Not shown in this layout; removed on save
+                  </span>
+                )}
                 <TextInput
                   aria-label={`Description of image ${index + 1}`}
                   placeholder="Describe the image (alt text)"
@@ -79,12 +107,17 @@ export function ImageListField({ value, onChange, onUpload, label, firstLabel = 
                 />
               </div>
               <div className="flex gap-1">
-                {index > 0 && (
+                {index > 0 && !single && (
                   <Button variant="ghost" onClick={() => move(index, 0)}>
                     Make main
                   </Button>
                 )}
-                <Button variant="ghost" aria-label={`Move image ${index + 1} up`} disabled={index === 0} onClick={() => move(index, index - 1)}>
+                <Button
+                  variant="ghost"
+                  aria-label={`Move image ${index + 1} up`}
+                  disabled={index === 0}
+                  onClick={() => move(index, index - 1)}
+                >
                   ↑
                 </Button>
                 <Button
@@ -104,57 +137,65 @@ export function ImageListField({ value, onChange, onUpload, label, firstLabel = 
         </ol>
       )}
 
-      <div className="grid gap-2">
-        <SourceModeToggle label={label} mode={mode} onChange={setMode} />
-        {mode === 'upload' ? (
-          <div
-            onDragOver={(event) => event.preventDefault()}
-            onDrop={(event) => {
-              event.preventDefault();
-              void uploadFiles(event.dataTransfer.files);
-            }}
-            className="flex flex-wrap items-center gap-3 rounded-md border border-dashed border-border bg-surface px-3 py-3"
-          >
-            <input
-              ref={inputRef}
-              type="file"
-              multiple
-              accept={IMAGE_ACCEPT}
-              aria-label={`Upload ${label}`}
-              onChange={(event) => void uploadFiles(event.target.files)}
-              className="sr-only"
-            />
-            <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
-              {uploading ? 'Uploading…' : 'Add images'}
-            </Button>
-            <span className="text-sm text-muted">or drop files here · you can pick several</span>
-          </div>
-        ) : (
-          <div className="flex gap-2">
-            <TextInput
-              type="url"
-              aria-label={`${label} URL`}
-              placeholder="https://…"
-              value={urlDraft}
-              onChange={(event) => setUrlDraft(event.target.value.trim())}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  addUrl();
-                }
+      {remaining > 0 && (
+        <div className="grid gap-2">
+          <SourceModeToggle label={label} mode={mode} onChange={setMode} />
+          {mode === 'upload' ? (
+            <div
+              onDragOver={(event) => event.preventDefault()}
+              onDrop={(event) => {
+                event.preventDefault();
+                void uploadFiles(event.dataTransfer.files);
               }}
-            />
-            <Button onClick={addUrl} disabled={!isImageSrc(urlDraft)}>
-              Add
-            </Button>
-          </div>
-        )}
-        {error && (
-          <p role="alert" className="text-sm text-red-700 dark:text-red-400">
-            {error}
-          </p>
-        )}
-      </div>
+              className="flex flex-wrap items-center gap-3 rounded-md border border-dashed border-border bg-surface px-3 py-3"
+            >
+              <input
+                ref={inputRef}
+                type="file"
+                multiple={!single}
+                accept={IMAGE_ACCEPT}
+                aria-label={`Upload ${label}`}
+                onChange={(event) => void uploadFiles(event.target.files)}
+                className="sr-only"
+              />
+              <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
+                {uploading ? 'Uploading…' : single ? 'Choose image' : 'Add images'}
+              </Button>
+              <span className="text-sm text-muted">
+                {single ? 'or drop a file here' : 'or drop files here · you can pick several'}
+              </span>
+            </div>
+          ) : (
+            <div className="flex gap-2">
+              <TextInput
+                type="url"
+                aria-label={`${label} URL`}
+                placeholder="https://…"
+                value={urlDraft}
+                onChange={(event) => setUrlDraft(event.target.value.trim())}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') {
+                    event.preventDefault();
+                    addUrl();
+                  }
+                }}
+              />
+              <Button onClick={addUrl} disabled={!isImageSrc(urlDraft)}>
+                Add
+              </Button>
+            </div>
+          )}
+        </div>
+      )}
+      {error && (
+        <p role="alert" className="text-sm text-red-700 dark:text-red-400">
+          {error}
+        </p>
+      )}
+      <ImageLightbox
+        image={previewIndex === undefined ? undefined : value[previewIndex]}
+        onClose={() => setPreviewIndex(undefined)}
+      />
     </div>
   );
 }

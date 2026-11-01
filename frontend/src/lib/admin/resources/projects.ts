@@ -28,7 +28,8 @@ function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
     repoUrl: text(values, 'repoUrl'),
     liveUrl: text(values, 'liveUrl'),
     mediaLayout: mediaLayout(values),
-    images: images(values, 'images'),
+    // A single header shows one image; extras left over from a gallery aren't kept
+    images: mediaLayout(values) === 'single' ? images(values, 'images').slice(0, 1) : images(values, 'images'),
     startDate: text(values, 'startDate'),
     endDate: text(values, 'endDate'),
     featured: bool(values, 'featured'),
@@ -55,9 +56,10 @@ export const projectsResource: ContentResource<Project> = {
       label: 'Project images',
       kind: 'images',
       visibleWhen: (values) => mediaLayout(values) !== 'none',
+      maxItemsFor: (values) => (mediaLayout(values) === 'single' ? 1 : undefined),
       helpFor: (values) =>
         mediaLayout(values) === 'single'
-          ? 'Only the first image is shown, as a header above the write-up.'
+          ? 'One image, shown as a header above the write-up.'
           : 'The first image is shown large; the rest appear as smaller tiles below it.',
     },
     { name: 'content', label: 'Write-up', kind: 'richtext' },

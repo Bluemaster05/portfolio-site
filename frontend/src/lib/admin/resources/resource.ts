@@ -26,6 +26,8 @@ export interface FieldConfig {
   options?: { value: string; label: string }[];
   /** Hide the field unless this returns true for the current form values */
   visibleWhen?: (values: FormValues) => boolean;
+  /** Most items an `images` field accepts for the current form values */
+  maxItemsFor?: (values: FormValues) => number | undefined;
   /** Overrides `help` from the current form values, e.g. to explain the chosen layout */
   helpFor?: (values: FormValues) => string | undefined;
 }

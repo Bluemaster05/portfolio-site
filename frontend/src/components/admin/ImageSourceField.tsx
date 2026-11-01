@@ -4,6 +4,7 @@ import { useId, useRef, useState } from 'react';
 import { IMAGE_ACCEPT, type UploadImage } from '@/lib/admin/media';
 import { errorMessage } from '@/lib/admin/api-error';
 import { isImageSrc, isUploadedImage } from '@/lib/images';
+import { ImageLightbox } from './ImageLightbox';
 import { Button, TextInput } from './ui';
 
 export type SourceMode = 'upload' | 'url';
@@ -27,6 +28,7 @@ export function ImageSourceField({ value, onChange, onUpload, label, compact = f
   const [mode, setMode] = useState<SourceMode>(value && !isUploadedImage(value) ? 'url' : 'upload');
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string>();
+  const [previewing, setPreviewing] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const id = useId();
 
@@ -89,18 +91,26 @@ export function ImageSourceField({ value, onChange, onUpload, label, compact = f
 
       {isImageSrc(value) && (
         <div className="flex items-center gap-3">
-          {/* Previews arbitrary hosts and uploads, so next/image's allow-list doesn't fit */}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={value}
-            alt=""
-            className={`rounded-md border border-border bg-surface object-contain ${compact ? 'size-12 p-1' : 'max-h-40 max-w-full'}`}
-          />
+          <button
+            type="button"
+            onClick={() => setPreviewing(true)}
+            aria-label={`View ${label} full screen`}
+            className="cursor-zoom-in"
+          >
+            {/* Previews arbitrary hosts and uploads, so next/image's allow-list doesn't fit */}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={value}
+              alt=""
+              className={`rounded-md border border-border bg-surface object-contain transition-opacity hover:opacity-85 ${compact ? 'size-12 p-1' : 'max-h-40 max-w-full'}`}
+            />
+          </button>
           <Button variant="ghost" onClick={() => onChange('')}>
             Remove
           </Button>
         </div>
       )}
+      <ImageLightbox image={previewing && value ? { url: value } : undefined} onClose={() => setPreviewing(false)} />
     </div>
   );
 }
