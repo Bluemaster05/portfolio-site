@@ -5,7 +5,7 @@ import { Fragment, useId, useRef, useState, useSyncExternalStore, type KeyboardE
 import { getVersion, subscribe, tokensFor } from '../../client-highlight';
 import { CODE_INDENT } from '../../languages';
 import { codeTabsOf, type CodeTab } from '../../types';
-import { LanguageInput } from '../LanguageInput';
+import { LanguagePicker } from '../LanguagePicker';
 import { useDraft } from '../use-draft';
 
 /** Editing UI for a codeTabs block: rename, add, remove, and edit tabs. */
@@ -90,7 +90,7 @@ function TabEditor({ tab, onChange }: { tab: CodeTab; onChange: (patch: Partial<
             className="rounded border border-border bg-background px-2 py-1 font-mono text-sm text-foreground"
           />
         </label>
-        <LanguageInput
+        <LanguagePicker
           value={language}
           onChange={(next) => {
             setLanguage(next);
