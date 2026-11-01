@@ -18,12 +18,12 @@ the public site.
 
 | Section          | Route              | Notes                                                  |
 | ---------------- | ------------------ | ------------------------------------------------------ |
-| Home             | `/`                | Profile intro, featured projects, links                |
+| Home             | `/`                | Profile intro, featured projects, and optionally one featured job, education entry and honor |
 | Projects         | `/projects`        | List (filterable by technology, `?tech=<slug>`) + detail page (`/projects/[slug]`) |
 | Experience       | `/experience`      | One card per employer with its jobs + job page (`/experience/[slug]`) with a write-up |
-| Education        | `/education`       | Schools, degrees, coursework                           |
+| Education        | `/education`       | One card per degree + entry page (`/education/[slug]`) with a write-up |
 | Blog             | `/blog`            | List + post page (`/blog/[slug]`); off by default      |
-| Honors / Awards  | `/honors`          | Awards, scholarships, certifications                   |
+| Honors / Awards  | `/honors`          | One card per honor + honor page (`/honors/[slug]`) with a write-up |
 
 Every section has an on/off switch in **Site settings**. A disabled section is removed from the
 navigation, its pages return 404, and its public API endpoints return 404. If Home is disabled, `/`

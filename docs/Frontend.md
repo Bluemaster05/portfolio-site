@@ -48,6 +48,15 @@ This Next.js version runs with Cache Components: anything that reads request dat
 `usePathname`, …) must sit inside `<Suspense>`. Dynamic `[slug]` pages await `params` inside a
 Suspense boundary; don't add `generateStaticParams` unless it can always return at least one entry.
 
+## Admin pages
+
+The admin renders in the browser after sign-in: the `(portal)` layout shows only "Loading…" until
+the session check finishes. Next's instant-navigation validation therefore can't render admin pages
+and reports them as dropped segments. So every admin `page.tsx` is a small server component that
+sets `export const instant = false` and renders the real client page from a sibling file (e.g.
+`employers/EmployersPage.tsx`); `instant` can't be exported from a client component. Follow the
+same shape for new admin pages.
+
 ## Admin content editors
 
 Projects, experience, education, honors, and blog share one list page and one editor
@@ -73,10 +82,22 @@ on a hidden tab blocks it, the editor switches to that tab so the browser can po
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
 Experience entries are **jobs**: each belongs to an **employer** (managed at `/admin/employers`:
-name, website, logo, order; an employer with jobs can't be deleted) and is picked in the job editor
+name, website, optional logo, order; an employer with jobs can't be deleted) and is picked in the job editor
 with `kind: 'employer'` (`EmployerSelect`, with inline "New…"). A job has free-text skills,
 technologies, a short description and a longer write-up, and its own page at `/experience/[slug]`
 (slug generated from role + employer when left empty).
+
+Education entries and honors work the same way without employers: a short description on the card,
+a write-up on their own page at `/education/[slug]` or `/honors/[slug]` (slug from degree +
+institution, or title + issuer, when left empty), and Details / Description / Write-up tabs in the
+editor. Card titles link to those pages with a "Read more" tooltip.
+
+Projects can be featured on the home page in any number (a checkbox on their Details tab). Jobs,
+education entries and honors allow one each, or none: their admin lists have a Feature / Unfeature
+button and an "On home page" badge (a resource's `featuring` option). Featuring one unfeatures the
+previous one server-side (`common/utils/feature-only.ts`); unfeaturing leaves none. The public list
+endpoints take `?featured=true`. Server-side, both use `uniqueSlug()` from
+`common/utils/unique-slug.ts`.
 
 Employer order lives in one place, `EmployersService.ordered()`: manual order, then an employer with
 a current job, then the most recently active (drafts count). The public page, the Employers page and

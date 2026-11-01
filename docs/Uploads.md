@@ -44,6 +44,10 @@ can be seeked, including through the Next.js `/media` proxy.
 | Site settings         | `avatarUrl`                | `MediaSourceField`                     |
 | Projects              | `mediaLayout` + `media[]`  | select + `MediaListField`              |
 | Blog posts            | `coverImageUrl`            | `MediaSourceField`                     |
+| Honors                | `imageUrl` + `imageAlt`    | `MediaSourceField` (editor's Image tab); alt falls back to the title |
+| Honors (more images)  | `images[]` (`ImageItemDto`: `url`, `alt`) | `MediaListField` with `imagesOnly`; a carousel on the honor's page |
+| Rich text videos      | `video` node `src`         | editor Video button → `MediaSourceField kind="video"` |
+| Rich text carousels   | `imageCarousel` node `images` | `MediaListField` with `imagesOnly` in the node view |
 | Rich text             | `image` node `src`         | editor Image button → upload panel     |
 | Technologies          | `iconUrl`                  | `MediaSourceField` with `compact`      |
 
