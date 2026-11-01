@@ -58,12 +58,7 @@ async function ProjectDetails({ params }: Pick<PageProps<'/projects/[slug]'>, 'p
           )}
         </div>
       </header>
-      <ProjectMedia
-        layout={project.mediaLayout}
-        images={project.images}
-        videoUrl={project.videoUrl}
-        title={project.title}
-      />
+      <ProjectMedia layout={project.mediaLayout} media={project.media} title={project.title} />
       <RichTextRenderer doc={project.content} />
     </article>
   );
