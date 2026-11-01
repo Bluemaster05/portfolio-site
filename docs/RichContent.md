@@ -37,9 +37,23 @@ validate every node. The renderer ignores node types it does not know.
 | ----------------------------- | ---------------------------- | -------------------------------------------------- |
 | paragraph, heading (h2–h4), blockquote, bulletList, orderedList, listItem, horizontalRule, hardBreak | TipTap StarterKit | Semantic HTML |
 | marks: bold, italic, strike, code, underline, link | StarterKit / Link | Inline HTML; links limited to `http(s)`, `mailto`, relative |
-| codeBlock                     | StarterKit                   | Shiki-highlighted `<pre>`                          |
+| codeBlock                     | `@tiptap/extension-code-block`, extended in `extensions/code-block` (language field) | Shiki-highlighted `<pre>` in `attrs.language`; none or unknown → plain text |
 | image                         | `@tiptap/extension-image`, extended in `extensions/aligned-image.ts` | `<img>` with alt text; uploaded `/media/…` or `http(s)` sources only; `align` attr `left` (default, also for older images) or `center`, output as `data-align` |
 | **codeTabs** (custom)         | `frontend/src/components/rich-text/extensions/code-tabs` | Tabs of Shiki-highlighted snippets; tab switching is the only client JS |
+
+## Syntax colors
+
+The public site highlights code on the server (`highlight.ts`). The admin editor colors code as you
+type with the same Shiki themes, loaded in the browser on first use (`client-highlight.ts`, with
+Shiki's JavaScript regex engine so no WebAssembly ships). Code blocks are colored by a ProseMirror
+decoration plugin (`extensions/code-block/highlight-plugin.ts`), which never changes the stored
+document. Code tabs draw the colored code behind a textarea with transparent text. Both use the
+language list in `languages.ts`.
+
+In both, Tab indents by `CODE_INDENT` (four spaces) and Shift+Tab outdents, instead of moving
+focus. In a code tab's textarea, Escape then Tab moves on. Node view text boxes edit a local draft
+(`extensions/use-draft.ts`) so the caret doesn't jump when the node's attributes come back a render
+later.
 
 ## Adding a new block type
 
