@@ -6,6 +6,8 @@ import { isMediaItem, type FormValue, type FormValues, type MediaItem } from '@/
 import type { UploadMedia } from '@/lib/admin/media';
 import type { FieldConfig } from '@/lib/admin/resources/resource';
 import { MediaListField } from '../MediaListField';
+import { TechnologyPicker } from '../TechnologyPicker';
+import type { TechnologySummary } from '@/lib/api/types';
 import { MediaSourceField } from '../MediaSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from '../ui';
 
@@ -19,6 +21,13 @@ interface ContentFormProps {
   onCancel: () => void;
   /** Stores an image and resolves to its URL; used by image fields and the editor */
   onUpload: UploadMedia;
+  /** Shared lists some fields pick from, loaded by the container */
+  lookups?: FormLookups;
+}
+
+export interface FormLookups {
+  technologies?: TechnologySummary[];
+  createTechnology?: (name: string) => Promise<TechnologySummary>;
 }
 
 /** Form for any content type, built from its field configuration. */
@@ -31,6 +40,7 @@ export function ContentForm({
   onSubmit,
   onCancel,
   onUpload,
+  lookups = {},
 }: ContentFormProps) {
   const [values, setValues] = useState<FormValues>(initialValues);
 
@@ -61,6 +71,7 @@ export function ContentForm({
                 value={values[field.name]}
                 onChange={(value) => set(field.name, value)}
                 onUpload={onUpload}
+                lookups={lookups}
               />
             </div>
           ))}
@@ -89,7 +100,7 @@ export function ContentForm({
 }
 
 function isWide(field: FieldConfig): boolean {
-  return ['richtext', 'textarea', 'tags', 'media', 'image'].includes(field.kind);
+  return ['richtext', 'textarea', 'tags', 'media', 'image', 'technologies'].includes(field.kind);
 }
 
 interface FieldInputProps {
@@ -99,13 +110,26 @@ interface FieldInputProps {
   value: FormValue | undefined;
   onChange: (value: FormValue) => void;
   onUpload: UploadMedia;
+  lookups: FormLookups;
 }
 
-function FieldInput({ field, help, maxItems, value, onChange, onUpload }: FieldInputProps) {
+function FieldInput({ field, help, maxItems, value, onChange, onUpload, lookups }: FieldInputProps) {
   const id = `field-${field.name}`;
   const common = { label: field.label, htmlFor: id, help, required: field.required };
 
   switch (field.kind) {
+    case 'technologies':
+      return (
+        <Field {...common} htmlFor={undefined}>
+          <TechnologyPicker
+            label={field.label}
+            value={Array.isArray(value) ? value.filter((item): item is number => typeof item === 'number') : []}
+            onChange={onChange}
+            technologies={lookups.technologies ?? []}
+            onCreate={lookups.createTechnology}
+          />
+        </Field>
+      );
     case 'richtext':
       return (
         <Field {...common} htmlFor={undefined}>

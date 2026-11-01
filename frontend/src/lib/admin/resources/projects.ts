@@ -2,7 +2,7 @@ import { adminClient } from '@/lib/api/admin-client';
 import type { Project } from '@/lib/api/types';
 import type { components } from '@/lib/api/schema';
 import { ensureOk, unwrap } from '../api-error';
-import { bool, list, mediaItems, optional, richText, text, type FormValues } from '../form-values';
+import { bool, ids, mediaItems, optional, richText, text, type FormValues } from '../form-values';
 import { DATE_HELP, type ContentResource } from './resource';
 
 type MediaLayout = components['schemas']['ProjectMediaLayout'];
@@ -24,7 +24,7 @@ function toBody(values: FormValues): components['schemas']['CreateProjectDto'] {
     slug: text(values, 'slug'),
     summary: text(values, 'summary'),
     content: richText(values, 'content'),
-    technologies: list(values, 'technologies'),
+    technologyIds: ids(values, 'technologyIds'),
     repoUrl: text(values, 'repoUrl'),
     liveUrl: text(values, 'liveUrl'),
     mediaLayout: mediaLayout(values),
@@ -45,7 +45,12 @@ export const projectsResource: ContentResource<Project> = {
     { name: 'title', label: 'Title', kind: 'text', required: true },
     { name: 'slug', label: 'URL slug', kind: 'slug', help: 'Leave empty to generate from the title' },
     { name: 'summary', label: 'Summary', kind: 'textarea', help: 'One or two sentences for cards and search results' },
-    { name: 'technologies', label: 'Technologies', kind: 'tags', placeholder: 'TypeScript, React, PostgreSQL' },
+    {
+      name: 'technologyIds',
+      label: 'Technologies',
+      kind: 'technologies',
+      help: 'Shown as pins on the project and used for filtering. Manage icons under Technologies.',
+    },
     { name: 'startDate', label: 'Started', kind: 'date', help: DATE_HELP },
     { name: 'endDate', label: 'Finished', kind: 'date', help: 'Empty if ongoing' },
     { name: 'liveUrl', label: 'Live URL', kind: 'url' },
@@ -72,7 +77,7 @@ export const projectsResource: ContentResource<Project> = {
     slug: project?.slug ?? '',
     summary: project?.summary ?? '',
     content: project?.content ?? { type: 'doc', content: [] },
-    technologies: project?.technologies ?? [],
+    technologyIds: project?.technologies.map((technology) => technology.id) ?? [],
     repoUrl: optional(project?.repoUrl),
     liveUrl: optional(project?.liveUrl),
     mediaLayout: project?.mediaLayout ?? 'none',

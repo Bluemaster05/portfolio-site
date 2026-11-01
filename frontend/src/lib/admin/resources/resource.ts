@@ -13,7 +13,9 @@ export type FieldKind =
   | 'image'
   /** One ordered list of images and videos with descriptions; the first is the main one */
   | 'media'
-  | 'select';
+  | 'select'
+  /** Technologies picked from the shared list, stored as ids in order */
+  | 'technologies';
 
 export interface FieldConfig {
   name: string;

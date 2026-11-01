@@ -55,6 +55,13 @@ export async function getProjects(featured?: boolean) {
   return (data ?? []).map(withMediaDefaults);
 }
 
+/** Technologies used by published projects, with counts, for the project filter. */
+export async function getProjectTechnologies() {
+  'use cache';
+  cachePublic();
+  return (await safely(() => publicApi.GET('/api/public/projects/technologies'))) ?? [];
+}
+
 export async function getProject(slug: string) {
   'use cache';
   cachePublic();

@@ -10,7 +10,7 @@ export interface MediaItem {
 }
 
 /** Values held by the generic content form, keyed by field name. */
-export type FormValue = string | boolean | string[] | MediaItem[] | RichTextValue;
+export type FormValue = string | boolean | string[] | number[] | MediaItem[] | RichTextValue;
 export type FormValues = Record<string, FormValue>;
 
 export function text(values: FormValues, name: string): string {
@@ -25,6 +25,12 @@ export function bool(values: FormValues, name: string): boolean {
 export function list(values: FormValues, name: string): string[] {
   const value = values[name];
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : [];
+}
+
+/** Numeric ids, e.g. selected technologies, in order. */
+export function ids(values: FormValues, name: string): number[] {
+  const value = values[name];
+  return Array.isArray(value) ? value.filter((item): item is number => typeof item === 'number') : [];
 }
 
 export function isMediaItem(item: unknown): item is MediaItem {

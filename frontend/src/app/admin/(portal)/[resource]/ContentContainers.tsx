@@ -8,7 +8,8 @@ import type { FormValues } from '@/lib/admin/form-values';
 import { uploadMedia } from '@/lib/admin/media';
 import type { ContentItemBase, ContentResource } from '@/lib/admin/resources/resource';
 import { ContentList } from '@/components/admin/content/ContentList';
-import { ContentForm } from '@/components/admin/content/ContentForm';
+import { ContentForm, type FormLookups } from '@/components/admin/content/ContentForm';
+import { $api } from '@/lib/api/admin-query';
 import { AdminPageHeader, ErrorBanner } from '@/components/admin/ui';
 
 export function ContentListContainer<Item extends ContentItemBase>({ resource }: { resource: ContentResource<Item> }) {
@@ -82,6 +83,17 @@ export function ContentEditContainer<Item extends ContentItemBase>({
     },
   });
 
+  // Shared lists for fields like the technology picker, loaded only when the form needs them
+  const usesTechnologies = resource.fields.some((field) => field.kind === 'technologies');
+  const technologies = $api.useQuery('get', '/api/admin/technologies', {}, { enabled: usesTechnologies });
+  const createTechnology = $api.useMutation('post', '/api/admin/technologies', {
+    onSuccess: () => technologies.refetch(),
+  });
+  const lookups: FormLookups = {
+    technologies: technologies.data,
+    createTechnology: (name) => createTechnology.mutateAsync({ body: { name } }),
+  };
+
   const title = id === undefined ? `New ${resource.singular}` : `Edit ${resource.singular}`;
 
   if (id !== undefined && item.isPending) return <p className="text-muted">Loading…</p>;
@@ -101,6 +113,7 @@ export function ContentEditContainer<Item extends ContentItemBase>({
         onSubmit={(values) => save.mutate(values)}
         onCancel={() => router.push(`/admin/${resource.key}`)}
         onUpload={uploadMedia}
+        lookups={lookups}
       />
     </>
   );

@@ -8,6 +8,7 @@ export const ADMIN_NAV = [
   { href: '/admin', label: 'Dashboard' },
   { href: '/admin/site', label: 'Site settings' },
   { href: '/admin/projects', label: 'Projects' },
+  { href: '/admin/technologies', label: 'Technologies' },
   { href: '/admin/experience', label: 'Experience' },
   { href: '/admin/education', label: 'Education' },
   { href: '/admin/honors', label: 'Honors & Awards' },

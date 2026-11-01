@@ -264,6 +264,23 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/public/projects/technologies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Technologies used by published projects, with counts, for filtering */
+        get: operations["ProjectsPublicController_technologies"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/public/projects/{slug}": {
         parameters: {
             query?: never;
@@ -279,6 +296,59 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/admin/technologies": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List technologies in display order */
+        get: operations["TechnologiesAdminController_findAll"];
+        put?: never;
+        /** Create a technology */
+        post: operations["TechnologiesAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/technologies/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the display order of technologies */
+        put: operations["TechnologiesAdminController_reorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/technologies/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete a technology; projects using it lose it */
+        delete: operations["TechnologiesAdminController_remove"];
+        options?: never;
+        head?: never;
+        /** Update a technology */
+        patch: operations["TechnologiesAdminController_update"];
         trace?: never;
     };
     "/api/admin/experience": {
@@ -780,6 +850,13 @@ export interface components {
         };
         /** @enum {string} */
         ProjectMediaLayout: "none" | "single" | "gallery";
+        TechnologySummaryDto: {
+            id: number;
+            name: string;
+            /** @description Used in the project filter: `/projects?tech=<slug>` */
+            slug: string;
+            iconUrl?: string;
+        };
         /** @enum {string} */
         MediaKind: "image" | "video";
         MediaItemDto: {
@@ -803,7 +880,8 @@ export interface components {
             title: string;
             slug: string;
             summary: string;
-            technologies: string[];
+            /** @description Technologies used, in display order */
+            technologies: components["schemas"]["TechnologySummaryDto"][];
             repoUrl?: string;
             liveUrl?: string;
             /** @description Images and videos in gallery order; see `main` on each item */
@@ -856,7 +934,8 @@ export interface components {
             slug?: string;
             /** @description Short plain-text summary for cards and meta descriptions */
             summary?: string;
-            technologies?: string[];
+            /** @description Technologies used, by id, in display order (manage them under /api/admin/technologies) */
+            technologyIds?: number[];
             repoUrl?: string;
             liveUrl?: string;
             /**
@@ -916,7 +995,8 @@ export interface components {
             slug?: string;
             /** @description Short plain-text summary for cards and meta descriptions */
             summary?: string;
-            technologies?: string[];
+            /** @description Technologies used, by id, in display order (manage them under /api/admin/technologies) */
+            technologyIds?: number[];
             repoUrl?: string;
             liveUrl?: string;
             /**
@@ -939,7 +1019,8 @@ export interface components {
             title: string;
             slug: string;
             summary: string;
-            technologies: string[];
+            /** @description Technologies used, in display order */
+            technologies: components["schemas"]["TechnologySummaryDto"][];
             repoUrl?: string;
             liveUrl?: string;
             /** @description Images and videos in gallery order; see `main` on each item */
@@ -947,6 +1028,47 @@ export interface components {
             startDate?: string;
             endDate?: string;
             featured: boolean;
+        };
+        TechnologyUsageDto: {
+            id: number;
+            name: string;
+            /** @description Used in the project filter: `/projects?tech=<slug>` */
+            slug: string;
+            iconUrl?: string;
+            projectCount: number;
+        };
+        TechnologyResponseDto: {
+            id: number;
+            name: string;
+            /** @description Used in the project filter: `/projects?tech=<slug>` */
+            slug: string;
+            iconUrl?: string;
+            url?: string;
+            sortOrder: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateTechnologyDto: {
+            /** @description Display name, e.g. "TypeScript" */
+            name: string;
+            /** @description Icon for the pill (square works best; SVG ideal): an upload or an http(s) image URL */
+            iconUrl?: string;
+            /** @description Link to the technology's own site */
+            url?: string;
+            /** @description Lower numbers are listed first. Defaults to 0. */
+            sortOrder?: number;
+        };
+        UpdateTechnologyDto: {
+            /** @description Display name, e.g. "TypeScript" */
+            name?: string;
+            /** @description Icon for the pill (square works best; SVG ideal): an upload or an http(s) image URL */
+            iconUrl?: string;
+            /** @description Link to the technology's own site */
+            url?: string;
+            /** @description Lower numbers are listed first. Defaults to 0. */
+            sortOrder?: number;
         };
         ExperienceResponseDto: {
             /** @description What the role involved */
@@ -1742,6 +1864,15 @@ export interface operations {
                     "application/json": components["schemas"]["ProjectResponseDto"];
                 };
             };
+            /** @description Invalid fields or unknown technology ids */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
             /** @description Slug already used */
             409: {
                 headers: {
@@ -1914,6 +2045,43 @@ export interface operations {
             };
         };
     };
+    ProjectsPublicController_technologies: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TechnologyUsageDto"][];
+                };
+            };
+            /** @description Missing, invalid, revoked or under-scoped API token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Section disabled or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
     ProjectsPublicController_findOne: {
         parameters: {
             query?: never;
@@ -1944,6 +2112,157 @@ export interface operations {
             };
             /** @description Section disabled or item not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TechnologiesAdminController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TechnologyResponseDto"][];
+                };
+            };
+        };
+    };
+    TechnologiesAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateTechnologyDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TechnologyResponseDto"];
+                };
+            };
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Name already used */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TechnologiesAdminController_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TechnologyResponseDto"][];
+                };
+            };
+        };
+    };
+    TechnologiesAdminController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    TechnologiesAdminController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateTechnologyDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["TechnologyResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Name already used */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

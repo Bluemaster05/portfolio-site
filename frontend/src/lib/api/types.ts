@@ -16,6 +16,9 @@ export type ApiToken = Schemas['ApiTokenResponseDto'];
 export type ProjectMediaItem = Schemas['MediaItemDto'];
 export type MediaKind = Schemas['MediaKind'];
 export type ProjectMediaLayout = Schemas['ProjectMediaLayout'];
+export type Technology = Schemas['TechnologyResponseDto'];
+export type TechnologySummary = Schemas['TechnologySummaryDto'];
+export type TechnologyUsage = Schemas['TechnologyUsageDto'];
 export type ApiScope = Schemas['ApiScope'];
 
 export type SectionKey = keyof SectionToggles;
