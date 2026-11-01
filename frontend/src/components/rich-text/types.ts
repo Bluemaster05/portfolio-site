@@ -83,3 +83,20 @@ export type ImageAlign = 'left' | 'center';
 export function imageAlign(node: { attrs?: Record<string, unknown> }): ImageAlign {
   return node.attrs?.align === 'center' ? 'center' : 'left';
 }
+
+/** One image in an imageCarousel block. */
+export interface CarouselImageAttr {
+  src: string;
+  alt: string;
+}
+
+/** The images of an imageCarousel node, skipping malformed entries. */
+export function carouselImagesOf(node: { attrs?: Record<string, unknown> }): CarouselImageAttr[] {
+  const images = node.attrs?.images;
+  if (!Array.isArray(images)) return [];
+  return images
+    .filter(isRecord)
+    .flatMap((image) =>
+      typeof image.src === 'string' ? [{ src: image.src, alt: typeof image.alt === 'string' ? image.alt : '' }] : [],
+    );
+}

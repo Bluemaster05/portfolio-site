@@ -1,8 +1,10 @@
 import { Fragment, type ReactNode } from 'react';
-import { isImageSrc } from '@/lib/images';
+import { firstFrame, isImageSrc, isVideoSrc } from '@/lib/images';
 import { CodeBlock } from './CodeBlock';
 import { CodeTabs } from './CodeTabs';
+import { ImageCarousel } from '@/components/public/ImageCarousel';
 import {
+  carouselImagesOf,
   childrenOf,
   codeTabsOf,
   imageAlign,
@@ -71,6 +73,27 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
         // eslint-disable-next-line @next/next/no-img-element
         <img key={key} src={src} alt={stringAttr(node, 'alt') ?? ''} data-align={imageAlign(node)} loading="lazy" />
       );
+    }
+    case 'video': {
+      const src = stringAttr(node, 'src');
+      if (!isVideoSrc(src)) return null;
+      const title = stringAttr(node, 'title');
+      // Shows its first frame until played; never autoplays
+      return (
+        <video
+          key={key}
+          src={firstFrame(src)}
+          controls
+          playsInline
+          preload="metadata"
+          aria-label={title || 'Video'}
+          title={title || undefined}
+        />
+      );
+    }
+    case 'imageCarousel': {
+      const images = carouselImagesOf(node).flatMap(({ src, alt }) => (isImageSrc(src) ? [{ url: src, alt }] : []));
+      return <ImageCarousel key={key} images={images} />;
     }
     case 'text':
       return renderText(node, key);

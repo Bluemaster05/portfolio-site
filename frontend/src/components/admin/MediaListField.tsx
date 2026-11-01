@@ -16,6 +16,8 @@ interface MediaListFieldProps {
   label: string;
   /** Most items allowed, e.g. 1 for a single header */
   maxItems?: number;
+  /** Images only: no videos and no main-item marking (e.g. extra images, a carousel) */
+  imagesOnly?: boolean;
 }
 
 /**
@@ -23,7 +25,7 @@ interface MediaListFieldProps {
  * Several files can be uploaded at once. One image is the main image (the cover on cards and the
  * home page) and one video the main video (leads the project page); unmarked, the first of each.
  */
-export function MediaListField({ value, onChange, onUpload, label, maxItems }: MediaListFieldProps) {
+export function MediaListField({ value, onChange, onUpload, label, maxItems, imagesOnly = false }: MediaListFieldProps) {
   const [mode, setMode] = useState<SourceMode>('upload');
   const [urlDraft, setUrlDraft] = useState('');
   const [urlKind, setUrlKind] = useState<MediaItem['kind']>('image');
@@ -32,6 +34,8 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
   const [previewIndex, setPreviewIndex] = useState<number>();
   const inputRef = useRef<HTMLInputElement>(null);
   const single = maxItems === 1;
+  // Main images/videos only mean something for project media
+  const showMain = !single && !imagesOnly;
   const remaining = maxItems === undefined ? Infinity : Math.max(0, maxItems - value.length);
   const urlValid = urlKind === 'video' ? isVideoSrc(urlDraft) : isImageSrc(urlDraft);
   const mainImageIndex = mainIndexOf(value, 'image');
@@ -45,6 +49,10 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
     try {
       // One at a time keeps the order the admin picked and stops at the first failure
       for (const file of Array.from(files).slice(0, remaining)) {
+        if (imagesOnly && file.type.startsWith('video/')) {
+          setError('Only images can be added here.');
+          break;
+        }
         const url = await onUpload(file);
         // The server names files by their detected type, so the extension is trustworthy
         added.push({ kind: looksLikeVideo(url) ? 'video' : 'image', url, alt: '' });
@@ -60,7 +68,7 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
 
   function changeUrlDraft(url: string) {
     setUrlDraft(url);
-    if (url) setUrlKind(looksLikeVideo(url) ? 'video' : 'image');
+    if (url && !imagesOnly) setUrlKind(looksLikeVideo(url) ? 'video' : 'image');
   }
 
   function addUrl() {
@@ -106,7 +114,7 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
               <div className="grid min-w-48 flex-1 gap-1">
                 <span className="text-xs font-medium text-muted">
                   {item.kind === 'video' ? 'Video' : 'Image'}
-                  {!single && index === (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
+                  {showMain && index === (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
                     <span className="text-accent">
                       {item.kind === 'video' ? ' · Main video (leads the project page)' : ' · Main image (cover)'}
                     </span>
@@ -125,7 +133,7 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
                 />
               </div>
               <div className="flex gap-1">
-                {!single && index !== (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
+                {showMain && index !== (item.kind === 'video' ? mainVideoIndex : mainImageIndex) && (
                   <Button variant="ghost" onClick={() => makeMain(index)}>
                     {item.kind === 'video' ? 'Make main video' : 'Make main image'}
                   </Button>
@@ -171,20 +179,30 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
                 ref={inputRef}
                 type="file"
                 multiple={!single}
-                accept={`${IMAGE_ACCEPT},${VIDEO_ACCEPT}`}
+                accept={imagesOnly ? IMAGE_ACCEPT : `${IMAGE_ACCEPT},${VIDEO_ACCEPT}`}
                 aria-label={`Upload ${label}`}
                 onChange={(event) => void uploadFiles(event.target.files)}
                 className="sr-only"
               />
               <Button onClick={() => inputRef.current?.click()} disabled={uploading}>
-                {uploading ? 'Uploading…' : single ? 'Choose image or video' : 'Add images or videos'}
+                {uploading
+                  ? 'Uploading…'
+                  : imagesOnly
+                    ? single
+                      ? 'Choose image'
+                      : 'Add images'
+                    : single
+                      ? 'Choose image or video'
+                      : 'Add images or videos'}
               </Button>
               <span className="text-sm text-muted">
-                {single ? 'or drop a file here' : 'or drop files here · you can pick several'} · videos: MP4 or WebM
+                {single ? 'or drop a file here' : 'or drop files here · you can pick several'}
+                {!imagesOnly && ' · videos: MP4 or WebM'}
               </span>
             </div>
           ) : (
             <div className="flex flex-wrap gap-2">
+              {!imagesOnly && (
               <select
                 aria-label="Kind of media at this URL"
                 value={urlKind}
@@ -194,6 +212,7 @@ export function MediaListField({ value, onChange, onUpload, label, maxItems }: M
                 <option value="image">Image</option>
                 <option value="video">Video</option>
               </select>
+              )}
               <TextInput
                 type="url"
                 aria-label={`${label} URL`}

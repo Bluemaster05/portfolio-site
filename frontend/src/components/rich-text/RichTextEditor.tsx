@@ -5,12 +5,14 @@ import StarterKit from '@tiptap/starter-kit';
 import { Placeholder } from '@tiptap/extensions';
 import { useState, type ReactNode } from 'react';
 import type { UploadMedia } from '@/lib/admin/media';
-import { isImageSrc } from '@/lib/images';
+import { isImageSrc, isVideoSrc } from '@/lib/images';
 import { MediaSourceField } from '@/components/admin/MediaSourceField';
 import { Button, TextInput } from '@/components/admin/ui';
 import { AlignedImage } from './extensions/aligned-image';
 import { HighlightedCodeBlock } from './extensions/code-block/code-block';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
+import { ImageCarouselExtension } from './extensions/image-carousel/image-carousel';
+import { VideoExtension } from './extensions/video';
 import { imageAlign, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
 interface RichTextEditorProps {
@@ -39,6 +41,9 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
       HighlightedCodeBlock,
       Placeholder.configure({ placeholder: placeholder ?? 'Start writing…' }),
       CodeTabsExtension,
+      // The node view uploads carousel images itself
+      ImageCarouselExtension.configure({ onUpload }),
+      VideoExtension,
     ],
     content: toDoc(value),
     editorProps: {
@@ -63,7 +68,9 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
 }
 
 function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }) {
-  const [imagePanelOpen, setImagePanelOpen] = useState(false);
+  // At most one insert panel is open at a time
+  const [panel, setPanel] = useState<'image' | 'video'>();
+  const togglePanel = (name: 'image' | 'video') => setPanel((open) => (open === name ? undefined : name));
   const state = useEditorState({
     editor,
     selector: ({ editor: e }) => ({
@@ -97,7 +104,12 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
 
   function insertImage(src: string, alt: string, align: ImageAlign) {
     chain().insertContent({ type: 'image', attrs: { src, alt, align } }).run();
-    setImagePanelOpen(false);
+    setPanel(undefined);
+  }
+
+  function insertVideo(src: string, title: string) {
+    chain().insertContent({ type: 'video', attrs: { src, title } }).run();
+    setPanel(undefined);
   }
 
   return (
@@ -149,8 +161,17 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       >
         Code tabs
       </ToolButton>
-      <ToolButton label="Image" active={imagePanelOpen} onClick={() => setImagePanelOpen((open) => !open)}>
+      <ToolButton label="Image" active={panel === 'image'} onClick={() => togglePanel('image')}>
         Image
+      </ToolButton>
+      <ToolButton label="Video" active={panel === 'video'} onClick={() => togglePanel('video')}>
+        Video
+      </ToolButton>
+      <ToolButton
+        label="Image carousel"
+        onClick={() => chain().insertContent({ type: 'imageCarousel', attrs: { images: [] } }).run()}
+      >
+        Carousel
       </ToolButton>
       <ToolButton label="Divider" onClick={() => chain().setHorizontalRule().run()}>
         ―
@@ -171,9 +192,45 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
         </>
       )}
     </div>
-    {imagePanelOpen && (
-      <ImageInsertPanel onUpload={onUpload} onInsert={insertImage} onCancel={() => setImagePanelOpen(false)} />
+    {panel === 'image' && (
+      <ImageInsertPanel onUpload={onUpload} onInsert={insertImage} onCancel={() => setPanel(undefined)} />
     )}
+    {panel === 'video' && (
+      <VideoInsertPanel onUpload={onUpload} onInsert={insertVideo} onCancel={() => setPanel(undefined)} />
+    )}
+    </div>
+  );
+}
+
+/** Choose a video (upload by default, or URL; MP4 or WebM) and its description, then insert it. */
+function VideoInsertPanel({
+  onUpload,
+  onInsert,
+  onCancel,
+}: {
+  onUpload: UploadMedia;
+  onInsert: (src: string, title: string) => void;
+  onCancel: () => void;
+}) {
+  const [src, setSrc] = useState('');
+  const [title, setTitle] = useState('');
+
+  return (
+    // Capped so a stuck panel never hides the write-up it's inserting into
+    <div className="grid max-h-[60dvh] gap-3 overflow-y-auto border-b border-border bg-background px-4 py-3">
+      <MediaSourceField label="Video" kind="video" value={src} onChange={setSrc} onUpload={onUpload} />
+      <TextInput
+        aria-label="Video description"
+        placeholder="Describe the video for screen readers"
+        value={title}
+        onChange={(event) => setTitle(event.target.value)}
+      />
+      <div className="flex gap-2">
+        <Button variant="primary" disabled={!isVideoSrc(src)} onClick={() => onInsert(src, title.trim())}>
+          Insert video
+        </Button>
+        <Button onClick={onCancel}>Cancel</Button>
+      </div>
     </div>
   );
 }

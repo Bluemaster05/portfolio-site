@@ -39,6 +39,8 @@ validate every node. The renderer ignores node types it does not know.
 | marks: bold, italic, strike, code, underline, link | StarterKit / Link | Inline HTML; links limited to `http(s)`, `mailto`, relative |
 | codeBlock                     | `@tiptap/extension-code-block`, extended in `extensions/code-block` (language field) | Shiki-highlighted `<pre>` in `attrs.language`; none or unknown → plain text |
 | image                         | `@tiptap/extension-image`, extended in `extensions/aligned-image.ts` | `<img>` with alt text; uploaded `/media/…` or `http(s)` sources only; `align` attr `left` (default, also for older images) or `center`, output as `data-align` |
+| **video** (custom)           | `frontend/src/components/rich-text/extensions/video.ts` | `<video controls>` showing its first frame (never autoplays); `attrs.src` (upload or `http(s)` MP4/WebM) and `attrs.title` (description for screen readers); inserted from the editor's Video panel |
+| **imageCarousel** (custom)   | `frontend/src/components/rich-text/extensions/image-carousel` | `ImageCarousel`: one image at a time, centered between faded neighbours, arrows/keys to move (400ms slide, off under reduced motion); `attrs.images` = `{ src, alt }[]`. In the editor the block is compact (thumbnails + count) until Edit |
 | **codeTabs** (custom)         | `frontend/src/components/rich-text/extensions/code-tabs` | Tabs of Shiki-highlighted snippets; tab switching is the only client JS |
 
 ## Syntax colors

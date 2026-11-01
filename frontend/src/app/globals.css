@@ -165,10 +165,42 @@ body {
   margin: 2em 0;
 }
 
+/* Blocks with their own UI (code tabs, image carousels) opt out of prose list and link styling */
+.prose .not-prose ul,
+.prose .not-prose ol {
+  list-style: none;
+  padding-left: 0;
+}
+
+.prose .not-prose li + li {
+  margin-top: 0;
+}
+
+.prose .not-prose a {
+  color: inherit;
+  text-decoration: none;
+}
+
+/* Unlayered .prose img (height: auto) would otherwise beat the block's own utility classes and
+   let tall images overflow, e.g. in a carousel frame; revert to those classes */
+.prose .not-prose img {
+  max-width: revert-layer;
+  height: revert-layer;
+  border-radius: revert-layer;
+}
+
 .prose img {
   border-radius: var(--radius);
   max-width: 100%;
   height: auto;
+}
+
+/* Videos in write-ups (and the editor) fill the text column like images */
+.prose video {
+  width: 100%;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: #000;
 }
 
 /* Images are block-level (Tailwind preflight); data-align comes from the image node's align attr */
