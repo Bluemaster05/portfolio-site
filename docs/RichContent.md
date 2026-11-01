@@ -38,7 +38,7 @@ validate every node. The renderer ignores node types it does not know.
 | paragraph, heading (h2–h4), blockquote, bulletList, orderedList, listItem, horizontalRule, hardBreak | TipTap StarterKit | Semantic HTML |
 | marks: bold, italic, strike, code, underline, link | StarterKit / Link | Inline HTML; links limited to `http(s)`, `mailto`, relative |
 | codeBlock                     | StarterKit                   | Shiki-highlighted `<pre>`                          |
-| image                         | `@tiptap/extension-image`    | `<img>` with alt text; uploaded `/media/…` or `http(s)` sources only |
+| image                         | `@tiptap/extension-image`, extended in `extensions/aligned-image.ts` | `<img>` with alt text; uploaded `/media/…` or `http(s)` sources only; `align` attr `left` (default, also for older images) or `center`, output as `data-align` |
 | **codeTabs** (custom)         | `frontend/src/components/rich-text/extensions/code-tabs` | Tabs of Shiki-highlighted snippets; tab switching is the only client JS |
 
 ## Adding a new block type

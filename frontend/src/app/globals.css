@@ -171,6 +171,17 @@ body {
   height: auto;
 }
 
+/* Images are block-level (Tailwind preflight); data-align comes from the image node's align attr */
+.prose img[data-align="center"] {
+  margin-inline: auto;
+}
+
+/* The selected image in the editor, so it's clear what the alignment buttons apply to */
+.rich-text-editor .ProseMirror img.ProseMirror-selectednode {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 .prose :not(pre) > code {
   font-family: var(--font-geist-mono), ui-monospace, monospace;
   font-size: 0.875em;

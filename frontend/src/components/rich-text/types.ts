@@ -76,3 +76,10 @@ export function safeHref(href: string | undefined): string | undefined {
   if (/^(https?:|mailto:)/i.test(href) || href.startsWith('/') || href.startsWith('#')) return href;
   return undefined;
 }
+
+/** Where an image sits in the text column. Images saved before alignment existed are left-aligned. */
+export type ImageAlign = 'left' | 'center';
+
+export function imageAlign(node: { attrs?: Record<string, unknown> }): ImageAlign {
+  return node.attrs?.align === 'center' ? 'center' : 'left';
+}

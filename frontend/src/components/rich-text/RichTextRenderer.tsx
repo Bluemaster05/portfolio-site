@@ -5,6 +5,7 @@ import { CodeTabs } from './CodeTabs';
 import {
   childrenOf,
   codeTabsOf,
+  imageAlign,
   numberAttr,
   safeHref,
   stringAttr,
@@ -66,8 +67,10 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
       const src = stringAttr(node, 'src');
       if (!isImageSrc(src)) return null;
       // Stored images can be uploads or live on any host, so next/image's allow-list doesn't fit
-      // eslint-disable-next-line @next/next/no-img-element
-      return <img key={key} src={src} alt={stringAttr(node, 'alt') ?? ''} loading="lazy" />;
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img key={key} src={src} alt={stringAttr(node, 'alt') ?? ''} data-align={imageAlign(node)} loading="lazy" />
+      );
     }
     case 'text':
       return renderText(node, key);

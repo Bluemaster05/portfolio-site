@@ -2,15 +2,15 @@
 
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
-import Image from '@tiptap/extension-image';
 import { Placeholder } from '@tiptap/extensions';
 import { useState, type ReactNode } from 'react';
 import type { UploadMedia } from '@/lib/admin/media';
 import { isImageSrc } from '@/lib/images';
 import { MediaSourceField } from '@/components/admin/MediaSourceField';
 import { Button, TextInput } from '@/components/admin/ui';
+import { AlignedImage } from './extensions/aligned-image';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
-import { safeHref, toDoc, type RichTextValue } from './types';
+import { imageAlign, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
 interface RichTextEditorProps {
   value: unknown;
@@ -32,7 +32,7 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
         heading: { levels: [2, 3, 4] },
         link: { openOnClick: false, autolink: true, protocols: ['http', 'https', 'mailto'] },
       }),
-      Image,
+      AlignedImage,
       Placeholder.configure({ placeholder: placeholder ?? 'Start writing…' }),
       CodeTabsExtension,
     ],
@@ -75,6 +75,8 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       orderedList: e.isActive('orderedList'),
       blockquote: e.isActive('blockquote'),
       codeBlock: e.isActive('codeBlock'),
+      image: e.isActive('image'),
+      imageAlign: imageAlign({ attrs: e.getAttributes('image') }),
     }),
   });
 
@@ -89,8 +91,8 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
     if (href) chain().extendMarkRange('link').setLink({ href }).run();
   }
 
-  function insertImage(src: string, alt: string) {
-    chain().setImage({ src, alt }).run();
+  function insertImage(src: string, alt: string, align: ImageAlign) {
+    chain().insertContent({ type: 'image', attrs: { src, alt, align } }).run();
     setImagePanelOpen(false);
   }
 
@@ -148,6 +150,21 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       <ToolButton label="Divider" onClick={() => chain().setHorizontalRule().run()}>
         ―
       </ToolButton>
+      {state.image && (
+        <>
+          <Divider />
+          {IMAGE_ALIGNS.map(({ value, label }) => (
+            <ToolButton
+              key={value}
+              label={`Align image ${value}`}
+              active={state.imageAlign === value}
+              onClick={() => chain().updateAttributes('image', { align: value }).run()}
+            >
+              {label}
+            </ToolButton>
+          ))}
+        </>
+      )}
     </div>
     {imagePanelOpen && (
       <ImageInsertPanel onUpload={onUpload} onInsert={insertImage} onCancel={() => setImagePanelOpen(false)} />
@@ -156,18 +173,24 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
   );
 }
 
-/** Choose an image (upload by default, or URL) and its alt text, then insert it. */
+const IMAGE_ALIGNS: { value: ImageAlign; label: string }[] = [
+  { value: 'left', label: 'Left' },
+  { value: 'center', label: 'Center' },
+];
+
+/** Choose an image (upload by default, or URL), its alt text and alignment, then insert it. */
 function ImageInsertPanel({
   onUpload,
   onInsert,
   onCancel,
 }: {
   onUpload: UploadMedia;
-  onInsert: (src: string, alt: string) => void;
+  onInsert: (src: string, alt: string, align: ImageAlign) => void;
   onCancel: () => void;
 }) {
   const [src, setSrc] = useState('');
   const [alt, setAlt] = useState('');
+  const [align, setAlign] = useState<ImageAlign>('left');
 
   return (
     <div className="grid gap-3 border-b border-border bg-background px-4 py-3">
@@ -178,8 +201,27 @@ function ImageInsertPanel({
         value={alt}
         onChange={(event) => setAlt(event.target.value)}
       />
+      <fieldset className="flex items-center gap-4 text-sm">
+        <legend className="sr-only">Alignment</legend>
+        <span aria-hidden="true" className="text-muted">
+          Alignment
+        </span>
+        {IMAGE_ALIGNS.map(({ value, label }) => (
+          <label key={value} className="flex items-center gap-1.5">
+            <input
+              type="radio"
+              name="image-align"
+              value={value}
+              checked={align === value}
+              onChange={() => setAlign(value)}
+              className="accent-accent"
+            />
+            {label}
+          </label>
+        ))}
+      </fieldset>
       <div className="flex gap-2">
-        <Button variant="primary" disabled={!isImageSrc(src)} onClick={() => onInsert(src, alt.trim())}>
+        <Button variant="primary" disabled={!isImageSrc(src)} onClick={() => onInsert(src, alt.trim(), align)}>
           Insert image
         </Button>
         <Button onClick={onCancel}>Cancel</Button>
