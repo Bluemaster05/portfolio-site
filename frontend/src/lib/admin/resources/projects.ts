@@ -76,8 +76,8 @@ export const projectsResource: ContentResource<Project> = {
           : 'Tiles follow this order. The main video (or the main image if there is no video) is shown large first; the main image is the cover on cards and the home page.',
     },
     { name: 'content', label: 'Write-up', kind: 'richtext', tab: 'Write-up' },
-    { name: 'featured', label: 'Feature on the home page', kind: 'checkbox' },
-    { name: 'published', label: 'Published', kind: 'checkbox' },
+    { name: 'featured', label: 'Feature on the home page', kind: 'checkbox', tab: 'Details' },
+    { name: 'published', label: 'Published', kind: 'checkbox', tab: 'Details' },
   ],
   describe: (project) => ({ title: project.title, subtitle: project.summary || undefined }),
   toValues: (project) => ({

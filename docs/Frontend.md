@@ -58,8 +58,8 @@ resource's `fields`, `toValues`, and `toBody` (TypeScript flags any mismatch wit
 
 Long editors can be split into tabs by giving fields a `tab` label (projects use Details,
 Technologies, Images & videos, Write-up). Tabs show in the order their first field is listed;
-fields without a `tab`, such as the Featured/Published checkboxes, form one more group below the
-tabs.
+fields without a `tab` form one more group below the tabs. Checkboxes (e.g. Featured/Published,
+on the project Details tab) come after a tab's other fields.
 
 When editing, each group is its own form. Save and Cancel appear (stuck to the bottom of the
 window) only once that group differs from what was last saved, and a dot marks tabs with unsaved
