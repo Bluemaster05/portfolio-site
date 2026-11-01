@@ -8,7 +8,7 @@ interface SiteFooterProps {
 
 export function SiteFooter({ ownerName, links, contactEmail }: SiteFooterProps) {
   return (
-    <footer className="mt-24 border-t border-border">
+    <footer className="mt-16 border-t border-border">
       <div className="mx-auto flex max-w-5xl flex-wrap items-center justify-between gap-4 px-5 py-8 text-sm text-muted">
         <p>{ownerName}</p>
         <ul className="flex flex-wrap gap-x-5 gap-y-1">

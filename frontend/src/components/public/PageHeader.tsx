@@ -2,8 +2,8 @@ import type { ReactNode } from 'react';
 
 export function PageHeader({ title, children }: { title: string; children?: ReactNode }) {
   return (
-    <header className="mb-12 animate-fade-up">
-      <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{title}</h1>
+    <header className="mb-8 animate-fade-up">
+      <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
       {children && <div className="mt-3 max-w-[70ch] text-lg text-muted">{children}</div>}
     </header>
   );

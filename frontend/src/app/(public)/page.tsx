@@ -22,7 +22,7 @@ export default async function HomePage() {
   const featured = site.sections.projects ? await getProjects(true) : [];
 
   return (
-    <div className="grid gap-20">
+    <div className="grid gap-14">
       <section aria-labelledby="intro" className="animate-fade-up">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           {isImageSrc(site.avatarUrl) && (

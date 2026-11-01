@@ -15,13 +15,13 @@ export function ProjectMedia({ layout, images }: ProjectMediaProps) {
   if (layout === 'single' || shown.length === 1) {
     const [image] = shown;
     return (
-      <figure className="mb-10">
+      <figure className="mb-8">
         {/* Uploads and external hosts both appear here, so next/image's allow-list doesn't fit */}
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
           src={image.url}
           alt={image.alt ?? ''}
-          className="max-h-[32rem] w-full rounded-card border border-border bg-surface object-cover"
+          className="max-h-[min(40vh,22rem)] w-auto max-w-full rounded-card border border-border bg-surface object-contain"
         />
       </figure>
     );

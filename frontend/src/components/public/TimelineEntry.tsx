@@ -30,5 +30,5 @@ export function TimelineEntry({ title, subtitle, meta, description, footer }: Ti
 }
 
 export function Timeline({ children }: { children: ReactNode }) {
-  return <div className="grid gap-10">{children}</div>;
+  return <div className="grid gap-8">{children}</div>;
 }

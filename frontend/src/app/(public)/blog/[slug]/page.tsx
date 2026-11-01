@@ -37,8 +37,8 @@ async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'para
       <Link href="/blog" className="text-sm text-muted hover:text-foreground">
         ← All posts
       </Link>
-      <header className="mb-10 mt-4 grid max-w-[70ch] gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{post.title}</h1>
+      <header className="mb-6 mt-3 grid max-w-[70ch] gap-2">
+        <h1 className="text-3xl font-semibold tracking-tight">{post.title}</h1>
         {post.publishedAt && (
           <p className="text-muted">
             <time dateTime={post.publishedAt}>{formatDate(post.publishedAt)}</time>
@@ -52,7 +52,7 @@ async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'para
         <img
           src={post.coverImageUrl}
           alt=""
-          className="mb-10 max-h-[28rem] w-full rounded-card border border-border bg-surface object-cover"
+          className="mb-8 max-h-[min(40vh,22rem)] w-full rounded-card border border-border bg-surface object-cover"
         />
       )}
       <RichTextRenderer doc={post.content} />

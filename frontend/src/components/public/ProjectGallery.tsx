@@ -12,15 +12,15 @@ export function ProjectGallery({ images }: { images: ProjectImage[] }) {
   const main = images[selected] ?? images[0];
 
   return (
-    <section aria-label="Project images" className="mb-10 grid gap-3">
+    <section aria-label="Project images" className="mb-8 grid gap-2">
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         key={main.url}
         src={main.url}
         alt={main.alt ?? ''}
-        className="aspect-video w-full rounded-card border border-border bg-surface object-contain animate-fade-up"
+        className="h-[min(36vh,20rem)] w-full rounded-card border border-border bg-surface object-contain animate-fade-up"
       />
-      <ul className="grid grid-cols-3 gap-3 sm:grid-cols-5">
+      <ul className="grid max-w-xl grid-cols-5 gap-2">
         {images.map((image, index) => (
           <li key={`${image.url}-${index}`}>
             <button

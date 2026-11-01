@@ -39,22 +39,24 @@ async function ProjectDetails({ params }: Pick<PageProps<'/projects/[slug]'>, 'p
       <Link href="/projects" className="text-sm text-muted hover:text-foreground">
         ← All projects
       </Link>
-      <header className="mb-10 mt-4 grid gap-3">
-        <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl">{project.title}</h1>
+      <header className="mb-6 mt-3 grid gap-2">
+        <h1 className="text-3xl font-semibold tracking-tight">{project.title}</h1>
         {dates && <p className="text-muted">{dates}</p>}
         {project.summary && <p className="max-w-[70ch] text-lg text-muted">{project.summary}</p>}
-        <TagList tags={project.technologies} label="Technologies" />
-        {links.length > 0 && (
-          <ul className="flex gap-5">
-            {links.map((link) => (
-              <li key={link.href}>
-                <a href={link.href} className="text-accent underline underline-offset-4" rel="noopener noreferrer">
-                  {link.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        )}
+        <div className="mt-1 flex flex-wrap items-center gap-x-6 gap-y-2">
+          <TagList tags={project.technologies} label="Technologies" />
+          {links.length > 0 && (
+            <ul className="flex gap-5">
+              {links.map((link) => (
+                <li key={link.href}>
+                  <a href={link.href} className="text-accent underline underline-offset-4" rel="noopener noreferrer">
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
       </header>
       <ProjectMedia layout={project.mediaLayout} images={project.images} />
       <RichTextRenderer doc={project.content} />

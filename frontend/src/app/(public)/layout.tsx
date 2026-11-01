@@ -27,7 +27,7 @@ export default async function PublicLayout({ children }: LayoutProps<'/'>) {
         Skip to content
       </a>
       <SiteHeader ownerName={ownerName} sections={enabledSections(site?.sections)} />
-      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-5 pt-14">
+      <main id="main" className="mx-auto w-full max-w-5xl flex-1 px-5 pt-8 sm:pt-10">
         {children}
       </main>
       <SiteFooter ownerName={ownerName} links={site?.links ?? []} contactEmail={site?.contactEmail} />

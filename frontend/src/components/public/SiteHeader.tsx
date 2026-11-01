@@ -15,7 +15,7 @@ export function SiteHeader({ ownerName, sections }: SiteHeaderProps) {
     <header className="border-b border-border">
       <nav
         aria-label="Main"
-        className="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-5 py-5"
+        className="mx-auto flex max-w-5xl flex-wrap items-baseline justify-between gap-x-8 gap-y-2 px-5 py-4"
       >
         <Link href="/" className="font-semibold tracking-tight">
           {ownerName}
