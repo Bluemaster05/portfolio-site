@@ -13,6 +13,7 @@ import { Education } from './education/entities/education.entity.js';
 import { Honor } from './honors/entities/honor.entity.js';
 import { BlogPost } from './blog/entities/blog-post.entity.js';
 import { MediaAsset } from './media/entities/media-asset.entity.js';
+import { Technology } from './technologies/entities/technology.entity.js';
 
 export default defineConfig({
   metadataProvider: ReflectMetadataProvider,
@@ -32,6 +33,7 @@ export default defineConfig({
     Honor,
     BlogPost,
     MediaAsset,
+    Technology,
   ],
   extensions: [Migrator, SeedManager],
   migrations: {

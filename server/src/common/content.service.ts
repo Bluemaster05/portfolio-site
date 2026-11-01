@@ -2,6 +2,7 @@ import { ConflictException, NotFoundException } from '@nestjs/common';
 import {
   UniqueConstraintViolationException,
   type FilterQuery,
+  type FindOptions,
   type QueryOrderMap,
 } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
@@ -27,15 +28,23 @@ export abstract class ContentService<T extends ContentItem> {
   /** Column -> direction, applied in turn; columns must exist on the entity */
   protected readonly orderBy: Record<string, 'asc' | 'desc'>[] = [{ sortOrder: 'asc' }, { id: 'desc' }];
 
+  /** Relations loaded with every item, e.g. ['technologies']; must be relations of the entity */
+  protected readonly populate: string[] = [];
+
   constructor(protected readonly em: EntityManager) {}
 
   private get order(): QueryOrderMap<T>[] {
     return this.orderBy as unknown as QueryOrderMap<T>[];
   }
 
+  /** Same reason as forEntity: relation paths can't be checked against an unresolved T. */
+  private get relations(): FindOptions<T>['populate'] {
+    return this.populate as unknown as FindOptions<T>['populate'];
+  }
+
   /** Every item, drafts included, for the admin portal. */
   findAll(): Promise<T[]> {
-    return this.em.find(this.entity, {}, { orderBy: this.order });
+    return this.em.find(this.entity, {}, { orderBy: this.order, populate: this.relations });
   }
 
   /** Published items in display order, for the public site. */
@@ -43,36 +52,41 @@ export abstract class ContentService<T extends ContentItem> {
     return this.em.find(
       this.entity,
       { $and: [where, forEntity<T>({ published: true })] },
-      { orderBy: this.order },
+      { orderBy: this.order, populate: this.relations },
     );
   }
 
   async findPublishedOne(where: FilterQuery<T>): Promise<T> {
-    const item = await this.em.findOne(this.entity, {
-      $and: [where, forEntity<T>({ published: true })],
-    });
+    const item = await this.em.findOne(
+      this.entity,
+      { $and: [where, forEntity<T>({ published: true })] },
+      { populate: this.relations },
+    );
     if (!item) throw new NotFoundException(`${this.label} not found`);
     return item;
   }
 
   async findOne(id: number): Promise<T> {
-    const item = await this.em.findOne(this.entity, forEntity<T>({ id }));
+    const item = await this.em.findOne(this.entity, forEntity<T>({ id }), { populate: this.relations });
     if (!item) throw new NotFoundException(`${this.label} not found`);
     return item;
   }
 
-  async create(data: Partial<T>): Promise<T> {
+  /** `apply` runs before the flush, e.g. to set relations the plain data can't express. */
+  async create(data: Partial<T>, apply?: (item: T) => Promise<void>): Promise<T> {
     const item = Object.assign(new this.entity(), definedOnly(data));
     this.beforeSave(item);
     this.em.persist(item);
+    await apply?.(item);
     await this.flush();
     return item;
   }
 
-  async update(id: number, data: Partial<T>): Promise<T> {
+  async update(id: number, data: Partial<T>, apply?: (item: T) => Promise<void>): Promise<T> {
     const item = await this.findOne(id);
     Object.assign(item, definedOnly(data));
     this.beforeSave(item);
+    await apply?.(item);
     await this.flush();
     return item;
   }

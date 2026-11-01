@@ -12,6 +12,7 @@ import { EducationModule } from './education/education.module.js';
 import { HonorsModule } from './honors/honors.module.js';
 import { BlogModule } from './blog/blog.module.js';
 import { MediaModule } from './media/media.module.js';
+import { TechnologiesModule } from './technologies/technologies.module.js';
 import { HealthController } from './health/health.controller.js';
 
 @Module({
@@ -28,6 +29,7 @@ import { HealthController } from './health/health.controller.js';
     HonorsModule,
     BlogModule,
     MediaModule,
+    TechnologiesModule,
   ],
   controllers: [HealthController],
 })
