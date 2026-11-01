@@ -13,6 +13,8 @@ export interface ProjectMediaItem {
   kind: 'image' | 'video';
   url: string;
   alt?: string;
+  /** Main image (cover) or main video (leads the project page) */
+  main?: boolean;
 }
 
 @Entity()
@@ -46,8 +48,8 @@ export class Project extends ContentItem {
   mediaLayout: ProjectMediaLayout & Opt = ProjectMediaLayout.None;
 
   /**
-   * Images and videos in display order. The first item is the header (single) or the large main
-   * item (gallery); the first image is the cover on cards and the home page.
+   * Images and videos in gallery order. The main video, else the main image, leads the project
+   * page; the main image is the cover on cards and the home page. Unmarked: first of each kind.
    */
   @Property({ type: 'json' })
   media: ProjectMediaItem[] & Opt = [];

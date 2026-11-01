@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIn, IsOptional, IsString, MaxLength } from 'class-validator';
+import { IsBoolean, IsIn, IsOptional, IsString, MaxLength, registerDecorator } from 'class-validator';
 import { IsMediaSourceFor } from '../validators/is-media-source.js';
 
 export const MEDIA_KINDS = ['image', 'video'] as const;
@@ -21,4 +21,32 @@ export class MediaItemDto {
   @IsString()
   @MaxLength(300)
   alt?: string;
+
+  /**
+   * The main item of its kind: the main image is the cover on cards and the home page; the main
+   * video leads the project page. Without one, the first item of that kind is used.
+   */
+  @IsOptional()
+  @IsBoolean()
+  main?: boolean;
+}
+
+/** A media list may mark at most one main image and one main video. */
+export function HasOneMainPerKind(): PropertyDecorator {
+  return (object, propertyName) => {
+    registerDecorator({
+      name: 'hasOneMainPerKind',
+      target: object.constructor,
+      propertyName: String(propertyName),
+      options: { message: '$property may mark at most one main image and one main video' },
+      validator: {
+        validate: (value: unknown) => {
+          if (!Array.isArray(value)) return true;
+          return MEDIA_KINDS.every(
+            (kind) => value.filter((item: Partial<MediaItemDto>) => item?.kind === kind && item.main).length <= 1,
+          );
+        },
+      },
+    });
+  };
 }

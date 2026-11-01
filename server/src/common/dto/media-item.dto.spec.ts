@@ -1,6 +1,6 @@
 import { plainToInstance } from 'class-transformer';
 import { validateSync } from 'class-validator';
-import { MediaItemDto } from './media-item.dto.js';
+import { HasOneMainPerKind, MediaItemDto } from './media-item.dto.js';
 
 const errorsFor = (item: object) => validateSync(plainToInstance(MediaItemDto, item)).map((error) => error.property);
 
@@ -12,6 +12,16 @@ describe('MediaItemDto', () => {
     expect(errorsFor({ kind: 'image', url: image })).toEqual([]);
     expect(errorsFor({ kind: 'video', url: video })).toEqual([]);
     expect(errorsFor({ kind: 'video', url: 'https://example.com/clip.mp4' })).toEqual([]);
+  });
+
+  it('allows one main image and one main video, not two of a kind', () => {
+    class List {
+      @HasOneMainPerKind()
+      media!: object[];
+    }
+    const list = (media: object[]) => validateSync(Object.assign(new List(), { media })).length;
+    expect(list([{ kind: 'image', main: true }, { kind: 'video', main: true }, { kind: 'image' }])).toBe(0);
+    expect(list([{ kind: 'image', main: true }, { kind: 'image', main: true }])).toBe(1);
   });
 
   it('refuses an upload of the other kind, unknown kinds, and unsafe URLs', () => {

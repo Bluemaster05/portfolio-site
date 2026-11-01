@@ -12,7 +12,7 @@ import {
   ValidateNested,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { MediaItemDto } from '../../common/dto/media-item.dto.js';
+import { HasOneMainPerKind, MediaItemDto } from '../../common/dto/media-item.dto.js';
 import { ProjectMediaLayout } from '../entities/project.entity.js';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
@@ -69,12 +69,13 @@ export class CreateProjectDto extends ContentItemFieldsDto {
   mediaLayout?: ProjectMediaLayout;
 
   /**
-   * Images and videos in display order. The first item is the main one on the project page (single
-   * layout shows only it); cards and the home page use the first image.
+   * Images and videos in gallery order (single layout shows only the first). The main video, else
+   * the main image, leads the project page; cards and the home page use the main image.
    */
   @IsOptional()
   @IsArray()
   @ArrayMaxSize(30)
+  @HasOneMainPerKind()
   @ValidateNested({ each: true })
   @Type(() => MediaItemDto)
   media?: MediaItemDto[];
@@ -112,7 +113,7 @@ export class ProjectResponseDto extends ContentItemResponseDto {
   @ApiProperty({ enum: ProjectMediaLayout, enumName: 'ProjectMediaLayout' })
   mediaLayout!: ProjectMediaLayout;
 
-  /** Images and videos in display order; the first is the main item on the project page */
+  /** Images and videos in gallery order; see `main` on each item */
   media!: MediaItemDto[];
   startDate?: string;
   endDate?: string;

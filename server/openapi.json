@@ -2712,6 +2712,10 @@
             "type": "string",
             "description": "Alternative text for an image, or a short description of a video",
             "maxLength": 300
+          },
+          "main": {
+            "type": "boolean",
+            "description": "The main item of its kind: the main image is the cover on cards and the home page; the main\nvideo leads the project page. Without one, the first item of that kind is used."
           }
         },
         "required": [
@@ -2756,7 +2760,7 @@
             "type": "string"
           },
           "media": {
-            "description": "Images and videos in display order; the first is the main item on the project page",
+            "description": "Images and videos in gallery order; see `main` on each item",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MediaItemDto"
@@ -2879,7 +2883,7 @@
             "maxLength": 2048
           },
           "media": {
-            "description": "Images and videos in display order. The first item is the main one on the project page (single\nlayout shows only it); cards and the home page use the first image.",
+            "description": "Images and videos in gallery order (single layout shows only the first). The main video, else\nthe main image, leads the project page; cards and the home page use the main image.",
             "maxItems": 30,
             "type": "array",
             "items": {
@@ -3005,7 +3009,7 @@
             "maxLength": 2048
           },
           "media": {
-            "description": "Images and videos in display order. The first item is the main one on the project page (single\nlayout shows only it); cards and the home page use the first image.",
+            "description": "Images and videos in gallery order (single layout shows only the first). The main video, else\nthe main image, leads the project page; cards and the home page use the main image.",
             "maxItems": 30,
             "type": "array",
             "items": {
@@ -3067,7 +3071,7 @@
             "type": "string"
           },
           "media": {
-            "description": "Images and videos in display order; the first is the main item on the project page",
+            "description": "Images and videos in gallery order; see `main` on each item",
             "type": "array",
             "items": {
               "$ref": "#/components/schemas/MediaItemDto"
