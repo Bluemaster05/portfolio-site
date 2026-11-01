@@ -58,9 +58,17 @@ resource's `fields`, `toValues`, and `toBody` (TypeScript flags any mismatch wit
 
 Long editors can be split into tabs by giving fields a `tab` label (projects use Details,
 Technologies, Images & videos, Write-up). Tabs show in the order their first field is listed;
-fields without a `tab`, such as the Featured/Published checkboxes, stay below the tabs next to
-Save. All panels stay mounted, and if a required or malformed field on a hidden tab blocks the
-save, the editor switches to that tab so the browser can point at it.
+fields without a `tab`, such as the Featured/Published checkboxes, form one more group below the
+tabs.
+
+When editing, each group is its own form. Save and Cancel appear (stuck to the bottom of the
+window) only once that group differs from what was last saved, and a dot marks tabs with unsaved
+changes. Saving a group sends the last-saved values plus that group's edits, so edits on other tabs
+stay pending for their own Save; Cancel puts the group back to its last-saved values. Edits survive
+switching tabs because the form keeps one set of values and every panel stays mounted.
+
+When creating, the tabs are one form with a single Create button. If a required or malformed field
+on a hidden tab blocks it, the editor switches to that tab so the browser can point at it.
 
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
