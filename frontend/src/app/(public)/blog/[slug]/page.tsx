@@ -6,6 +6,7 @@ import { getBlogPost } from '@/lib/api/public-data';
 import { formatDate } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { TagList } from '@/components/public/PageHeader';
+import { isImageSrc } from '@/lib/images';
 
 export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promise<Metadata> {
   const { slug } = await props.params;
@@ -45,6 +46,15 @@ async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'para
         )}
         <TagList tags={post.tags} label="Tags" />
       </header>
+      {isImageSrc(post.coverImageUrl) && (
+        // Decorative: the title already says what the post is about
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={post.coverImageUrl}
+          alt=""
+          className="mb-10 max-h-[28rem] w-full rounded-card border border-border bg-surface object-cover"
+        />
+      )}
       <RichTextRenderer doc={post.content} />
     </article>
   );

@@ -4,6 +4,7 @@ import { getProjects, getSite } from '@/lib/api/public-data';
 import { enabledSections } from '@/lib/sections';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { isEmptyDoc } from '@/components/rich-text/types';
+import { isImageSrc } from '@/lib/images';
 import { ProjectGrid } from '@/components/public/ProjectCard';
 import { EmptyState } from '@/components/public/PageHeader';
 
@@ -23,11 +24,23 @@ export default async function HomePage() {
   return (
     <div className="grid gap-20">
       <section aria-labelledby="intro" className="animate-fade-up">
-        <h1 id="intro" className="text-4xl font-semibold tracking-tight sm:text-5xl">
-          {site.ownerName}
-        </h1>
-        {site.headline && <p className="mt-3 text-xl text-muted">{site.headline}</p>}
-        {site.location && <p className="mt-1 text-muted">{site.location}</p>}
+        <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
+          {isImageSrc(site.avatarUrl) && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={site.avatarUrl}
+              alt={`Photo of ${site.ownerName}`}
+              className="size-28 shrink-0 rounded-full border border-border bg-surface object-cover sm:size-32"
+            />
+          )}
+          <div>
+            <h1 id="intro" className="text-4xl font-semibold tracking-tight sm:text-5xl">
+              {site.ownerName}
+            </h1>
+            {site.headline && <p className="mt-3 text-xl text-muted">{site.headline}</p>}
+            {site.location && <p className="mt-1 text-muted">{site.location}</p>}
+          </div>
+        </div>
         {!isEmptyDoc(site.bio) && <RichTextRenderer doc={site.bio} className="mt-8 text-lg" />}
       </section>
 

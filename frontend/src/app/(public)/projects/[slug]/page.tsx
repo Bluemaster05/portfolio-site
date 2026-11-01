@@ -6,6 +6,7 @@ import { getProject } from '@/lib/api/public-data';
 import { formatDateRange } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { TagList } from '@/components/public/PageHeader';
+import { ProjectMedia } from '@/components/public/ProjectMedia';
 
 export async function generateMetadata(props: PageProps<'/projects/[slug]'>): Promise<Metadata> {
   const { slug } = await props.params;
@@ -55,6 +56,7 @@ async function ProjectDetails({ params }: Pick<PageProps<'/projects/[slug]'>, 'p
           </ul>
         )}
       </header>
+      <ProjectMedia layout={project.mediaLayout} images={project.images} />
       <RichTextRenderer doc={project.content} />
     </article>
   );

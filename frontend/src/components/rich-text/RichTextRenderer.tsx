@@ -1,4 +1,5 @@
 import { Fragment, type ReactNode } from 'react';
+import { isImageSrc } from '@/lib/images';
 import { CodeBlock } from './CodeBlock';
 import { CodeTabs } from './CodeTabs';
 import {
@@ -63,8 +64,8 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
       return <CodeTabs key={key} tabs={codeTabsOf(node)} />;
     case 'image': {
       const src = stringAttr(node, 'src');
-      if (!src || !/^https?:\/\//i.test(src)) return null;
-      // Stored images can live on any host, so next/image's allow-list doesn't fit here
+      if (!isImageSrc(src)) return null;
+      // Stored images can be uploads or live on any host, so next/image's allow-list doesn't fit
       // eslint-disable-next-line @next/next/no-img-element
       return <img key={key} src={src} alt={stringAttr(node, 'alt') ?? ''} loading="lazy" />;
     }
