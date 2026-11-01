@@ -32,6 +32,8 @@ export interface FieldConfig {
   visibleWhen?: (values: FormValues) => boolean;
   /** Most items a `media` field accepts for the current form values */
   maxItemsFor?: (values: FormValues) => number | undefined;
+  /** `media` fields: images only, without main-item marking */
+  imagesOnly?: boolean;
   /** Overrides `help` from the current form values, e.g. to explain the chosen layout */
   helpFor?: (values: FormValues) => string | undefined;
   /**
@@ -60,6 +62,14 @@ export interface ContentResource<Item extends ContentItemBase> {
   describe(item: Item): { title: string; subtitle?: string };
   /** Lists items under groups (e.g. jobs under their employer); items move only within their group */
   grouping?: ContentGrouping<Item>;
+  /**
+   * One item can be featured on the home page, toggled from the list (featuring one unfeatures the
+   * rest on the server; unfeaturing leaves none)
+   */
+  featuring?: {
+    isFeatured(item: Item): boolean;
+    setFeatured(id: number, featured: boolean): Promise<Item>;
+  };
   toValues(item?: Item): FormValues;
   api: {
     list(): Promise<Item[]>;

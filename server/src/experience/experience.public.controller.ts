@@ -1,5 +1,5 @@
-import { Controller, Get, Param } from '@nestjs/common';
-import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiTags } from '@nestjs/swagger';
+import { Controller, Get, Param, ParseBoolPipe, Query } from '@nestjs/common';
+import { ApiNotFoundResponse, ApiOkResponse, ApiOperation, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { ExperienceService } from './experience.service.js';
 import { ExperienceGroupDto, ExperienceResponseDto } from './dto/experience.dto.js';
 import { ApiTokenAuth } from '../common/decorators/api-token-auth.decorator.js';
@@ -16,9 +16,17 @@ export class ExperiencePublicController {
 
   @Get()
   @ApiOperation({ summary: 'Published jobs grouped by employer, in display order' })
+  @ApiQuery({
+    name: 'featured',
+    required: false,
+    type: Boolean,
+    description: 'Only the featured job (at most one), in its employer group',
+  })
   @ApiOkResponse({ type: [ExperienceGroupDto] })
-  findAll(): Promise<ExperienceGroupDto[]> {
-    return this.experienceService.publishedByEmployer();
+  findAll(
+    @Query('featured', new ParseBoolPipe({ optional: true })) featured?: boolean,
+  ): Promise<ExperienceGroupDto[]> {
+    return this.experienceService.publishedByEmployer(featured ?? false);
   }
 
   @Get(':slug')

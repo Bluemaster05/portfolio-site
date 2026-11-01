@@ -1383,7 +1383,17 @@
     "/api/public/experience": {
       "get": {
         "operationId": "ExperiencePublicController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Only the featured job (at most one), in its employer group",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -1959,7 +1969,17 @@
     "/api/public/education": {
       "get": {
         "operationId": "EducationPublicController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Only the featured entry (at most one)",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -1968,7 +1988,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/EducationResponseDto"
+                    "$ref": "#/components/schemas/EducationSummaryDto"
                   }
                 }
               }
@@ -2000,7 +2020,63 @@
             "api-key": []
           }
         ],
-        "summary": "Published education entries in display order",
+        "summary": "Published education entries in display order, without write-ups",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/public/education/{slug}": {
+      "get": {
+        "operationId": "EducationPublicController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EducationResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "A published education entry by slug, with its write-up",
         "tags": [
           "public"
         ]
@@ -2251,7 +2327,17 @@
     "/api/public/honors": {
       "get": {
         "operationId": "HonorsPublicController_findAll",
-        "parameters": [],
+        "parameters": [
+          {
+            "name": "featured",
+            "required": false,
+            "in": "query",
+            "description": "Only the featured honor (at most one)",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
         "responses": {
           "200": {
             "description": "",
@@ -2260,7 +2346,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/HonorResponseDto"
+                    "$ref": "#/components/schemas/HonorSummaryDto"
                   }
                 }
               }
@@ -2292,7 +2378,63 @@
             "api-key": []
           }
         ],
-        "summary": "Published honors in display order",
+        "summary": "Published honors in display order, without write-ups",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/public/honors/{slug}": {
+      "get": {
+        "operationId": "HonorsPublicController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HonorResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "A published honor by slug, with its write-up",
         "tags": [
           "public"
         ]
@@ -3930,6 +4072,10 @@
               "$ref": "#/components/schemas/TechnologySummaryDto"
             }
           },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page (at most one job)"
+          },
           "id": {
             "type": "number"
           },
@@ -3957,6 +4103,7 @@
           "startDate",
           "skills",
           "technologies",
+          "featured",
           "id",
           "published",
           "sortOrder",
@@ -4058,6 +4205,10 @@
             "items": {
               "type": "number"
             }
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show on the home page; featuring this job unfeatures any other"
           },
           "published": {
             "type": "boolean",
@@ -4180,6 +4331,10 @@
             "items": {
               "type": "number"
             }
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show on the home page; featuring this job unfeatures any other"
           }
         }
       },
@@ -4224,6 +4379,10 @@
               "$ref": "#/components/schemas/TechnologySummaryDto"
             }
           },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page (at most one job)"
+          },
           "id": {
             "type": "number"
           },
@@ -4250,6 +4409,7 @@
           "startDate",
           "skills",
           "technologies",
+          "featured",
           "id",
           "published",
           "sortOrder",
@@ -4378,13 +4538,21 @@
         "properties": {
           "description": {
             "type": "object",
-            "description": "Coursework, activities, thesis, …",
+            "description": "Short summary: coursework, activities, thesis, …",
+            "additionalProperties": true
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the entry’s own page",
             "additionalProperties": true
           },
           "institution": {
             "type": "string"
           },
           "degree": {
+            "type": "string"
+          },
+          "slug": {
             "type": "string"
           },
           "fieldOfStudy": {
@@ -4404,6 +4572,10 @@
           },
           "grade": {
             "type": "string"
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page (at most one entry)"
           },
           "id": {
             "type": "number"
@@ -4425,8 +4597,11 @@
         },
         "required": [
           "description",
+          "writeup",
           "institution",
           "degree",
+          "slug",
+          "featured",
           "id",
           "published",
           "sortOrder",
@@ -4451,7 +4626,26 @@
           },
           "description": {
             "type": "object",
-            "description": "Coursework, activities, thesis, …",
+            "description": "Short summary: coursework, activities, thesis, …",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the entry’s own page",
             "additionalProperties": true,
             "example": {
               "type": "doc",
@@ -4479,6 +4673,12 @@
             "minLength": 1,
             "maxLength": 200
           },
+          "slug": {
+            "type": "string",
+            "description": "URL segment for /education/[slug]; empty to generate from the degree and institution",
+            "maxLength": 120,
+            "pattern": "^([a-z0-9]+(-[a-z0-9]+)*)?$"
+          },
           "fieldOfStudy": {
             "type": "string",
             "description": "e.g. \"Minor in Mathematics\"",
@@ -4496,6 +4696,10 @@
             "type": "string",
             "description": "e.g. \"3.9 GPA\", \"First Class Honours\"",
             "maxLength": 100
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show on the home page; featuring this entry unfeatures any other"
           },
           "published": {
             "type": "boolean",
@@ -4530,7 +4734,26 @@
           },
           "description": {
             "type": "object",
-            "description": "Coursework, activities, thesis, …",
+            "description": "Short summary: coursework, activities, thesis, …",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the entry’s own page",
             "additionalProperties": true,
             "example": {
               "type": "doc",
@@ -4568,6 +4791,12 @@
             "minLength": 1,
             "maxLength": 200
           },
+          "slug": {
+            "type": "string",
+            "description": "URL segment for /education/[slug]; empty to generate from the degree and institution",
+            "maxLength": 120,
+            "pattern": "^([a-z0-9]+(-[a-z0-9]+)*)?$"
+          },
           "fieldOfStudy": {
             "type": "string",
             "description": "e.g. \"Minor in Mathematics\"",
@@ -4585,28 +4814,51 @@
             "type": "string",
             "description": "e.g. \"3.9 GPA\", \"First Class Honours\"",
             "maxLength": 100
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show on the home page; featuring this entry unfeatures any other"
           }
         }
       },
-      "HonorResponseDto": {
+      "EducationSummaryDto": {
         "type": "object",
         "properties": {
           "description": {
             "type": "object",
-            "description": "What it was for",
+            "description": "Short summary: coursework, activities, thesis, …",
             "additionalProperties": true
           },
-          "title": {
+          "institution": {
             "type": "string"
           },
-          "issuer": {
+          "degree": {
             "type": "string"
           },
-          "date": {
+          "slug": {
+            "type": "string"
+          },
+          "fieldOfStudy": {
+            "type": "string"
+          },
+          "location": {
             "type": "string"
           },
           "url": {
             "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "grade": {
+            "type": "string"
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page (at most one entry)"
           },
           "id": {
             "type": "number"
@@ -4628,7 +4880,105 @@
         },
         "required": [
           "description",
+          "institution",
+          "degree",
+          "slug",
+          "featured",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ImageItemDto": {
+        "type": "object",
+        "properties": {
+          "url": {
+            "type": "string",
+            "description": "Upload (`/media/<key>`) or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "alt": {
+            "type": "string",
+            "description": "Alternative text for the image",
+            "maxLength": 300
+          }
+        },
+        "required": [
+          "url"
+        ]
+      },
+      "HonorResponseDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "object",
+            "description": "Short summary of what it was for",
+            "additionalProperties": true
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the honor’s own page",
+            "additionalProperties": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "imageAlt": {
+            "type": "string"
+          },
+          "images": {
+            "description": "More images, in carousel order",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageItemDto"
+            }
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page (at most one honor)"
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "writeup",
           "title",
+          "slug",
+          "images",
+          "featured",
           "id",
           "published",
           "sortOrder",
@@ -4647,7 +4997,26 @@
           },
           "description": {
             "type": "object",
-            "description": "What it was for",
+            "description": "Short summary of what it was for",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the honor’s own page",
             "additionalProperties": true,
             "example": {
               "type": "doc",
@@ -4669,6 +5038,12 @@
             "minLength": 1,
             "maxLength": 200
           },
+          "slug": {
+            "type": "string",
+            "description": "URL segment for /honors/[slug]; empty to generate from the title and issuer",
+            "maxLength": 120,
+            "pattern": "^([a-z0-9]+(-[a-z0-9]+)*)?$"
+          },
           "issuer": {
             "type": "string",
             "description": "Who awarded it",
@@ -4678,6 +5053,28 @@
             "type": "string",
             "description": "Link to a certificate or announcement",
             "maxLength": 2048
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Main image (e.g. the award or certificate): an upload or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "imageAlt": {
+            "type": "string",
+            "description": "Describes the main image for screen readers; the title is used when empty",
+            "maxLength": 300
+          },
+          "images": {
+            "description": "More images, in carousel order, shown on the honor's page",
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageItemDto"
+            }
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show on the home page; featuring this honor unfeatures any other"
           },
           "published": {
             "type": "boolean",
@@ -4705,7 +5102,26 @@
           },
           "description": {
             "type": "object",
-            "description": "What it was for",
+            "description": "Short summary of what it was for",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the honor’s own page",
             "additionalProperties": true,
             "example": {
               "type": "doc",
@@ -4737,6 +5153,12 @@
             "minLength": 1,
             "maxLength": 200
           },
+          "slug": {
+            "type": "string",
+            "description": "URL segment for /honors/[slug]; empty to generate from the title and issuer",
+            "maxLength": 120,
+            "pattern": "^([a-z0-9]+(-[a-z0-9]+)*)?$"
+          },
           "issuer": {
             "type": "string",
             "description": "Who awarded it",
@@ -4746,8 +5168,101 @@
             "type": "string",
             "description": "Link to a certificate or announcement",
             "maxLength": 2048
+          },
+          "imageUrl": {
+            "type": "string",
+            "description": "Main image (e.g. the award or certificate): an upload or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "imageAlt": {
+            "type": "string",
+            "description": "Describes the main image for screen readers; the title is used when empty",
+            "maxLength": 300
+          },
+          "images": {
+            "description": "More images, in carousel order, shown on the honor's page",
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageItemDto"
+            }
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Show on the home page; featuring this honor unfeatures any other"
           }
         }
+      },
+      "HonorSummaryDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "object",
+            "description": "Short summary of what it was for",
+            "additionalProperties": true
+          },
+          "title": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "issuer": {
+            "type": "string"
+          },
+          "date": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "imageUrl": {
+            "type": "string"
+          },
+          "imageAlt": {
+            "type": "string"
+          },
+          "images": {
+            "description": "More images, in carousel order",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ImageItemDto"
+            }
+          },
+          "featured": {
+            "type": "boolean",
+            "description": "Shown on the home page (at most one honor)"
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "title",
+          "slug",
+          "images",
+          "featured",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
       },
       "BlogPostResponseDto": {
         "type": "object",

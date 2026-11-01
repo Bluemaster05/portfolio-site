@@ -553,8 +553,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Published education entries in display order */
+        /** Published education entries in display order, without write-ups */
         get: operations["EducationPublicController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/education/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A published education entry by slug, with its write-up */
+        get: operations["EducationPublicController_findOne"];
         put?: never;
         post?: never;
         delete?: never;
@@ -624,8 +641,25 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Published honors in display order */
+        /** Published honors in display order, without write-ups */
         get: operations["HonorsPublicController_findAll"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/public/honors/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A published honor by slug, with its write-up */
+        get: operations["HonorsPublicController_findOne"];
         put?: never;
         post?: never;
         delete?: never;
@@ -1164,6 +1198,8 @@ export interface components {
             endDate?: string;
             skills: string[];
             technologies: components["schemas"]["TechnologySummaryDto"][];
+            /** @description Shown on the home page (at most one job) */
+            featured: boolean;
             id: number;
             published: boolean;
             sortOrder: number;
@@ -1236,6 +1272,8 @@ export interface components {
             skills?: string[];
             /** @description Technology ids, in display order */
             technologyIds?: number[];
+            /** @description Show on the home page; featuring this job unfeatures any other */
+            featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
@@ -1309,6 +1347,8 @@ export interface components {
             skills?: string[];
             /** @description Technology ids, in display order */
             technologyIds?: number[];
+            /** @description Show on the home page; featuring this job unfeatures any other */
+            featured?: boolean;
         };
         ExperienceSummaryDto: {
             /** @description Short summary of the role */
@@ -1324,6 +1364,8 @@ export interface components {
             endDate?: string;
             skills: string[];
             technologies: components["schemas"]["TechnologySummaryDto"][];
+            /** @description Shown on the home page (at most one job) */
+            featured: boolean;
             id: number;
             published: boolean;
             sortOrder: number;
@@ -1371,18 +1413,25 @@ export interface components {
             sortOrder?: number;
         };
         EducationResponseDto: {
-            /** @description Coursework, activities, thesis, … */
+            /** @description Short summary: coursework, activities, thesis, … */
             description: {
+                [key: string]: unknown;
+            };
+            /** @description Longer write-up, shown only on the entry’s own page */
+            writeup: {
                 [key: string]: unknown;
             };
             institution: string;
             degree: string;
+            slug: string;
             fieldOfStudy?: string;
             location?: string;
             url?: string;
             startDate?: string;
             endDate?: string;
             grade?: string;
+            /** @description Shown on the home page (at most one entry) */
+            featured: boolean;
             id: number;
             published: boolean;
             sortOrder: number;
@@ -1403,7 +1452,7 @@ export interface components {
              */
             endDate?: string;
             /**
-             * @description Coursework, activities, thesis, …
+             * @description Short summary: coursework, activities, thesis, …
              * @example {
              *       "type": "doc",
              *       "content": [
@@ -1422,15 +1471,39 @@ export interface components {
             description?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description Longer write-up, shown only on the entry’s own page
+             * @example {
+             *       "type": "doc",
+             *       "content": [
+             *         {
+             *           "type": "paragraph",
+             *           "content": [
+             *             {
+             *               "type": "text",
+             *               "text": "Hello"
+             *             }
+             *           ]
+             *         }
+             *       ]
+             *     }
+             */
+            writeup?: {
+                [key: string]: unknown;
+            };
             institution: string;
             /** @description e.g. "B.S. Computer Science" */
             degree: string;
+            /** @description URL segment for /education/[slug]; empty to generate from the degree and institution */
+            slug?: string;
             /** @description e.g. "Minor in Mathematics" */
             fieldOfStudy?: string;
             location?: string;
             url?: string;
             /** @description e.g. "3.9 GPA", "First Class Honours" */
             grade?: string;
+            /** @description Show on the home page; featuring this entry unfeatures any other */
+            featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
@@ -1448,7 +1521,7 @@ export interface components {
              */
             endDate?: string;
             /**
-             * @description Coursework, activities, thesis, …
+             * @description Short summary: coursework, activities, thesis, …
              * @example {
              *       "type": "doc",
              *       "content": [
@@ -1467,6 +1540,26 @@ export interface components {
             description?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description Longer write-up, shown only on the entry’s own page
+             * @example {
+             *       "type": "doc",
+             *       "content": [
+             *         {
+             *           "type": "paragraph",
+             *           "content": [
+             *             {
+             *               "type": "text",
+             *               "text": "Hello"
+             *             }
+             *           ]
+             *         }
+             *       ]
+             *     }
+             */
+            writeup?: {
+                [key: string]: unknown;
+            };
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
@@ -1474,22 +1567,67 @@ export interface components {
             institution?: string;
             /** @description e.g. "B.S. Computer Science" */
             degree?: string;
+            /** @description URL segment for /education/[slug]; empty to generate from the degree and institution */
+            slug?: string;
             /** @description e.g. "Minor in Mathematics" */
             fieldOfStudy?: string;
             location?: string;
             url?: string;
             /** @description e.g. "3.9 GPA", "First Class Honours" */
             grade?: string;
+            /** @description Show on the home page; featuring this entry unfeatures any other */
+            featured?: boolean;
         };
-        HonorResponseDto: {
-            /** @description What it was for */
+        EducationSummaryDto: {
+            /** @description Short summary: coursework, activities, thesis, … */
             description: {
                 [key: string]: unknown;
             };
+            institution: string;
+            degree: string;
+            slug: string;
+            fieldOfStudy?: string;
+            location?: string;
+            url?: string;
+            startDate?: string;
+            endDate?: string;
+            grade?: string;
+            /** @description Shown on the home page (at most one entry) */
+            featured: boolean;
+            id: number;
+            published: boolean;
+            sortOrder: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ImageItemDto: {
+            /** @description Upload (`/media/<key>`) or an http(s) image URL */
+            url: string;
+            /** @description Alternative text for the image */
+            alt?: string;
+        };
+        HonorResponseDto: {
+            /** @description Short summary of what it was for */
+            description: {
+                [key: string]: unknown;
+            };
+            /** @description Longer write-up, shown only on the honor’s own page */
+            writeup: {
+                [key: string]: unknown;
+            };
             title: string;
+            slug: string;
             issuer?: string;
             date?: string;
             url?: string;
+            imageUrl?: string;
+            imageAlt?: string;
+            /** @description More images, in carousel order */
+            images: components["schemas"]["ImageItemDto"][];
+            /** @description Shown on the home page (at most one honor) */
+            featured: boolean;
             id: number;
             published: boolean;
             sortOrder: number;
@@ -1505,7 +1643,7 @@ export interface components {
              */
             date?: string;
             /**
-             * @description What it was for
+             * @description Short summary of what it was for
              * @example {
              *       "type": "doc",
              *       "content": [
@@ -1524,11 +1662,41 @@ export interface components {
             description?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description Longer write-up, shown only on the honor’s own page
+             * @example {
+             *       "type": "doc",
+             *       "content": [
+             *         {
+             *           "type": "paragraph",
+             *           "content": [
+             *             {
+             *               "type": "text",
+             *               "text": "Hello"
+             *             }
+             *           ]
+             *         }
+             *       ]
+             *     }
+             */
+            writeup?: {
+                [key: string]: unknown;
+            };
             title: string;
+            /** @description URL segment for /honors/[slug]; empty to generate from the title and issuer */
+            slug?: string;
             /** @description Who awarded it */
             issuer?: string;
             /** @description Link to a certificate or announcement */
             url?: string;
+            /** @description Main image (e.g. the award or certificate): an upload or an http(s) image URL */
+            imageUrl?: string;
+            /** @description Describes the main image for screen readers; the title is used when empty */
+            imageAlt?: string;
+            /** @description More images, in carousel order, shown on the honor's page */
+            images?: components["schemas"]["ImageItemDto"][];
+            /** @description Show on the home page; featuring this honor unfeatures any other */
+            featured?: boolean;
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
@@ -1541,7 +1709,7 @@ export interface components {
              */
             date?: string;
             /**
-             * @description What it was for
+             * @description Short summary of what it was for
              * @example {
              *       "type": "doc",
              *       "content": [
@@ -1560,15 +1728,69 @@ export interface components {
             description?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description Longer write-up, shown only on the honor’s own page
+             * @example {
+             *       "type": "doc",
+             *       "content": [
+             *         {
+             *           "type": "paragraph",
+             *           "content": [
+             *             {
+             *               "type": "text",
+             *               "text": "Hello"
+             *             }
+             *           ]
+             *         }
+             *       ]
+             *     }
+             */
+            writeup?: {
+                [key: string]: unknown;
+            };
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
             sortOrder?: number;
             title?: string;
+            /** @description URL segment for /honors/[slug]; empty to generate from the title and issuer */
+            slug?: string;
             /** @description Who awarded it */
             issuer?: string;
             /** @description Link to a certificate or announcement */
             url?: string;
+            /** @description Main image (e.g. the award or certificate): an upload or an http(s) image URL */
+            imageUrl?: string;
+            /** @description Describes the main image for screen readers; the title is used when empty */
+            imageAlt?: string;
+            /** @description More images, in carousel order, shown on the honor's page */
+            images?: components["schemas"]["ImageItemDto"][];
+            /** @description Show on the home page; featuring this honor unfeatures any other */
+            featured?: boolean;
+        };
+        HonorSummaryDto: {
+            /** @description Short summary of what it was for */
+            description: {
+                [key: string]: unknown;
+            };
+            title: string;
+            slug: string;
+            issuer?: string;
+            date?: string;
+            url?: string;
+            imageUrl?: string;
+            imageAlt?: string;
+            /** @description More images, in carousel order */
+            images: components["schemas"]["ImageItemDto"][];
+            /** @description Shown on the home page (at most one honor) */
+            featured: boolean;
+            id: number;
+            published: boolean;
+            sortOrder: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
         };
         BlogPostResponseDto: {
             /** @description The post */
@@ -2653,7 +2875,10 @@ export interface operations {
     };
     ExperiencePublicController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Only the featured job (at most one), in its employer group */
+                featured?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3034,7 +3259,10 @@ export interface operations {
     };
     EducationPublicController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Only the featured entry (at most one) */
+                featured?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3046,7 +3274,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["EducationResponseDto"][];
+                    "application/json": components["schemas"]["EducationSummaryDto"][];
                 };
             };
             /** @description Missing, invalid, revoked or under-scoped API token */
@@ -3059,6 +3287,44 @@ export interface operations {
                 };
             };
             /** @description Section disabled or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EducationPublicController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EducationResponseDto"];
+                };
+            };
+            /** @description Missing, invalid, revoked or under-scoped API token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
             404: {
                 headers: {
                     [name: string]: unknown;
@@ -3225,7 +3491,10 @@ export interface operations {
     };
     HonorsPublicController_findAll: {
         parameters: {
-            query?: never;
+            query?: {
+                /** @description Only the featured honor (at most one) */
+                featured?: boolean;
+            };
             header?: never;
             path?: never;
             cookie?: never;
@@ -3237,7 +3506,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["HonorResponseDto"][];
+                    "application/json": components["schemas"]["HonorSummaryDto"][];
                 };
             };
             /** @description Missing, invalid, revoked or under-scoped API token */
@@ -3250,6 +3519,44 @@ export interface operations {
                 };
             };
             /** @description Section disabled or item not found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    HonorsPublicController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["HonorResponseDto"];
+                };
+            };
+            /** @description Missing, invalid, revoked or under-scoped API token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
             404: {
                 headers: {
                     [name: string]: unknown;

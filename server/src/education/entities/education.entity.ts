@@ -1,5 +1,5 @@
 import { type Opt } from '@mikro-orm/core';
-import { Entity, Property } from '@mikro-orm/decorators/legacy';
+import { Entity, Property, Unique } from '@mikro-orm/decorators/legacy';
 import { ContentItem } from '../../common/entities/content-item.entity.js';
 import { emptyDoc, type RichTextDoc } from '../../common/types/rich-text.js';
 
@@ -11,6 +11,11 @@ export class Education extends ContentItem {
   /** e.g. "B.S. Computer Science" */
   @Property({ length: 200 })
   degree!: string;
+
+  /** URL segment for /education/[slug] */
+  @Unique()
+  @Property({ length: 120 })
+  slug!: string;
 
   /** e.g. "Minor in Mathematics" */
   @Property({ length: 200, nullable: true })
@@ -33,6 +38,15 @@ export class Education extends ContentItem {
   @Property({ length: 100, nullable: true })
   grade?: string;
 
+  /** Shown on the home page; only one education entry can be featured at a time */
+  @Property()
+  featured: boolean & Opt = false;
+
+  /** Short summary, shown on the education page and at the top of the entry's own page */
   @Property({ type: 'json' })
   description: RichTextDoc & Opt = emptyDoc();
+
+  /** Longer write-up, shown only on the entry's own page */
+  @Property({ type: 'json' })
+  writeup: RichTextDoc & Opt = emptyDoc();
 }

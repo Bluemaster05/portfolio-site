@@ -72,13 +72,15 @@ export async function getProject(slug: string) {
 }
 
 /**
- * Published jobs grouped by employer. Entries in the older flat shape (an API or cached result from
- * before employers existed) are dropped instead of crashing the page.
+ * Published jobs grouped by employer; with `featured`, only the featured job in its group. Entries in
+ * the older flat shape (an API or cached result from before employers existed) are dropped instead
+ * of crashing the page.
  */
-export async function getExperience() {
+export async function getExperience(featured?: boolean) {
   'use cache';
   cachePublic();
-  const groups = (await safely(() => publicApi.GET('/api/public/experience'))) ?? [];
+  const groups =
+    (await safely(() => publicApi.GET('/api/public/experience', { params: { query: { featured } } }))) ?? [];
   return groups.filter((group) => group.employer !== undefined && Array.isArray(group.jobs));
 }
 
@@ -89,16 +91,33 @@ export async function getExperienceJob(slug: string) {
   return safely(() => publicApi.GET('/api/public/experience/{slug}', { params: { path: { slug } } }));
 }
 
-export async function getEducation() {
+/** Published education entries; with `featured`, only the featured one. */
+export async function getEducation(featured?: boolean) {
   'use cache';
   cachePublic();
-  return (await safely(() => publicApi.GET('/api/public/education'))) ?? [];
+  return (await safely(() => publicApi.GET('/api/public/education', { params: { query: { featured } } }))) ?? [];
 }
 
-export async function getHonors() {
+/** One published education entry, with its write-up. */
+export async function getEducationEntry(slug: string) {
   'use cache';
   cachePublic();
-  return (await safely(() => publicApi.GET('/api/public/honors'))) ?? [];
+  return safely(() => publicApi.GET('/api/public/education/{slug}', { params: { path: { slug } } }));
+}
+
+/** Published honors; with `featured`, only the featured one. */
+export async function getHonors(featured?: boolean) {
+  'use cache';
+  cachePublic();
+  return (await safely(() => publicApi.GET('/api/public/honors', { params: { query: { featured } } }))) ?? [];
+}
+
+/** One published honor, with its write-up. An older API (or cached result) without `images` gets none. */
+export async function getHonor(slug: string) {
+  'use cache';
+  cachePublic();
+  const honor = await safely(() => publicApi.GET('/api/public/honors/{slug}', { params: { path: { slug } } }));
+  return honor && { ...honor, images: honor.images ?? [] };
 }
 
 export async function getBlogPosts() {

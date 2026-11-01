@@ -10,6 +10,7 @@ function toBody(values: FormValues): components['schemas']['CreateEducationDto']
   return {
     institution: text(values, 'institution'),
     degree: text(values, 'degree'),
+    slug: text(values, 'slug'),
     fieldOfStudy: text(values, 'fieldOfStudy'),
     location: text(values, 'location'),
     url: text(values, 'url'),
@@ -17,6 +18,7 @@ function toBody(values: FormValues): components['schemas']['CreateEducationDto']
     endDate: text(values, 'endDate'),
     grade: text(values, 'grade'),
     description: richText(values, 'description'),
+    writeup: richText(values, 'writeup'),
     published: bool(values, 'published'),
   };
 }
@@ -26,17 +28,42 @@ export const educationResource: ContentResource<Education> = {
   label: 'Education',
   singular: 'education entry',
   fields: [
-    { name: 'degree', label: 'Degree', kind: 'text', required: true, placeholder: 'B.S. Computer Science' },
-    { name: 'institution', label: 'Institution', kind: 'text', required: true },
-    { name: 'fieldOfStudy', label: 'Field of study / minor', kind: 'text' },
-    { name: 'location', label: 'Location', kind: 'text' },
-    { name: 'startDate', label: 'Started', kind: 'date', help: DATE_HELP },
-    { name: 'endDate', label: 'Graduated', kind: 'date', help: 'Expected or actual' },
-    { name: 'grade', label: 'Grade', kind: 'text', placeholder: '3.9 GPA' },
-    { name: 'url', label: 'Institution URL', kind: 'url' },
-    { name: 'description', label: 'Description', kind: 'richtext' },
-    { name: 'published', label: 'Published', kind: 'checkbox' },
+    { name: 'degree', label: 'Degree', kind: 'text', required: true, placeholder: 'B.S. Computer Science', tab: 'Details' },
+    { name: 'institution', label: 'Institution', kind: 'text', required: true, tab: 'Details' },
+    {
+      name: 'slug',
+      label: 'URL slug',
+      kind: 'slug',
+      help: 'The entry’s page is /education/<slug>. Leave empty to generate from the degree and institution.',
+      tab: 'Details',
+    },
+    { name: 'fieldOfStudy', label: 'Field of study / minor', kind: 'text', tab: 'Details' },
+    { name: 'location', label: 'Location', kind: 'text', tab: 'Details' },
+    { name: 'startDate', label: 'Started', kind: 'date', help: DATE_HELP, tab: 'Details' },
+    { name: 'endDate', label: 'Graduated', kind: 'date', help: 'Expected or actual', tab: 'Details' },
+    { name: 'grade', label: 'Grade', kind: 'text', placeholder: '3.9 GPA', tab: 'Details' },
+    { name: 'url', label: 'Institution URL', kind: 'url', tab: 'Details' },
+    { name: 'published', label: 'Published', kind: 'checkbox', tab: 'Details' },
+    {
+      name: 'description',
+      label: 'Description',
+      kind: 'richtext',
+      help: 'A short summary, shown on the education page and at the top of the entry’s page.',
+      tab: 'Description',
+    },
+    {
+      name: 'writeup',
+      label: 'Write-up',
+      kind: 'richtext',
+      help: 'More detail and context, shown only on the entry’s own page.',
+      tab: 'Write-up',
+    },
   ],
+  featuring: {
+    isFeatured: (entry) => entry.featured,
+    setFeatured: async (id, featured) =>
+      unwrap(await adminClient.PATCH('/api/admin/education/{id}', { params: { path: { id } }, body: { featured } })),
+  },
   describe: (entry) => ({
     title: `${entry.degree} · ${entry.institution}`,
     subtitle: formatDateRange(entry.startDate, entry.endDate, 'Expected'),
@@ -44,6 +71,7 @@ export const educationResource: ContentResource<Education> = {
   toValues: (entry) => ({
     institution: entry?.institution ?? '',
     degree: entry?.degree ?? '',
+    slug: entry?.slug ?? '',
     fieldOfStudy: optional(entry?.fieldOfStudy),
     location: optional(entry?.location),
     url: optional(entry?.url),
@@ -51,6 +79,7 @@ export const educationResource: ContentResource<Education> = {
     endDate: optional(entry?.endDate),
     grade: optional(entry?.grade),
     description: entry?.description ?? { type: 'doc', content: [] },
+    writeup: entry?.writeup ?? { type: 'doc', content: [] },
     published: entry?.published ?? false,
   }),
   api: {

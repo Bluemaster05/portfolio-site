@@ -23,6 +23,14 @@ export function ContentListContainer<Item extends ContentItemBase>({ resource }:
     onSuccess: refresh,
   });
   const remove = useMutation({ mutationFn: resource.api.remove, onSuccess: refresh });
+  const { featuring } = resource;
+  const feature = useMutation({
+    mutationFn: async ({ id, featured }: { id: number; featured: boolean }) => {
+      await featuring?.setFeatured(id, featured);
+    },
+    // Featuring one unfeatures another on the server, so reload the whole list
+    onSuccess: refresh,
+  });
 
   // Grouped resources (jobs under employers) also load the groups in their display order
   const { grouping } = resource;
@@ -40,7 +48,12 @@ export function ContentListContainer<Item extends ContentItemBase>({ resource }:
     reorder.mutate(swapped((items.data ?? []).map((item) => item.id), index, direction));
   }
 
-  const rowOf = (item: Item) => ({ id: item.id, published: item.published, ...resource.describe(item) });
+  const rowOf = (item: Item) => ({
+    id: item.id,
+    published: item.published,
+    featured: featuring?.isFeatured(item),
+    ...resource.describe(item),
+  });
   // Only groups with items are listed; empty ones keep their place after them when reordering
   const groups: (ContentListGroup & { itemIds: number[] })[] = grouping
     ? (groupList.data ?? []).flatMap((group) => {
@@ -62,12 +75,14 @@ export function ContentListContainer<Item extends ContentItemBase>({ resource }:
     reorder.mutate(swapped(groups[groupIndex].itemIds, index, direction));
   }
 
-  const busy = reorder.isPending || reorderGroups.isPending || publish.isPending || remove.isPending;
+  const busy =
+    reorder.isPending || reorderGroups.isPending || publish.isPending || remove.isPending || feature.isPending;
   const listProps = {
     editHref: (id: number) => `/admin/${resource.key}/${id}`,
     singular: resource.singular,
     busy,
     onTogglePublished: (id: number, published: boolean) => publish.mutate({ id, published }),
+    onToggleFeatured: featuring ? (id: number, featured: boolean) => feature.mutate({ id, featured }) : undefined,
     onDelete: (id: number) => remove.mutate(id),
   };
 
@@ -83,7 +98,13 @@ export function ContentListContainer<Item extends ContentItemBase>({ resource }:
       />
       <ErrorBanner
         message={errorMessage(
-          items.error ?? groupList.error ?? reorder.error ?? reorderGroups.error ?? publish.error ?? remove.error,
+          items.error ??
+            groupList.error ??
+            reorder.error ??
+            reorderGroups.error ??
+            publish.error ??
+            feature.error ??
+            remove.error,
         )}
       />
       {items.isPending || (grouping && groupList.isPending) ? (

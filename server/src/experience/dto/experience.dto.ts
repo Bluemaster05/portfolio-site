@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { ArrayMaxSize, IsArray, IsInt, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
+import { ArrayMaxSize, IsArray, IsBoolean, IsInt, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsPartialDate } from '../../common/validators/is-partial-date.js';
@@ -69,6 +69,11 @@ export class CreateExperienceDto extends ContentItemFieldsDto {
   @ArrayMaxSize(30)
   @IsInt({ each: true })
   technologyIds?: number[];
+
+  /** Show on the home page; featuring this job unfeatures any other */
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
 }
 
 export class UpdateExperienceDto extends PartialType(CreateExperienceDto) {}
@@ -88,6 +93,8 @@ export class ExperienceSummaryDto extends ContentItemResponseDto {
 
   skills!: string[];
   technologies!: TechnologySummaryDto[];
+  /** Shown on the home page (at most one job) */
+  featured!: boolean;
 }
 
 export class ExperienceResponseDto extends ExperienceSummaryDto {

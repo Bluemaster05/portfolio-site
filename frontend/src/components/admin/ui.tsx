@@ -89,13 +89,15 @@ export function ErrorBanner({ message }: { message?: string }) {
   );
 }
 
-export function Badge({ tone, children }: { tone: 'success' | 'muted'; children: ReactNode }) {
+const BADGE_TONES = {
+  success: 'bg-accent-soft text-foreground',
+  muted: 'border border-border text-muted',
+  accent: 'bg-accent text-background',
+};
+
+export function Badge({ tone, children }: { tone: keyof typeof BADGE_TONES; children: ReactNode }) {
   return (
-    <span
-      className={`rounded-full px-2 py-0.5 text-xs font-medium ${
-        tone === 'success' ? 'bg-accent-soft text-foreground' : 'border border-border text-muted'
-      }`}
-    >
+    <span className={`rounded-full px-2 py-0.5 text-xs font-medium ${BADGE_TONES[tone]}`}>
       {children}
     </span>
   );

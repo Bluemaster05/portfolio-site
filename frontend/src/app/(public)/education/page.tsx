@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getEducation, isSectionEnabled } from '@/lib/api/public-data';
-import { formatDateRange } from '@/lib/format';
 import { EmptyState, PageHeader } from '@/components/public/PageHeader';
-import { Timeline, TimelineEntry } from '@/components/public/TimelineEntry';
+import { EducationCard } from '@/components/public/EducationCard';
 
 export const metadata: Metadata = { title: 'Education' };
 
@@ -17,30 +16,11 @@ export default async function EducationPage() {
       {entries.length === 0 ? (
         <EmptyState>No education listed yet.</EmptyState>
       ) : (
-        <Timeline>
+        <div className="grid gap-5">
           {entries.map((entry) => (
-            <TimelineEntry
-              key={entry.id}
-              title={entry.degree}
-              subtitle={
-                entry.url ? (
-                  <a href={entry.url} className="hover:underline" rel="noopener noreferrer">
-                    {entry.institution}
-                  </a>
-                ) : (
-                  entry.institution
-                )
-              }
-              meta={[
-                entry.fieldOfStudy,
-                formatDateRange(entry.startDate, entry.endDate, 'Expected'),
-                entry.grade,
-                entry.location,
-              ]}
-              description={entry.description}
-            />
+            <EducationCard key={entry.id} entry={entry} />
           ))}
-        </Timeline>
+        </div>
       )}
     </>
   );

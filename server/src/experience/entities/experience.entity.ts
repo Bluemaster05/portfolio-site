@@ -46,6 +46,10 @@ export class Experience extends ContentItem {
   @Property({ type: 'json' })
   skills: string[] & Opt = [];
 
+  /** Shown on the home page; only one job can be featured at a time */
+  @Property()
+  featured: boolean & Opt = false;
+
   /** Technologies used, in the order the admin picked */
   @ManyToMany(() => Technology, undefined, { fixedOrder: true })
   technologies = new Collection<Technology>(this);

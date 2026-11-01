@@ -89,6 +89,11 @@ export const experienceResource: ContentResource<Experience> = {
   ],
   // Listed under their employer, so the role alone is enough
   describe: (job) => ({ title: job.role, subtitle: formatDateRange(job.startDate, job.endDate) }),
+  featuring: {
+    isFeatured: (job) => job.featured,
+    setFeatured: async (id, featured) =>
+      unwrap(await adminClient.PATCH('/api/admin/experience/{id}', { params: { path: { id } }, body: { featured } })),
+  },
   grouping: {
     singular: 'employer',
     manageHref: '/admin/employers',

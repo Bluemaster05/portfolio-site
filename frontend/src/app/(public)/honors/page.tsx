@@ -1,9 +1,8 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { getHonors, isSectionEnabled } from '@/lib/api/public-data';
-import { formatPartialDate } from '@/lib/format';
 import { EmptyState, PageHeader } from '@/components/public/PageHeader';
-import { Timeline, TimelineEntry } from '@/components/public/TimelineEntry';
+import { HonorCard } from '@/components/public/HonorCard';
 
 export const metadata: Metadata = { title: 'Honors & Awards' };
 
@@ -17,24 +16,11 @@ export default async function HonorsPage() {
       {honors.length === 0 ? (
         <EmptyState>No honors listed yet.</EmptyState>
       ) : (
-        <Timeline>
+        <div className="grid gap-5">
           {honors.map((honor) => (
-            <TimelineEntry
-              key={honor.id}
-              title={honor.title}
-              subtitle={honor.issuer}
-              meta={[formatPartialDate(honor.date)]}
-              description={honor.description}
-              footer={
-                honor.url && (
-                  <a href={honor.url} className="text-sm text-accent underline underline-offset-4" rel="noopener noreferrer">
-                    View credential
-                  </a>
-                )
-              }
-            />
+            <HonorCard key={honor.id} honor={honor} />
           ))}
-        </Timeline>
+        </div>
       )}
     </>
   );

@@ -8,6 +8,8 @@ export interface ContentListRow {
   title: string;
   subtitle?: string;
   published: boolean;
+  /** On the home page; undefined when the content type can't be featured from the list */
+  featured?: boolean;
 }
 
 interface ContentListProps {
@@ -17,6 +19,8 @@ interface ContentListProps {
   busy: boolean;
   onMove: (index: number, direction: -1 | 1) => void;
   onTogglePublished: (id: number, published: boolean) => void;
+  /** Features or unfeatures an item on the home page (only one at a time; unfeaturing leaves none) */
+  onToggleFeatured?: (id: number, featured: boolean) => void;
   onDelete: (id: number) => void;
 }
 
@@ -151,6 +155,7 @@ function ContentRows({
   busy,
   onMove,
   onTogglePublished,
+  onToggleFeatured,
   onDelete,
 }: Omit<ContentListProps, 'singular'>) {
   return (
@@ -170,8 +175,19 @@ function ContentRows({
             </Link>
             {row.subtitle && <p className="truncate text-sm text-muted">{row.subtitle}</p>}
           </div>
+          {row.featured && <Badge tone="accent">On home page</Badge>}
           <Badge tone={row.published ? 'success' : 'muted'}>{row.published ? 'Published' : 'Draft'}</Badge>
           <div className="flex gap-1">
+            {onToggleFeatured && row.featured !== undefined && (
+              <Button
+                variant="ghost"
+                disabled={busy}
+                title={row.featured ? 'Remove from the home page' : 'Show on the home page instead of the current one'}
+                onClick={() => onToggleFeatured(row.id, !row.featured)}
+              >
+                {row.featured ? 'Unfeature' : 'Feature'}
+              </Button>
+            )}
             <Button variant="ghost" disabled={busy} onClick={() => onTogglePublished(row.id, !row.published)}>
               {row.published ? 'Unpublish' : 'Publish'}
             </Button>

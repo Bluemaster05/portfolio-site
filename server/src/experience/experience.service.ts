@@ -1,8 +1,8 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
-import { FlushMode } from '@mikro-orm/core';
 import { EntityManager } from '@mikro-orm/postgresql';
 import { ContentService } from '../common/content.service.js';
-import { slugify } from '../common/utils/slugify.js';
+import { uniqueSlug } from '../common/utils/unique-slug.js';
+import { featureOnly } from '../common/utils/feature-only.js';
 import { TechnologiesService } from '../technologies/technologies.service.js';
 import { EmployersService } from './employers.service.js';
 import { Employer } from './entities/employer.entity.js';
@@ -42,8 +42,8 @@ export class ExperienceService extends ContentService<Experience> {
    * Published jobs grouped by employer, in the same order as the admin's grouped list: employers
    * as EmployersService.ordered(), jobs in the service's order (manual, then newest first).
    */
-  async publishedByEmployer(): Promise<ExperienceGroupDto[]> {
-    const jobs = await this.findPublished();
+  async publishedByEmployer(featuredOnly = false): Promise<ExperienceGroupDto[]> {
+    const jobs = await this.findPublished(featuredOnly ? { featured: true } : {});
     return (await this.employersService.ordered()).flatMap(({ employer }) => {
       const employerJobs = jobs.filter((job) => job.employer.id === employer.id);
       return employerJobs.length
@@ -62,21 +62,7 @@ export class ExperienceService extends ContentService<Experience> {
     if (technologyIds !== undefined) {
       job.technologies.set(await this.technologiesService.findByIdsInOrder(technologyIds));
     }
-    if (!job.slug) job.slug = await this.uniqueSlug(job);
-  }
-
-  /** "role-employer", with -2, -3… if another job already uses it. */
-  private async uniqueSlug(job: Experience): Promise<string> {
-    const base = slugify(`${job.role} ${job.employer.name}`).slice(0, 110) || 'job';
-    // COMMIT: don't auto-flush the job being created, which has no slug yet
-    const others = await this.em.find(
-      Experience,
-      { slug: { $like: `${base}%` } },
-      { fields: ['slug'], flushMode: FlushMode.COMMIT },
-    );
-    const taken = new Set(others.filter((other) => other !== job).map((other) => other.slug));
-    let slug = base;
-    for (let suffix = 2; taken.has(slug); suffix++) slug = `${base}-${suffix}`;
-    return slug;
+    if (!job.slug) job.slug = await uniqueSlug(this.em, Experience, `${job.role} ${job.employer.name}`, job, 'job');
+    await featureOnly(this.em, Experience, job);
   }
 }

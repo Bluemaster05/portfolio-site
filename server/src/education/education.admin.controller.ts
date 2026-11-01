@@ -53,7 +53,7 @@ export class EducationAdminController {
   @ApiOperation({ summary: 'Create an education entry' })
   @ApiCreatedResponse({ type: EducationResponseDto })
   create(@Body() dto: CreateEducationDto): Promise<EducationResponseDto> {
-    return this.educationService.create(dto);
+    return this.educationService.createEntry(dto);
   }
 
   @Put('order')
@@ -71,7 +71,7 @@ export class EducationAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateEducationDto,
   ): Promise<EducationResponseDto> {
-    return this.educationService.update(id, dto);
+    return this.educationService.updateEntry(id, dto);
   }
 
   @Delete(':id')

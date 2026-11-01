@@ -27,6 +27,7 @@ export function toExperienceResponse(job: Experience): ExperienceResponseDto {
     description: job.description,
     writeup: job.writeup,
     skills: job.skills,
+    featured: job.featured,
     technologies: job.technologies.getItems().map(toTechnologySummary),
   };
 }

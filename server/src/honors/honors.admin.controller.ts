@@ -53,7 +53,7 @@ export class HonorsAdminController {
   @ApiOperation({ summary: 'Create an honor' })
   @ApiCreatedResponse({ type: HonorResponseDto })
   create(@Body() dto: CreateHonorDto): Promise<HonorResponseDto> {
-    return this.honorsService.create(dto);
+    return this.honorsService.createHonor(dto);
   }
 
   @Put('order')
@@ -71,7 +71,7 @@ export class HonorsAdminController {
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateHonorDto,
   ): Promise<HonorResponseDto> {
-    return this.honorsService.update(id, dto);
+    return this.honorsService.updateHonor(id, dto);
   }
 
   @Delete(':id')

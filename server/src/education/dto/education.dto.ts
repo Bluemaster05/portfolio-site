@@ -1,5 +1,5 @@
 import { ApiProperty, PartialType } from '@nestjs/swagger';
-import { IsOptional, IsString, Length, MaxLength } from 'class-validator';
+import { IsBoolean, IsOptional, IsString, Length, Matches, MaxLength } from 'class-validator';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsPartialDate } from '../../common/validators/is-partial-date.js';
@@ -17,6 +17,13 @@ export class CreateEducationDto extends ContentItemFieldsDto {
   @IsString()
   @Length(1, 200)
   degree!: string;
+
+  /** URL segment for /education/[slug]; empty to generate from the degree and institution */
+  @IsOptional()
+  @IsString()
+  @MaxLength(120)
+  @Matches(/^([a-z0-9]+(-[a-z0-9]+)*)?$/, { message: 'slug may only contain a-z, 0-9 and single dashes' })
+  slug?: string;
 
   /** e.g. "Minor in Mathematics" */
   @IsOptional()
@@ -55,22 +62,40 @@ export class CreateEducationDto extends ContentItemFieldsDto {
   grade?: string;
 
   @IsOptional()
-  @IsRichTextDoc('Coursework, activities, thesis, …', false)
+  @IsRichTextDoc('Short summary: coursework, activities, thesis, …', false)
   description?: RichTextDoc;
+
+  @IsOptional()
+  @IsRichTextDoc('Longer write-up, shown only on the entry’s own page', false)
+  writeup?: RichTextDoc;
+
+  /** Show on the home page; featuring this entry unfeatures any other */
+  @IsOptional()
+  @IsBoolean()
+  featured?: boolean;
 }
 
 export class UpdateEducationDto extends PartialType(CreateEducationDto) {}
 
-export class EducationResponseDto extends ContentItemResponseDto {
+/** An education entry without its write-up, for lists. */
+export class EducationSummaryDto extends ContentItemResponseDto {
   institution!: string;
   degree!: string;
+  slug!: string;
   fieldOfStudy?: string;
   location?: string;
   url?: string;
   startDate?: string;
   endDate?: string;
   grade?: string;
+  /** Shown on the home page (at most one entry) */
+  featured!: boolean;
 
-  @ApiProperty(richTextSchema('Coursework, activities, thesis, …'))
+  @ApiProperty(richTextSchema('Short summary: coursework, activities, thesis, …'))
   description!: RichTextDoc;
+}
+
+export class EducationResponseDto extends EducationSummaryDto {
+  @ApiProperty(richTextSchema('Longer write-up, shown only on the entry’s own page'))
+  writeup!: RichTextDoc;
 }
