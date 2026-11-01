@@ -11,6 +11,7 @@ export const ADMIN_NAV = [
   { href: '/admin/projects', label: 'Projects' },
   { href: '/admin/technologies', label: 'Technologies' },
   { href: '/admin/experience', label: 'Experience' },
+  { href: '/admin/employers', label: 'Employers' },
   { href: '/admin/education', label: 'Education' },
   { href: '/admin/honors', label: 'Honors & Awards' },
   { href: '/admin/blog', label: 'Blog' },

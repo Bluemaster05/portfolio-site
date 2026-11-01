@@ -3,55 +3,107 @@ import type { Experience } from '@/lib/api/types';
 import type { components } from '@/lib/api/schema';
 import { formatDateRange } from '@/lib/format';
 import { ensureOk, unwrap } from '../api-error';
-import { bool, list, optional, richText, text, type FormValues } from '../form-values';
+import { bool, ids, list, optional, richText, text, type FormValues } from '../form-values';
 import { DATE_HELP, type ContentResource } from './resource';
 
 function toBody(values: FormValues): components['schemas']['CreateExperienceDto'] {
   return {
-    organization: text(values, 'organization'),
+    employerId: Number(text(values, 'employerId')),
     role: text(values, 'role'),
+    slug: text(values, 'slug'),
     employmentType: text(values, 'employmentType'),
     location: text(values, 'location'),
-    url: text(values, 'url'),
     startDate: text(values, 'startDate'),
     endDate: text(values, 'endDate'),
     description: richText(values, 'description'),
+    writeup: richText(values, 'writeup'),
     skills: list(values, 'skills'),
+    technologyIds: ids(values, 'technologyIds'),
     published: bool(values, 'published'),
   };
 }
 
+const EMPTY_DOC = { type: 'doc', content: [] };
+
+/** Each experience entry is one job at an employer, with its own page at /experience/[slug]. */
 export const experienceResource: ContentResource<Experience> = {
   key: 'experience',
   label: 'Experience',
-  singular: 'experience entry',
+  singular: 'job',
   fields: [
-    { name: 'role', label: 'Role / job title', kind: 'text', required: true },
-    { name: 'organization', label: 'Organization', kind: 'text', required: true },
-    { name: 'employmentType', label: 'Type', kind: 'text', placeholder: 'Full-time, Internship, Contract…' },
-    { name: 'location', label: 'Location', kind: 'text', placeholder: 'City, Country or Remote' },
-    { name: 'startDate', label: 'Started', kind: 'date', required: true, help: DATE_HELP },
-    { name: 'endDate', label: 'Ended', kind: 'date', help: 'Empty while this is your current role' },
-    { name: 'url', label: 'Organization URL', kind: 'url' },
-    { name: 'skills', label: 'Skills', kind: 'tags' },
-    { name: 'description', label: 'Description', kind: 'richtext' },
-    { name: 'published', label: 'Published', kind: 'checkbox' },
+    {
+      name: 'employerId',
+      label: 'Employer',
+      kind: 'employer',
+      required: true,
+      help: 'Several jobs can share an employer. Edit names, links and logos under Employers.',
+      tab: 'Details',
+    },
+    { name: 'role', label: 'Role / job title', kind: 'text', required: true, tab: 'Details' },
+    {
+      name: 'slug',
+      label: 'URL slug',
+      kind: 'slug',
+      help: 'The job’s page is /experience/<slug>. Leave empty to generate from the role and employer.',
+      tab: 'Details',
+    },
+    {
+      name: 'employmentType',
+      label: 'Type',
+      kind: 'text',
+      placeholder: 'Full-time, Internship, Contract…',
+      tab: 'Details',
+    },
+    { name: 'location', label: 'Location', kind: 'text', placeholder: 'City, Country or Remote', tab: 'Details' },
+    { name: 'startDate', label: 'Started', kind: 'date', required: true, help: DATE_HELP, tab: 'Details' },
+    { name: 'endDate', label: 'Ended', kind: 'date', help: 'Empty while this is your current role', tab: 'Details' },
+    { name: 'published', label: 'Published', kind: 'checkbox', tab: 'Details' },
+    {
+      name: 'skills',
+      label: 'Skills',
+      kind: 'tags',
+      help: 'Free-text, e.g. Leadership, Mentoring. Separate with commas.',
+      tab: 'Skills & technologies',
+    },
+    {
+      name: 'technologyIds',
+      label: 'Technologies',
+      kind: 'technologies',
+      help: 'Picked from the shared list; shown as pins that open the projects using them.',
+      tab: 'Skills & technologies',
+    },
+    {
+      name: 'description',
+      label: 'Description',
+      kind: 'richtext',
+      help: 'A short summary, shown in the experience list and at the top of the job’s page.',
+      tab: 'Description',
+    },
+    {
+      name: 'writeup',
+      label: 'Write-up',
+      kind: 'richtext',
+      help: 'More detail and context, shown only on the job’s own page.',
+      tab: 'Write-up',
+    },
   ],
-  describe: (entry) => ({
-    title: `${entry.role} · ${entry.organization}`,
-    subtitle: formatDateRange(entry.startDate, entry.endDate),
+  describe: (job) => ({
+    title: `${job.role} · ${job.employer.name}`,
+    subtitle: formatDateRange(job.startDate, job.endDate),
   }),
-  toValues: (entry) => ({
-    organization: entry?.organization ?? '',
-    role: entry?.role ?? '',
-    employmentType: optional(entry?.employmentType),
-    location: optional(entry?.location),
-    url: optional(entry?.url),
-    startDate: entry?.startDate ?? '',
-    endDate: optional(entry?.endDate),
-    description: entry?.description ?? { type: 'doc', content: [] },
-    skills: entry?.skills ?? [],
-    published: entry?.published ?? false,
+  toValues: (job) => ({
+    employerId: job ? String(job.employer.id) : '',
+    role: job?.role ?? '',
+    slug: job?.slug ?? '',
+    employmentType: optional(job?.employmentType),
+    location: optional(job?.location),
+    startDate: job?.startDate ?? '',
+    endDate: optional(job?.endDate),
+    description: job?.description ?? EMPTY_DOC,
+    writeup: job?.writeup ?? EMPTY_DOC,
+    skills: job?.skills ?? [],
+    technologyIds: job?.technologies.map((technology) => technology.id) ?? [],
+    published: job?.published ?? false,
   }),
   api: {
     list: async () => unwrap(await adminClient.GET('/api/admin/experience')),

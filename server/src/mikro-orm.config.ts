@@ -9,6 +9,7 @@ import { ApiToken } from './api-tokens/entities/api-token.entity.js';
 import { SiteSettings } from './site/entities/site-settings.entity.js';
 import { Project } from './projects/entities/project.entity.js';
 import { Experience } from './experience/entities/experience.entity.js';
+import { Employer } from './experience/entities/employer.entity.js';
 import { Education } from './education/entities/education.entity.js';
 import { Honor } from './honors/entities/honor.entity.js';
 import { BlogPost } from './blog/entities/blog-post.entity.js';
@@ -29,6 +30,7 @@ export default defineConfig({
     SiteSettings,
     Project,
     Experience,
+    Employer,
     Education,
     Honor,
     BlogPost,

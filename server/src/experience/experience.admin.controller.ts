@@ -11,6 +11,8 @@ import {
   Put,
 } from '@nestjs/common';
 import {
+  ApiBadRequestResponse,
+  ApiConflictResponse,
   ApiCookieAuth,
   ApiCreatedResponse,
   ApiNoContentResponse,
@@ -27,6 +29,7 @@ import {
 } from './dto/experience.dto.js';
 import { ReorderDto } from '../common/dto/reorder.dto.js';
 import { ErrorResponseDto } from '../common/dto/error-response.dto.js';
+import { toExperienceResponse } from './experience.mapper.js';
 
 @ApiTags('admin: experience')
 @ApiCookieAuth('access_token')
@@ -35,48 +38,52 @@ export class ExperienceAdminController {
   constructor(private readonly experienceService: ExperienceService) {}
 
   @Get()
-  @ApiOperation({ summary: 'List all experience entries, drafts included' })
+  @ApiOperation({ summary: 'List all jobs, drafts included' })
   @ApiOkResponse({ type: [ExperienceResponseDto] })
-  findAll(): Promise<ExperienceResponseDto[]> {
-    return this.experienceService.findAll();
+  async findAll(): Promise<ExperienceResponseDto[]> {
+    return (await this.experienceService.findAll()).map(toExperienceResponse);
   }
 
   @Get(':id')
-  @ApiOperation({ summary: 'Get an experience entry' })
+  @ApiOperation({ summary: 'Get a job' })
   @ApiOkResponse({ type: ExperienceResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })
-  findOne(@Param('id', ParseIntPipe) id: number): Promise<ExperienceResponseDto> {
-    return this.experienceService.findOne(id);
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<ExperienceResponseDto> {
+    return toExperienceResponse(await this.experienceService.findOne(id));
   }
 
   @Post()
-  @ApiOperation({ summary: 'Create an experience entry' })
+  @ApiOperation({ summary: 'Create a job' })
   @ApiCreatedResponse({ type: ExperienceResponseDto })
-  create(@Body() dto: CreateExperienceDto): Promise<ExperienceResponseDto> {
-    return this.experienceService.create(dto);
+  @ApiBadRequestResponse({ description: 'Unknown employer or technology', type: ErrorResponseDto })
+  @ApiConflictResponse({ description: 'Slug already used', type: ErrorResponseDto })
+  async create(@Body() dto: CreateExperienceDto): Promise<ExperienceResponseDto> {
+    return toExperienceResponse(await this.experienceService.createJob(dto));
   }
 
   @Put('order')
-  @ApiOperation({ summary: 'Set the display order of experience entries' })
+  @ApiOperation({ summary: 'Set the display order of jobs (within each employer on the public page)' })
   @ApiOkResponse({ type: [ExperienceResponseDto] })
-  reorder(@Body() dto: ReorderDto): Promise<ExperienceResponseDto[]> {
-    return this.experienceService.reorder(dto.ids);
+  async reorder(@Body() dto: ReorderDto): Promise<ExperienceResponseDto[]> {
+    return (await this.experienceService.reorder(dto.ids)).map(toExperienceResponse);
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: 'Update an experience entry' })
+  @ApiOperation({ summary: 'Update a job' })
   @ApiOkResponse({ type: ExperienceResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })
-  update(
+  @ApiBadRequestResponse({ description: 'Unknown employer or technology', type: ErrorResponseDto })
+  @ApiConflictResponse({ description: 'Slug already used', type: ErrorResponseDto })
+  async update(
     @Param('id', ParseIntPipe) id: number,
     @Body() dto: UpdateExperienceDto,
   ): Promise<ExperienceResponseDto> {
-    return this.experienceService.update(id, dto);
+    return toExperienceResponse(await this.experienceService.updateJob(id, dto));
   }
 
   @Delete(':id')
   @HttpCode(204)
-  @ApiOperation({ summary: 'Delete an experience entry' })
+  @ApiOperation({ summary: 'Delete a job' })
   @ApiNoContentResponse()
   @ApiNotFoundResponse({ type: ErrorResponseDto })
   remove(@Param('id', ParseIntPipe) id: number): Promise<void> {

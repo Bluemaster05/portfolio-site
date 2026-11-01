@@ -358,10 +358,10 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** List all experience entries, drafts included */
+        /** List all jobs, drafts included */
         get: operations["ExperienceAdminController_findAll"];
         put?: never;
-        /** Create an experience entry */
+        /** Create a job */
         post: operations["ExperienceAdminController_create"];
         delete?: never;
         options?: never;
@@ -376,15 +376,15 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Get an experience entry */
+        /** Get a job */
         get: operations["ExperienceAdminController_findOne"];
         put?: never;
         post?: never;
-        /** Delete an experience entry */
+        /** Delete a job */
         delete: operations["ExperienceAdminController_remove"];
         options?: never;
         head?: never;
-        /** Update an experience entry */
+        /** Update a job */
         patch: operations["ExperienceAdminController_update"];
         trace?: never;
     };
@@ -396,7 +396,7 @@ export interface paths {
             cookie?: never;
         };
         get?: never;
-        /** Set the display order of experience entries */
+        /** Set the display order of jobs (within each employer on the public page) */
         put: operations["ExperienceAdminController_reorder"];
         post?: never;
         delete?: never;
@@ -412,7 +412,7 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        /** Published experience entries in display order */
+        /** Published jobs grouped by employer, in display order */
         get: operations["ExperiencePublicController_findAll"];
         put?: never;
         post?: never;
@@ -420,6 +420,76 @@ export interface paths {
         options?: never;
         head?: never;
         patch?: never;
+        trace?: never;
+    };
+    "/api/public/experience/{slug}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** A published job by slug, with its write-up */
+        get: operations["ExperiencePublicController_findOne"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/employers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** List employers in display order, with their job counts */
+        get: operations["EmployersAdminController_findAll"];
+        put?: never;
+        /** Create an employer */
+        post: operations["EmployersAdminController_create"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/employers/order": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        /** Set the display order of employers */
+        put: operations["EmployersAdminController_reorder"];
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/admin/employers/{id}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /** Delete an employer that has no jobs */
+        delete: operations["EmployersAdminController_remove"];
+        options?: never;
+        head?: never;
+        /** Update an employer */
+        patch: operations["EmployersAdminController_update"];
         trace?: never;
     };
     "/api/admin/education": {
@@ -1070,19 +1140,30 @@ export interface components {
             /** @description Lower numbers are listed first. Defaults to 0. */
             sortOrder?: number;
         };
+        EmployerSummaryDto: {
+            id: number;
+            name: string;
+            url?: string;
+            logoUrl?: string;
+        };
         ExperienceResponseDto: {
-            /** @description What the role involved */
+            /** @description Short summary of the role */
             description: {
                 [key: string]: unknown;
             };
-            organization: string;
+            /** @description Longer write-up, shown only on the job’s own page */
+            writeup: {
+                [key: string]: unknown;
+            };
+            employer: components["schemas"]["EmployerSummaryDto"];
             role: string;
+            slug: string;
             employmentType?: string;
             location?: string;
-            url?: string;
             startDate: string;
             endDate?: string;
             skills: string[];
+            technologies: components["schemas"]["TechnologySummaryDto"][];
             id: number;
             published: boolean;
             sortOrder: number;
@@ -1103,7 +1184,7 @@ export interface components {
              */
             endDate?: string;
             /**
-             * @description What the role involved
+             * @description Short summary of the role, shown in the list and on its page
              * @example {
              *       "type": "doc",
              *       "content": [
@@ -1122,15 +1203,39 @@ export interface components {
             description?: {
                 [key: string]: unknown;
             };
-            /** @description Company or organization */
-            organization: string;
+            /**
+             * @description Longer write-up, shown only on the job’s own page
+             * @example {
+             *       "type": "doc",
+             *       "content": [
+             *         {
+             *           "type": "paragraph",
+             *           "content": [
+             *             {
+             *               "type": "text",
+             *               "text": "Hello"
+             *             }
+             *           ]
+             *         }
+             *       ]
+             *     }
+             */
+            writeup?: {
+                [key: string]: unknown;
+            };
+            /** @description The employer this job was at */
+            employerId: number;
             /** @description Job title */
             role: string;
+            /** @description URL segment for /experience/[slug]; empty to generate from the role and employer */
+            slug?: string;
             /** @description e.g. "Full-time", "Internship", "Contract" */
             employmentType?: string;
             location?: string;
-            url?: string;
+            /** @description Free-text skills, e.g. "Leadership" */
             skills?: string[];
+            /** @description Technology ids, in display order */
+            technologyIds?: number[];
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
@@ -1148,7 +1253,7 @@ export interface components {
              */
             endDate?: string;
             /**
-             * @description What the role involved
+             * @description Short summary of the role, shown in the list and on its page
              * @example {
              *       "type": "doc",
              *       "content": [
@@ -1167,19 +1272,103 @@ export interface components {
             description?: {
                 [key: string]: unknown;
             };
+            /**
+             * @description Longer write-up, shown only on the job’s own page
+             * @example {
+             *       "type": "doc",
+             *       "content": [
+             *         {
+             *           "type": "paragraph",
+             *           "content": [
+             *             {
+             *               "type": "text",
+             *               "text": "Hello"
+             *             }
+             *           ]
+             *         }
+             *       ]
+             *     }
+             */
+            writeup?: {
+                [key: string]: unknown;
+            };
             /** @description Visible on the public site. Defaults to false (draft). */
             published?: boolean;
             /** @description Lower numbers are shown first. Defaults to 0. */
             sortOrder?: number;
-            /** @description Company or organization */
-            organization?: string;
+            /** @description The employer this job was at */
+            employerId?: number;
             /** @description Job title */
             role?: string;
+            /** @description URL segment for /experience/[slug]; empty to generate from the role and employer */
+            slug?: string;
             /** @description e.g. "Full-time", "Internship", "Contract" */
             employmentType?: string;
             location?: string;
-            url?: string;
+            /** @description Free-text skills, e.g. "Leadership" */
             skills?: string[];
+            /** @description Technology ids, in display order */
+            technologyIds?: number[];
+        };
+        ExperienceSummaryDto: {
+            /** @description Short summary of the role */
+            description: {
+                [key: string]: unknown;
+            };
+            employer: components["schemas"]["EmployerSummaryDto"];
+            role: string;
+            slug: string;
+            employmentType?: string;
+            location?: string;
+            startDate: string;
+            endDate?: string;
+            skills: string[];
+            technologies: components["schemas"]["TechnologySummaryDto"][];
+            id: number;
+            published: boolean;
+            sortOrder: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        ExperienceGroupDto: {
+            employer: components["schemas"]["EmployerSummaryDto"];
+            /** @description Newest first (after any manual order) */
+            jobs: components["schemas"]["ExperienceSummaryDto"][];
+        };
+        EmployerResponseDto: {
+            id: number;
+            name: string;
+            url?: string;
+            logoUrl?: string;
+            sortOrder: number;
+            /** @description Jobs at this employer, drafts included; an employer with jobs can't be deleted */
+            jobCount: number;
+            /** Format: date-time */
+            createdAt: string;
+            /** Format: date-time */
+            updatedAt: string;
+        };
+        CreateEmployerDto: {
+            /** @description Company or organization name */
+            name: string;
+            /** @description The employer's website */
+            url?: string;
+            /** @description Small logo (square works best): an upload or an http(s) image URL */
+            logoUrl?: string;
+            /** @description Lower numbers are listed first. Defaults to 0. */
+            sortOrder?: number;
+        };
+        UpdateEmployerDto: {
+            /** @description Company or organization name */
+            name?: string;
+            /** @description The employer's website */
+            url?: string;
+            /** @description Small logo (square works best): an upload or an http(s) image URL */
+            logoUrl?: string;
+            /** @description Lower numbers are listed first. Defaults to 0. */
+            sortOrder?: number;
         };
         EducationResponseDto: {
             /** @description Coursework, activities, thesis, … */
@@ -2312,6 +2501,24 @@ export interface operations {
                     "application/json": components["schemas"]["ExperienceResponseDto"];
                 };
             };
+            /** @description Unknown employer or technology */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Slug already used */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
         };
     };
     ExperienceAdminController_findOne: {
@@ -2393,7 +2600,25 @@ export interface operations {
                     "application/json": components["schemas"]["ExperienceResponseDto"];
                 };
             };
+            /** @description Unknown employer or technology */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Slug already used */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };
@@ -2440,7 +2665,7 @@ export interface operations {
                     [name: string]: unknown;
                 };
                 content: {
-                    "application/json": components["schemas"]["ExperienceResponseDto"][];
+                    "application/json": components["schemas"]["ExperienceGroupDto"][];
                 };
             };
             /** @description Missing, invalid, revoked or under-scoped API token */
@@ -2454,6 +2679,196 @@ export interface operations {
             };
             /** @description Section disabled or item not found */
             404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    ExperiencePublicController_findOne: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                slug: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ExperienceResponseDto"];
+                };
+            };
+            /** @description Missing, invalid, revoked or under-scoped API token */
+            401: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployersAdminController_findAll: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployerResponseDto"][];
+                };
+            };
+        };
+    };
+    EmployersAdminController_create: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CreateEmployerDto"];
+            };
+        };
+        responses: {
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployerResponseDto"];
+                };
+            };
+            /** @description Name already used */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployersAdminController_reorder: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ReorderDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployerResponseDto"][];
+                };
+            };
+        };
+    };
+    EmployersAdminController_remove: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description The employer still has jobs */
+            409: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+        };
+    };
+    EmployersAdminController_update: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                id: number;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UpdateEmployerDto"];
+            };
+        };
+        responses: {
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["EmployerResponseDto"];
+                };
+            };
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ErrorResponseDto"];
+                };
+            };
+            /** @description Name already used */
+            409: {
                 headers: {
                     [name: string]: unknown;
                 };

@@ -15,7 +15,9 @@ export type FieldKind =
   | 'media'
   | 'select'
   /** Technologies picked from the shared list, stored as ids in order */
-  | 'technologies';
+  | 'technologies'
+  /** One employer picked from the shared list (or added inline), stored as its id in a string */
+  | 'employer';
 
 export interface FieldConfig {
   name: string;

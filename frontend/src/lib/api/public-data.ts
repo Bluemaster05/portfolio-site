@@ -71,10 +71,22 @@ export async function getProject(slug: string) {
   return project && withMediaDefaults(project);
 }
 
+/**
+ * Published jobs grouped by employer. Entries in the older flat shape (an API or cached result from
+ * before employers existed) are dropped instead of crashing the page.
+ */
 export async function getExperience() {
   'use cache';
   cachePublic();
-  return (await safely(() => publicApi.GET('/api/public/experience'))) ?? [];
+  const groups = (await safely(() => publicApi.GET('/api/public/experience'))) ?? [];
+  return groups.filter((group) => group.employer !== undefined && Array.isArray(group.jobs));
+}
+
+/** One published job, with its write-up. */
+export async function getExperienceJob(slug: string) {
+  'use cache';
+  cachePublic();
+  return safely(() => publicApi.GET('/api/public/experience/{slug}', { params: { path: { slug } } }));
 }
 
 export async function getEducation() {

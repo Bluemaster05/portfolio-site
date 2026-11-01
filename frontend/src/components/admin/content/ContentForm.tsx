@@ -9,7 +9,8 @@ import type { UploadMedia } from '@/lib/admin/media';
 import type { FieldConfig } from '@/lib/admin/resources/resource';
 import { MediaListField } from '../MediaListField';
 import { TechnologyPicker } from '../TechnologyPicker';
-import type { TechnologySummary } from '@/lib/api/types';
+import { EmployerSelect } from '../EmployerSelect';
+import type { EmployerSummary, TechnologySummary } from '@/lib/api/types';
 import { MediaSourceField } from '../MediaSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from '../ui';
 
@@ -34,6 +35,8 @@ interface ContentFormProps {
 export interface FormLookups {
   technologies?: TechnologySummary[];
   createTechnology?: (name: string) => Promise<TechnologySummary>;
+  employers?: EmployerSummary[];
+  createEmployer?: (name: string) => Promise<EmployerSummary>;
 }
 
 /** Fields saved together: one tab, or the fields outside the tabs. */
@@ -335,6 +338,19 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload, lookups 
             onChange={onChange}
             technologies={lookups.technologies ?? []}
             onCreate={lookups.createTechnology}
+          />
+        </Field>
+      );
+    case 'employer':
+      return (
+        <Field {...common}>
+          <EmployerSelect
+            id={id}
+            required={field.required}
+            value={typeof value === 'string' ? value : ''}
+            onChange={onChange}
+            employers={lookups.employers ?? []}
+            onCreate={lookups.createEmployer}
           />
         </Field>
       );

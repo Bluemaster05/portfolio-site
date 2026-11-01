@@ -90,9 +90,16 @@ export function ContentEditContainer<Item extends ContentItemBase>({
   const createTechnology = $api.useMutation('post', '/api/admin/technologies', {
     onSuccess: () => technologies.refetch(),
   });
+  const usesEmployers = resource.fields.some((field) => field.kind === 'employer');
+  const employers = $api.useQuery('get', '/api/admin/employers', {}, { enabled: usesEmployers });
+  const createEmployer = $api.useMutation('post', '/api/admin/employers', {
+    onSuccess: () => employers.refetch(),
+  });
   const lookups: FormLookups = {
     technologies: technologies.data,
     createTechnology: (name) => createTechnology.mutateAsync({ body: { name } }),
+    employers: employers.data,
+    createEmployer: (name) => createEmployer.mutateAsync({ body: { name } }),
   };
 
   const title = id === undefined ? `New ${resource.singular}` : `Edit ${resource.singular}`;

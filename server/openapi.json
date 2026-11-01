@@ -1122,7 +1122,7 @@
             "access_token": []
           }
         ],
-        "summary": "List all experience entries, drafts included",
+        "summary": "List all jobs, drafts included",
         "tags": [
           "admin: experience"
         ]
@@ -1150,6 +1150,26 @@
                 }
               }
             }
+          },
+          "400": {
+            "description": "Unknown employer or technology",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Slug already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
           }
         },
         "security": [
@@ -1157,7 +1177,7 @@
             "access_token": []
           }
         ],
-        "summary": "Create an experience entry",
+        "summary": "Create a job",
         "tags": [
           "admin: experience"
         ]
@@ -1203,7 +1223,7 @@
             "access_token": []
           }
         ],
-        "summary": "Get an experience entry",
+        "summary": "Get a job",
         "tags": [
           "admin: experience"
         ]
@@ -1241,8 +1261,28 @@
               }
             }
           },
+          "400": {
+            "description": "Unknown employer or technology",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
           "404": {
             "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Slug already used",
             "content": {
               "application/json": {
                 "schema": {
@@ -1257,7 +1297,7 @@
             "access_token": []
           }
         ],
-        "summary": "Update an experience entry",
+        "summary": "Update a job",
         "tags": [
           "admin: experience"
         ]
@@ -1294,7 +1334,7 @@
             "access_token": []
           }
         ],
-        "summary": "Delete an experience entry",
+        "summary": "Delete a job",
         "tags": [
           "admin: experience"
         ]
@@ -1334,7 +1374,7 @@
             "access_token": []
           }
         ],
-        "summary": "Set the display order of experience entries",
+        "summary": "Set the display order of jobs (within each employer on the public page)",
         "tags": [
           "admin: experience"
         ]
@@ -1352,7 +1392,7 @@
                 "schema": {
                   "type": "array",
                   "items": {
-                    "$ref": "#/components/schemas/ExperienceResponseDto"
+                    "$ref": "#/components/schemas/ExperienceGroupDto"
                   }
                 }
               }
@@ -1384,9 +1424,293 @@
             "api-key": []
           }
         ],
-        "summary": "Published experience entries in display order",
+        "summary": "Published jobs grouped by employer, in display order",
         "tags": [
           "public"
+        ]
+      }
+    },
+    "/api/public/experience/{slug}": {
+      "get": {
+        "operationId": "ExperiencePublicController_findOne",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ExperienceResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Missing, invalid, revoked or under-scoped API token",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "api-key": []
+          }
+        ],
+        "summary": "A published job by slug, with its write-up",
+        "tags": [
+          "public"
+        ]
+      }
+    },
+    "/api/admin/employers": {
+      "get": {
+        "operationId": "EmployersAdminController_findAll",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployerResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "List employers in display order, with their job counts",
+        "tags": [
+          "admin: employers"
+        ]
+      },
+      "post": {
+        "operationId": "EmployersAdminController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateEmployerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployerResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Create an employer",
+        "tags": [
+          "admin: employers"
+        ]
+      }
+    },
+    "/api/admin/employers/order": {
+      "put": {
+        "operationId": "EmployersAdminController_reorder",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ReorderDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/EmployerResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Set the display order of employers",
+        "tags": [
+          "admin: employers"
+        ]
+      }
+    },
+    "/api/admin/employers/{id}": {
+      "patch": {
+        "operationId": "EmployersAdminController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateEmployerDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EmployerResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Name already used",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Update an employer",
+        "tags": [
+          "admin: employers"
+        ]
+      },
+      "delete": {
+        "operationId": "EmployersAdminController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": ""
+          },
+          "404": {
+            "description": "",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "The employer still has jobs",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "access_token": []
+          }
+        ],
+        "summary": "Delete an employer that has no jobs",
+        "tags": [
+          "admin: employers"
         ]
       }
     },
@@ -3539,27 +3863,53 @@
           }
         }
       },
+      "EmployerSummaryDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name"
+        ]
+      },
       "ExperienceResponseDto": {
         "type": "object",
         "properties": {
           "description": {
             "type": "object",
-            "description": "What the role involved",
+            "description": "Short summary of the role",
             "additionalProperties": true
           },
-          "organization": {
-            "type": "string"
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the job’s own page",
+            "additionalProperties": true
+          },
+          "employer": {
+            "$ref": "#/components/schemas/EmployerSummaryDto"
           },
           "role": {
+            "type": "string"
+          },
+          "slug": {
             "type": "string"
           },
           "employmentType": {
             "type": "string"
           },
           "location": {
-            "type": "string"
-          },
-          "url": {
             "type": "string"
           },
           "startDate": {
@@ -3572,6 +3922,12 @@
             "type": "array",
             "items": {
               "type": "string"
+            }
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TechnologySummaryDto"
             }
           },
           "id": {
@@ -3594,10 +3950,13 @@
         },
         "required": [
           "description",
-          "organization",
+          "writeup",
+          "employer",
           "role",
+          "slug",
           "startDate",
           "skills",
+          "technologies",
           "id",
           "published",
           "sortOrder",
@@ -3622,7 +3981,7 @@
           },
           "description": {
             "type": "object",
-            "description": "What the role involved",
+            "description": "Short summary of the role, shown in the list and on its page",
             "additionalProperties": true,
             "example": {
               "type": "doc",
@@ -3639,17 +3998,40 @@
               ]
             }
           },
-          "organization": {
-            "type": "string",
-            "description": "Company or organization",
-            "minLength": 1,
-            "maxLength": 200
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the job’s own page",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "employerId": {
+            "type": "number",
+            "description": "The employer this job was at"
           },
           "role": {
             "type": "string",
             "description": "Job title",
             "minLength": 1,
             "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL segment for /experience/[slug]; empty to generate from the role and employer",
+            "maxLength": 120,
+            "pattern": "^([a-z0-9]+(-[a-z0-9]+)*)?$"
           },
           "employmentType": {
             "type": "string",
@@ -3660,16 +4042,21 @@
             "type": "string",
             "maxLength": 120
           },
-          "url": {
-            "type": "string",
-            "maxLength": 2048
-          },
           "skills": {
+            "description": "Free-text skills, e.g. \"Leadership\"",
             "maxItems": 30,
             "type": "array",
             "items": {
               "type": "string",
               "maxLength": 40
+            }
+          },
+          "technologyIds": {
+            "description": "Technology ids, in display order",
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "number"
             }
           },
           "published": {
@@ -3685,7 +4072,7 @@
         },
         "required": [
           "startDate",
-          "organization",
+          "employerId",
           "role"
         ]
       },
@@ -3706,7 +4093,26 @@
           },
           "description": {
             "type": "object",
-            "description": "What the role involved",
+            "description": "Short summary of the role, shown in the list and on its page",
+            "additionalProperties": true,
+            "example": {
+              "type": "doc",
+              "content": [
+                {
+                  "type": "paragraph",
+                  "content": [
+                    {
+                      "type": "text",
+                      "text": "Hello"
+                    }
+                  ]
+                }
+              ]
+            }
+          },
+          "writeup": {
+            "type": "object",
+            "description": "Longer write-up, shown only on the job’s own page",
             "additionalProperties": true,
             "example": {
               "type": "doc",
@@ -3733,17 +4139,21 @@
             "minimum": -100000,
             "maximum": 100000
           },
-          "organization": {
-            "type": "string",
-            "description": "Company or organization",
-            "minLength": 1,
-            "maxLength": 200
+          "employerId": {
+            "type": "number",
+            "description": "The employer this job was at"
           },
           "role": {
             "type": "string",
             "description": "Job title",
             "minLength": 1,
             "maxLength": 200
+          },
+          "slug": {
+            "type": "string",
+            "description": "URL segment for /experience/[slug]; empty to generate from the role and employer",
+            "maxLength": 120,
+            "pattern": "^([a-z0-9]+(-[a-z0-9]+)*)?$"
           },
           "employmentType": {
             "type": "string",
@@ -3754,17 +4164,212 @@
             "type": "string",
             "maxLength": 120
           },
-          "url": {
-            "type": "string",
-            "maxLength": 2048
-          },
           "skills": {
+            "description": "Free-text skills, e.g. \"Leadership\"",
             "maxItems": 30,
             "type": "array",
             "items": {
               "type": "string",
               "maxLength": 40
             }
+          },
+          "technologyIds": {
+            "description": "Technology ids, in display order",
+            "maxItems": 30,
+            "type": "array",
+            "items": {
+              "type": "number"
+            }
+          }
+        }
+      },
+      "ExperienceSummaryDto": {
+        "type": "object",
+        "properties": {
+          "description": {
+            "type": "object",
+            "description": "Short summary of the role",
+            "additionalProperties": true
+          },
+          "employer": {
+            "$ref": "#/components/schemas/EmployerSummaryDto"
+          },
+          "role": {
+            "type": "string"
+          },
+          "slug": {
+            "type": "string"
+          },
+          "employmentType": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "startDate": {
+            "type": "string"
+          },
+          "endDate": {
+            "type": "string"
+          },
+          "skills": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "technologies": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/TechnologySummaryDto"
+            }
+          },
+          "id": {
+            "type": "number"
+          },
+          "published": {
+            "type": "boolean"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "description",
+          "employer",
+          "role",
+          "slug",
+          "startDate",
+          "skills",
+          "technologies",
+          "id",
+          "published",
+          "sortOrder",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "ExperienceGroupDto": {
+        "type": "object",
+        "properties": {
+          "employer": {
+            "$ref": "#/components/schemas/EmployerSummaryDto"
+          },
+          "jobs": {
+            "description": "Newest first (after any manual order)",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/ExperienceSummaryDto"
+            }
+          }
+        },
+        "required": [
+          "employer",
+          "jobs"
+        ]
+      },
+      "EmployerResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          },
+          "logoUrl": {
+            "type": "string"
+          },
+          "sortOrder": {
+            "type": "number"
+          },
+          "jobCount": {
+            "type": "number",
+            "description": "Jobs at this employer, drafts included; an employer with jobs can't be deleted"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "sortOrder",
+          "jobCount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreateEmployerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Company or organization name",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "url": {
+            "type": "string",
+            "description": "The employer's website",
+            "maxLength": 2048
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Small logo (square works best): an upload or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are listed first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
+      "UpdateEmployerDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Company or organization name",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "url": {
+            "type": "string",
+            "description": "The employer's website",
+            "maxLength": 2048
+          },
+          "logoUrl": {
+            "type": "string",
+            "description": "Small logo (square works best): an upload or an http(s) image URL",
+            "maxLength": 2048
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Lower numbers are listed first. Defaults to 0.",
+            "minimum": -100000,
+            "maximum": 100000
           }
         }
       },
