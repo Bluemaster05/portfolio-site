@@ -56,6 +56,12 @@ Projects, experience, education, honors, and blog share one list page and one ed
 `adminClient` calls. To add a field: add it on the server, regenerate types, then add it to the
 resource's `fields`, `toValues`, and `toBody` (TypeScript flags any mismatch with the DTO).
 
+Long editors can be split into tabs by giving fields a `tab` label (projects use Details,
+Technologies, Images & videos, Write-up). Tabs show in the order their first field is listed;
+fields without a `tab`, such as the Featured/Published checkboxes, stay below the tabs next to
+Save. All panels stay mounted, and if a required or malformed field on a hidden tab blocks the
+save, the editor switches to that tab so the browser can point at it.
+
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
 Technologies are managed on their own page (`/admin/technologies`) and picked in the project editor
