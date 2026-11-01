@@ -4,6 +4,7 @@ import { EntityManager } from '@mikro-orm/postgresql';
 import { ContentService } from '../common/content.service.js';
 import { slugify } from '../common/utils/slugify.js';
 import { TechnologiesService } from '../technologies/technologies.service.js';
+import { EmployersService } from './employers.service.js';
 import { Employer } from './entities/employer.entity.js';
 import { Experience } from './entities/experience.entity.js';
 import { CreateExperienceDto, ExperienceGroupDto, UpdateExperienceDto } from './dto/experience.dto.js';
@@ -24,6 +25,7 @@ export class ExperienceService extends ContentService<Experience> {
   constructor(
     em: EntityManager,
     private readonly technologiesService: TechnologiesService,
+    private readonly employersService: EmployersService,
   ) {
     super(em);
   }
@@ -37,30 +39,17 @@ export class ExperienceService extends ContentService<Experience> {
   }
 
   /**
-   * Published jobs grouped by employer. Employers follow their manual order, then the most recent
-   * first (a current job beats any ended one); jobs keep the service's order (manual, then newest).
+   * Published jobs grouped by employer, in the same order as the admin's grouped list: employers
+   * as EmployersService.ordered(), jobs in the service's order (manual, then newest first).
    */
   async publishedByEmployer(): Promise<ExperienceGroupDto[]> {
-    const groups = new Map<number, { employer: Employer; jobs: Experience[] }>();
-    for (const job of await this.findPublished()) {
-      const group = groups.get(job.employer.id);
-      if (group) group.jobs.push(job);
-      else groups.set(job.employer.id, { employer: job.employer, jobs: [job] });
-    }
-    // Partial dates ("2024", "2024-06") compare correctly as strings; "~" sorts after any of them
-    const lastActive = (jobs: Experience[]) =>
-      jobs.reduce((latest, job) => {
-        const end = job.endDate ?? '~';
-        return end > latest ? end : latest;
-      }, '');
-    return [...groups.values()]
-      .sort(
-        (a, b) =>
-          a.employer.sortOrder - b.employer.sortOrder ||
-          lastActive(b.jobs).localeCompare(lastActive(a.jobs)) ||
-          a.employer.name.localeCompare(b.employer.name),
-      )
-      .map(({ employer, jobs }) => ({ employer: toEmployerSummary(employer), jobs: jobs.map(toExperienceSummary) }));
+    const jobs = await this.findPublished();
+    return (await this.employersService.ordered()).flatMap(({ employer }) => {
+      const employerJobs = jobs.filter((job) => job.employer.id === employer.id);
+      return employerJobs.length
+        ? [{ employer: toEmployerSummary(employer), jobs: employerJobs.map(toExperienceSummary) }]
+        : [];
+    });
   }
 
   /** Sets what the plain data can't (undefined = keep), then fills in an empty slug. */

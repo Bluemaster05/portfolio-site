@@ -87,10 +87,16 @@ export const experienceResource: ContentResource<Experience> = {
       tab: 'Write-up',
     },
   ],
-  describe: (job) => ({
-    title: `${job.role} · ${job.employer.name}`,
-    subtitle: formatDateRange(job.startDate, job.endDate),
-  }),
+  // Listed under their employer, so the role alone is enough
+  describe: (job) => ({ title: job.role, subtitle: formatDateRange(job.startDate, job.endDate) }),
+  grouping: {
+    singular: 'employer',
+    manageHref: '/admin/employers',
+    list: async () =>
+      unwrap(await adminClient.GET('/api/admin/employers')).map(({ id, name }) => ({ id, title: name })),
+    groupOf: (job) => job.employer.id,
+    reorder: async (ids) => unwrap(await adminClient.PUT('/api/admin/employers/order', { body: { ids } })),
+  },
   toValues: (job) => ({
     employerId: job ? String(job.employer.id) : '',
     role: job?.role ?? '',

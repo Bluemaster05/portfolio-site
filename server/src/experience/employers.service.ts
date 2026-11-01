@@ -10,13 +10,35 @@ import { CreateEmployerDto, EmployerResponseDto, UpdateEmployerDto } from './dto
 export class EmployersService {
   constructor(private readonly em: EntityManager) {}
 
-  /** Every employer with how many jobs (drafts included) it has. */
+  /** Every employer in display order, with how many jobs (drafts included) it has. */
   async findAll(): Promise<EmployerResponseDto[]> {
-    const employers = await this.em.find(Employer, {}, { orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] });
-    const jobs = await this.em.find(Experience, {}, { fields: ['employer'] });
-    const counts = new Map<number, number>();
-    for (const job of jobs) counts.set(job.employer.id, (counts.get(job.employer.id) ?? 0) + 1);
-    return employers.map((employer) => toResponse(employer, counts.get(employer.id) ?? 0));
+    return (await this.ordered()).map(({ employer, jobCount }) => toResponse(employer, jobCount));
+  }
+
+  /**
+   * The one employer order used by the admin and the public experience page: manual order, then
+   * an employer with a current job, then the most recently active. Drafts count, so both agree.
+   */
+  async ordered(): Promise<{ employer: Employer; jobCount: number }[]> {
+    const employers = await this.em.find(Employer, {});
+    const jobs = await this.em.find(Experience, {}, { fields: ['employer', 'endDate'] });
+    const stats = new Map<number, { jobCount: number; lastActive: string }>();
+    for (const job of jobs) {
+      const entry = stats.get(job.employer.id) ?? { jobCount: 0, lastActive: '' };
+      // Partial dates ("2024", "2024-06") compare correctly as strings; "~" sorts after any of them
+      const end = job.endDate ?? '~';
+      stats.set(job.employer.id, { jobCount: entry.jobCount + 1, lastActive: end > entry.lastActive ? end : entry.lastActive });
+    }
+    const statsOf = (employer: Employer) => stats.get(employer.id) ?? { jobCount: 0, lastActive: '' };
+    return employers
+      .sort(
+        (a, b) =>
+          a.sortOrder - b.sortOrder ||
+          // Plain comparison: localeCompare would sort "~" before digits
+          compare(statsOf(b).lastActive, statsOf(a).lastActive) ||
+          a.name.localeCompare(b.name),
+      )
+      .map((employer) => ({ employer, jobCount: statsOf(employer).jobCount }));
   }
 
   async create(dto: CreateEmployerDto): Promise<EmployerResponseDto> {
@@ -82,6 +104,10 @@ export class EmployersService {
       throw error;
     }
   }
+}
+
+function compare(a: string, b: string): number {
+  return a < b ? -1 : a > b ? 1 : 0;
 }
 
 function toResponse(employer: Employer, jobCount: number): EmployerResponseDto {

@@ -58,6 +58,8 @@ export interface ContentResource<Item extends ContentItemBase> {
   singular: string;
   fields: FieldConfig[];
   describe(item: Item): { title: string; subtitle?: string };
+  /** Lists items under groups (e.g. jobs under their employer); items move only within their group */
+  grouping?: ContentGrouping<Item>;
   toValues(item?: Item): FormValues;
   api: {
     list(): Promise<Item[]>;
@@ -68,6 +70,23 @@ export interface ContentResource<Item extends ContentItemBase> {
     remove(id: number): Promise<void>;
     reorder(ids: number[]): Promise<Item[]>;
   };
+}
+
+export interface ContentGroup {
+  id: number;
+  title: string;
+}
+
+export interface ContentGrouping<Item> {
+  /** e.g. "employer" */
+  singular: string;
+  /** Where groups are edited, e.g. /admin/employers */
+  manageHref: string;
+  /** Every group, in display order */
+  list(): Promise<ContentGroup[]>;
+  groupOf(item: Item): number;
+  /** Sets the display order of groups */
+  reorder(ids: number[]): Promise<unknown>;
 }
 
 export const DATE_HELP = 'YYYY, YYYY-MM, or YYYY-MM-DD';

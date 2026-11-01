@@ -76,8 +76,13 @@ Experience entries are **jobs**: each belongs to an **employer** (managed at `/a
 name, website, logo, order; an employer with jobs can't be deleted) and is picked in the job editor
 with `kind: 'employer'` (`EmployerSelect`, with inline "New…"). A job has free-text skills,
 technologies, a short description and a longer write-up, and its own page at `/experience/[slug]`
-(slug generated from role + employer when left empty). The public list groups jobs by employer:
-manual employer order, then employers with a current job, then most recently active.
+(slug generated from role + employer when left empty).
+
+Employer order lives in one place, `EmployersService.ordered()`: manual order, then an employer with
+a current job, then the most recently active (drafts count). The public page, the Employers page and
+the admin Experience list all use it, so they always agree. A resource can set `grouping` (as
+experience does with employers): the admin list then shows items under their groups
+(`GroupedContentList`), groups move with their own arrows, and items move only within their group.
 
 Technologies are managed on their own page (`/admin/technologies`) and picked in the project and job editors
 with `kind: 'technologies'` (`TechnologyPicker`: ordered, searchable, quick-create). Shared lists a

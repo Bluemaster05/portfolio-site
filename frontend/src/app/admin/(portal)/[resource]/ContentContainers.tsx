@@ -7,7 +7,7 @@ import { errorMessage } from '@/lib/admin/api-error';
 import type { FormValues } from '@/lib/admin/form-values';
 import { uploadMedia } from '@/lib/admin/media';
 import type { ContentItemBase, ContentResource } from '@/lib/admin/resources/resource';
-import { ContentList } from '@/components/admin/content/ContentList';
+import { ContentList, GroupedContentList, type ContentListGroup } from '@/components/admin/content/ContentList';
 import { ContentForm, type FormLookups } from '@/components/admin/content/ContentForm';
 import { $api } from '@/lib/api/admin-query';
 import { AdminPageHeader, ErrorBanner } from '@/components/admin/ui';
@@ -24,12 +24,52 @@ export function ContentListContainer<Item extends ContentItemBase>({ resource }:
   });
   const remove = useMutation({ mutationFn: resource.api.remove, onSuccess: refresh });
 
+  // Grouped resources (jobs under employers) also load the groups in their display order
+  const { grouping } = resource;
+  const groupList = useQuery({
+    queryKey: [resource.key, 'groups'],
+    queryFn: () => grouping?.list() ?? Promise.resolve([]),
+    enabled: grouping !== undefined,
+  });
+  const reorderGroups = useMutation({
+    mutationFn: (ids: number[]) => grouping?.reorder(ids) ?? Promise.resolve(),
+    onSuccess: refresh,
+  });
+
   function move(index: number, direction: -1 | 1) {
-    const ids = (items.data ?? []).map((item) => item.id);
-    const target = index + direction;
-    [ids[index], ids[target]] = [ids[target], ids[index]];
-    reorder.mutate(ids);
+    reorder.mutate(swapped((items.data ?? []).map((item) => item.id), index, direction));
   }
+
+  const rowOf = (item: Item) => ({ id: item.id, published: item.published, ...resource.describe(item) });
+  // Only groups with items are listed; empty ones keep their place after them when reordering
+  const groups: (ContentListGroup & { itemIds: number[] })[] = grouping
+    ? (groupList.data ?? []).flatMap((group) => {
+        const members = (items.data ?? []).filter((item) => grouping.groupOf(item) === group.id);
+        return members.length
+          ? [{ ...group, rows: members.map(rowOf), itemIds: members.map((item) => item.id) }]
+          : [];
+      })
+    : [];
+
+  function moveGroup(index: number, direction: -1 | 1) {
+    const shown = swapped(groups.map((group) => group.id), index, direction);
+    const hidden = (groupList.data ?? []).map((group) => group.id).filter((id) => !shown.includes(id));
+    reorderGroups.mutate([...shown, ...hidden]);
+  }
+
+  /** Reorders one group's items; items in other groups keep their positions. */
+  function moveInGroup(groupIndex: number, index: number, direction: -1 | 1) {
+    reorder.mutate(swapped(groups[groupIndex].itemIds, index, direction));
+  }
+
+  const busy = reorder.isPending || reorderGroups.isPending || publish.isPending || remove.isPending;
+  const listProps = {
+    editHref: (id: number) => `/admin/${resource.key}/${id}`,
+    singular: resource.singular,
+    busy,
+    onTogglePublished: (id: number, published: boolean) => publish.mutate({ id, published }),
+    onDelete: (id: number) => remove.mutate(id),
+  };
 
   return (
     <>
@@ -41,19 +81,24 @@ export function ContentListContainer<Item extends ContentItemBase>({ resource }:
           </Link>
         }
       />
-      <ErrorBanner message={errorMessage(items.error ?? reorder.error ?? publish.error ?? remove.error)} />
-      {items.isPending ? (
+      <ErrorBanner
+        message={errorMessage(
+          items.error ?? groupList.error ?? reorder.error ?? reorderGroups.error ?? publish.error ?? remove.error,
+        )}
+      />
+      {items.isPending || (grouping && groupList.isPending) ? (
         <p className="text-muted">Loading…</p>
-      ) : (
-        <ContentList
-          rows={(items.data ?? []).map((item) => ({ id: item.id, published: item.published, ...resource.describe(item) }))}
-          editHref={(id) => `/admin/${resource.key}/${id}`}
-          singular={resource.singular}
-          busy={reorder.isPending || publish.isPending || remove.isPending}
-          onMove={move}
-          onTogglePublished={(id, published) => publish.mutate({ id, published })}
-          onDelete={(id) => remove.mutate(id)}
+      ) : grouping ? (
+        <GroupedContentList
+          groups={groups}
+          groupSingular={grouping.singular}
+          manageHref={grouping.manageHref}
+          onMoveGroup={moveGroup}
+          onMove={moveInGroup}
+          {...listProps}
         />
+      ) : (
+        <ContentList rows={(items.data ?? []).map(rowOf)} onMove={move} {...listProps} />
       )}
     </>
   );
@@ -123,4 +168,12 @@ export function ContentEditContainer<Item extends ContentItemBase>({
       />
     </>
   );
+}
+
+/** A copy of `ids` with the entry at `index` swapped with its neighbour in `direction`. */
+function swapped(ids: number[], index: number, direction: -1 | 1): number[] {
+  const next = [...ids];
+  const target = index + direction;
+  [next[index], next[target]] = [next[target], next[index]];
+  return next;
 }
