@@ -13,6 +13,7 @@ import {
 } from 'class-validator';
 import { Type } from 'class-transformer';
 import { ImageDto } from '../../common/dto/image.dto.js';
+import { IsVideoSource } from '../../common/validators/is-image-source.js';
 import { ProjectMediaLayout } from '../entities/project.entity.js';
 import { ContentItemFieldsDto, ContentItemResponseDto } from '../../common/dto/content-item.dto.js';
 import { richTextSchema } from '../../common/dto/rich-text.schema.js';
@@ -76,6 +77,16 @@ export class CreateProjectDto extends ContentItemFieldsDto {
   @Type(() => ImageDto)
   images?: ImageDto[];
 
+  /**
+   * Video shown as the main item on the project page (layouts other than none). The first image
+   * is its poster, and stays the project's cover everywhere else.
+   */
+  @IsOptional()
+  @EmptyToNull()
+  @IsVideoSource()
+  @MaxLength(2048)
+  videoUrl?: string;
+
   @IsOptional()
   @EmptyToNull()
   @IsPartialDate('When work started', false)
@@ -110,6 +121,9 @@ export class ProjectResponseDto extends ContentItemResponseDto {
   mediaLayout!: ProjectMediaLayout;
 
   images!: ImageDto[];
+
+  /** Main item on the project page when set */
+  videoUrl?: string;
   startDate?: string;
   endDate?: string;
   featured!: boolean;

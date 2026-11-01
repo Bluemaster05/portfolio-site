@@ -2056,7 +2056,7 @@
     },
     "/api/admin/media": {
       "post": {
-        "description": "Send multipart/form-data with the image in a `file` field. Store the returned `url` in content.",
+        "description": "Send multipart/form-data with the file in a `file` field. Store the returned `url` in content. Images are limited to MAX_UPLOAD_MB, videos to MAX_VIDEO_UPLOAD_MB.",
         "operationId": "MediaAdminController_upload",
         "parameters": [],
         "requestBody": {
@@ -2069,7 +2069,7 @@
                   "file": {
                     "type": "string",
                     "format": "binary",
-                    "description": "The image file"
+                    "description": "The image or video file"
                   }
                 }
               }
@@ -2098,7 +2098,7 @@
             }
           },
           "413": {
-            "description": "Larger than MAX_UPLOAD_MB",
+            "description": "Over the size limit for its type",
             "content": {
               "application/json": {
                 "schema": {
@@ -2113,7 +2113,7 @@
             "access_token": []
           }
         ],
-        "summary": "Upload an image (PNG, JPEG, GIF, WebP, AVIF, or SVG)",
+        "summary": "Upload an image (PNG, JPEG, GIF, WebP, AVIF, SVG) or video (MP4, WebM)",
         "tags": [
           "admin: media"
         ]
@@ -2141,7 +2141,7 @@
             "access_token": []
           }
         ],
-        "summary": "List uploaded images, newest first",
+        "summary": "List uploaded files, newest first",
         "tags": [
           "admin: media"
         ]
@@ -2180,7 +2180,7 @@
             "access_token": []
           }
         ],
-        "summary": "Delete an uploaded image and its file",
+        "summary": "Delete an uploaded file",
         "tags": [
           "admin: media"
         ]
@@ -2201,7 +2201,7 @@
         ],
         "responses": {
           "200": {
-            "description": "The image file"
+            "description": "The file"
           },
           "404": {
             "description": "",
@@ -2235,11 +2235,21 @@
                 "schema": {
                   "$ref": "#/components/schemas/ErrorResponseDto"
                 }
+              },
+              "video/mp4": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
+              },
+              "video/webm": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorResponseDto"
+                }
               }
             }
           }
         },
-        "summary": "Serve an uploaded image",
+        "summary": "Serve an uploaded image or video (supports Range requests)",
         "tags": [
           "media"
         ]
@@ -2736,6 +2746,10 @@
               "$ref": "#/components/schemas/ImageDto"
             }
           },
+          "videoUrl": {
+            "type": "string",
+            "description": "Main item on the project page when set"
+          },
           "startDate": {
             "type": "string"
           },
@@ -2859,6 +2873,11 @@
             "items": {
               "$ref": "#/components/schemas/ImageDto"
             }
+          },
+          "videoUrl": {
+            "type": "string",
+            "description": "Video shown as the main item on the project page (layouts other than none). The first image\nis its poster, and stays the project's cover everywhere else.",
+            "maxLength": 2048
           },
           "featured": {
             "type": "boolean",
@@ -2986,6 +3005,11 @@
               "$ref": "#/components/schemas/ImageDto"
             }
           },
+          "videoUrl": {
+            "type": "string",
+            "description": "Video shown as the main item on the project page (layouts other than none). The first image\nis its poster, and stays the project's cover everywhere else.",
+            "maxLength": 2048
+          },
           "featured": {
             "type": "boolean",
             "description": "Shown on the home page"
@@ -3045,6 +3069,10 @@
             "items": {
               "$ref": "#/components/schemas/ImageDto"
             }
+          },
+          "videoUrl": {
+            "type": "string",
+            "description": "Main item on the project page when set"
           },
           "startDate": {
             "type": "string"

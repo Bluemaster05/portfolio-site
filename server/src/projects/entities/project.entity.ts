@@ -48,6 +48,10 @@ export class Project extends ContentItem {
   @Property({ type: 'json' })
   images: ProjectImage[] & Opt = [];
 
+  /** Main item on the project page when set; images still provide the poster and cover */
+  @Property({ length: 2048, nullable: true })
+  videoUrl?: string;
+
   @Property({ length: 10, nullable: true })
   startDate?: string;
 

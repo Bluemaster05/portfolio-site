@@ -141,7 +141,14 @@
           "default": null,
           "comment": null,
           "collation": null,
-          "enumItems": [],
+          "enumItems": [
+            "site:read",
+            "projects:read",
+            "experience:read",
+            "education:read",
+            "honors:read",
+            "blog:read"
+          ],
           "mappedType": "array"
         },
         "token_hash": {
@@ -187,8 +194,8 @@
       "checks": [
         {
           "name": "api_token_scopes_check",
-          "expression": "scopes <@ ARRAY['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]",
-          "definition": "CHECK ((scopes <@ ARRAY['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]))",
+          "expression": "\"scopes\" <@ array['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text]",
+          "definition": "check (\"scopes\" <@ array['site:read'::text, 'projects:read'::text, 'experience:read'::text, 'education:read'::text, 'honors:read'::text, 'blog:read'::text])",
           "columnName": "scopes"
         }
       ],
@@ -1420,7 +1427,7 @@
             "single",
             "gallery"
           ],
-          "mappedType": "unknown",
+          "mappedType": "enum",
           "nativeEnumName": "project_media_layout"
         },
         "published": {
@@ -1575,6 +1582,23 @@
           "collation": null,
           "enumItems": [],
           "mappedType": "datetime"
+        },
+        "video_url": {
+          "name": "video_url",
+          "type": "varchar(2048)",
+          "unsigned": false,
+          "autoincrement": false,
+          "primary": false,
+          "nullable": true,
+          "unique": false,
+          "length": 2048,
+          "precision": null,
+          "scale": null,
+          "default": null,
+          "comment": null,
+          "collation": null,
+          "enumItems": [],
+          "mappedType": "string"
         }
       },
       "indexes": [
