@@ -47,20 +47,26 @@ can be seeked, including through the Next.js `/media` proxy.
 | Rich text             | `image` node `src`         | editor Image button → upload panel     |
 | Technologies (next)   | icon                       | `MediaSourceField` with `compact`      |
 
-Projects keep images and videos in **one ordered list**, `media[]` of `{ kind, url, alt }`, edited
-in a single `MediaListField` (upload several files of either kind at once; reorder; "Make main").
-The order there is the order everywhere.
+Projects keep images and videos in **one ordered list**, `media[]` of `{ kind, url, alt, main }`,
+edited in a single `MediaListField` (upload several files of either kind at once; reorder). The order
+there is the gallery tile order.
+
+Each list has a **main image** and a **main video** ("Make main image" / "Make main video"; at most
+one of each, enforced by the API). Unmarked, the first item of that kind is main.
+
+- **Main image** — the cover on project cards and the home page (never a video).
+- **Main video** — shown large first on the project page; without a video, the main image is.
 
 Project `mediaLayout`:
 
 - `none` — no media.
 - `single` — one item (image or video) as a header above the write-up.
-- `gallery` — the first item is shown large, with every item as a smaller tile (5 per row on wide
-  screens); choosing a tile shows it large.
+- `gallery` — the main video (else main image) is shown large, with every item as a smaller tile
+  (5 per row on wide screens) in list order; choosing a tile shows it large.
 
-On the **project page** the main item may be a video. Everywhere else (cards, home) the cover is
-always the first **image** in the list, never a video. Videos show their own first frame (a `#t=0.1`
-media fragment, no separate poster image), have controls, and never autoplay.
+Videos show their own first frame (a `#t=0.1` media fragment, no separate poster image), have
+controls, and never autoplay. Helpers in `frontend/src/lib/images.ts`: `mainImage()`, `leadIndex()`,
+`mainIndexOf()`.
 
 ## Adding an image to a new feature
 
