@@ -49,7 +49,9 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
   });
 
   return (
-    <div className="rich-text-editor overflow-hidden rounded-card border border-border bg-surface focus-within:border-accent">
+    // overflow-clip, not overflow-hidden: hidden would make this a scroll container and the
+    // sticky toolbar would stick inside it instead of to the window
+    <div className="rich-text-editor overflow-clip rounded-card border border-border bg-surface focus-within:border-accent">
       {editor && <Toolbar editor={editor} onUpload={onUpload} />}
       <EditorContent editor={editor} />
     </div>
@@ -94,7 +96,8 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
 
   return (
     <>
-    <div role="toolbar" aria-label="Formatting" className="flex flex-wrap gap-0.5 border-b border-border bg-background px-2 py-1.5">
+    {/* Sticks to the top of the window while scrolling through a long write-up */}
+    <div role="toolbar" aria-label="Formatting" className="sticky top-0 z-10 flex flex-wrap gap-0.5 border-b border-border bg-background px-2 py-1.5">
       <ToolButton label="Bold" active={state.bold} onClick={() => chain().toggleBold().run()}>
         <strong>B</strong>
       </ToolButton>
