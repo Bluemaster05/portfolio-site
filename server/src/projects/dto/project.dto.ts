@@ -15,6 +15,7 @@ import { IsPartialDate } from '../../common/validators/is-partial-date.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
+import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 export class CreateProjectDto extends ContentItemFieldsDto {
   @IsString()
@@ -23,6 +24,7 @@ export class CreateProjectDto extends ContentItemFieldsDto {
 
   /** URL segment; generated from the title when omitted */
   @IsOptional()
+  @EmptyToNull()
   @Matches(/^[a-z0-9]+(-[a-z0-9]+)*$/, { message: 'slug may only contain a-z, 0-9 and dashes' })
   @MaxLength(120)
   slug?: string;
@@ -45,25 +47,30 @@ export class CreateProjectDto extends ContentItemFieldsDto {
   technologies?: string[];
 
   @IsOptional()
+  @EmptyToNull()
   @IsSafeUrl()
   @MaxLength(2048)
   repoUrl?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsSafeUrl()
   @MaxLength(2048)
   liveUrl?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsSafeUrl()
   @MaxLength(2048)
   imageUrl?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsPartialDate('When work started', false)
   startDate?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsPartialDate('When work finished; empty if ongoing', false)
   endDate?: string;
 

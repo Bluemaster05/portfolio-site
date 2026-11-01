@@ -6,6 +6,7 @@ import { IsPartialDate } from '../../common/validators/is-partial-date.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
+import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 export class CreateHonorDto extends ContentItemFieldsDto {
   @IsString()
@@ -14,16 +15,19 @@ export class CreateHonorDto extends ContentItemFieldsDto {
 
   /** Who awarded it */
   @IsOptional()
+  @EmptyToNull()
   @IsString()
   @MaxLength(200)
   issuer?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsPartialDate('When it was awarded', false)
   date?: string;
 
   /** Link to a certificate or announcement */
   @IsOptional()
+  @EmptyToNull()
   @IsSafeUrl()
   @MaxLength(2048)
   url?: string;

@@ -5,6 +5,7 @@ import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
+import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 export class CreateBlogPostDto extends ContentItemFieldsDto {
   @IsString()
@@ -13,6 +14,7 @@ export class CreateBlogPostDto extends ContentItemFieldsDto {
 
   /** URL segment; generated from the title when omitted */
   @IsOptional()
+  @EmptyToNull()
   @Matches(/^[a-z0-9]+(-[a-z0-9]+)*$/, { message: 'slug may only contain a-z, 0-9 and dashes' })
   @MaxLength(120)
   slug?: string;
@@ -35,6 +37,7 @@ export class CreateBlogPostDto extends ContentItemFieldsDto {
   tags?: string[];
 
   @IsOptional()
+  @EmptyToNull()
   @IsSafeUrl()
   @MaxLength(2048)
   coverImageUrl?: string;

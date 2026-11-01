@@ -6,6 +6,7 @@ import { IsPartialDate } from '../../common/validators/is-partial-date.js';
 import { IsRichTextDoc } from '../../common/validators/is-rich-text-doc.js';
 import { IsSafeUrl } from '../../common/validators/is-safe-url.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
+import { EmptyToNull } from '../../common/validators/empty-to-null.js';
 
 export class CreateExperienceDto extends ContentItemFieldsDto {
   /** Company or organization */
@@ -20,16 +21,19 @@ export class CreateExperienceDto extends ContentItemFieldsDto {
 
   /** e.g. "Full-time", "Internship", "Contract" */
   @IsOptional()
+  @EmptyToNull()
   @IsString()
   @MaxLength(60)
   employmentType?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsString()
   @MaxLength(120)
   location?: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsSafeUrl()
   @MaxLength(2048)
   url?: string;
@@ -38,6 +42,7 @@ export class CreateExperienceDto extends ContentItemFieldsDto {
   startDate!: string;
 
   @IsOptional()
+  @EmptyToNull()
   @IsPartialDate('When the role ended; empty while current', false)
   endDate?: string;
 
