@@ -22,8 +22,12 @@ export function CodeTabsView({ tabs }: { tabs: HighlightedTab[] }) {
   }
 
   return (
-    <div className="not-prose">
-      <div role="tablist" aria-label="Code samples" className="flex gap-1 overflow-x-auto">
+    <div className="code-window not-prose overflow-hidden rounded-card border border-border bg-code">
+      <div
+        role="tablist"
+        aria-label="Code samples"
+        className="flex overflow-x-auto border-b border-border bg-surface"
+      >
         {tabs.map((tab, index) => (
           <button
             key={index}
@@ -35,10 +39,10 @@ export function CodeTabsView({ tabs }: { tabs: HighlightedTab[] }) {
             tabIndex={index === active ? 0 : -1}
             onClick={() => setActive(index)}
             onKeyDown={onKeyDown}
-            className={`rounded-t-md border border-b-0 px-3 py-1.5 font-mono text-sm transition-colors ${
+            className={`border-r border-border px-4 py-2 font-mono text-sm transition-colors ${
               index === active
-                ? 'border-border bg-code text-foreground'
-                : 'border-transparent text-muted hover:text-foreground'
+                ? 'bg-code text-foreground shadow-[inset_0_-2px_0_var(--accent)]'
+                : 'text-muted hover:text-foreground'
             }`}
           >
             {tab.label}
@@ -52,7 +56,7 @@ export function CodeTabsView({ tabs }: { tabs: HighlightedTab[] }) {
           role="tabpanel"
           aria-labelledby={`${id}-tab-${index}`}
           hidden={index !== active}
-          className="code-block [&_pre]:rounded-tl-none"
+          className="code-block"
           dangerouslySetInnerHTML={{ __html: tab.html }}
         />
       ))}

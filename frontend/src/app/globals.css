@@ -205,6 +205,12 @@ body {
   background-color: var(--code-background) !important;
 }
 
+/* Inside a tabbed code window the window draws the frame, not each snippet. */
+.code-window pre {
+  border: 0;
+  border-radius: 0;
+}
+
 @media (prefers-color-scheme: dark) {
   .code-block .shiki,
   .code-block .shiki span {
