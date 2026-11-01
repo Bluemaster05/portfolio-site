@@ -44,14 +44,13 @@ can be seeked, including through the Next.js `/media` proxy.
 | Site settings         | `avatarUrl`                | `MediaSourceField`                     |
 | Projects              | `mediaLayout` + `media[]`  | select + `MediaListField`              |
 | Blog posts            | `coverImageUrl`            | `MediaSourceField`                     |
-| Honors                | `imageUrl` + `imageAlt`    | `MediaSourceField` (editor's Image tab); alt falls back to the title |
-| Honors (more images)  | `images[]` (`ImageItemDto`: `url`, `alt`) | `MediaListField` with `imagesOnly`; a carousel on the honor's page |
+| Honors                | `mediaLayout` + `media[]`  | same as projects (`mediaFields()` in `lib/admin/resources/media-fields.ts`); main image on the card, gallery on the page |
 | Rich text videos      | `video` node `src`         | editor Video button → `MediaSourceField kind="video"` |
 | Rich text carousels   | `imageCarousel` node `images` | `MediaListField` with `imagesOnly` in the node view |
 | Rich text             | `image` node `src`         | editor Image button → upload panel     |
 | Technologies          | `iconUrl`                  | `MediaSourceField` with `compact`      |
 
-Projects keep images and videos in **one ordered list**, `media[]` of `{ kind, url, alt, main }`,
+Projects (and honors, the same way) keep images and videos in **one ordered list**, `media[]` of `{ kind, url, alt, main }`,
 edited in a single `MediaListField` (upload several files of either kind at once; reorder). The order
 there is the gallery tile order.
 
