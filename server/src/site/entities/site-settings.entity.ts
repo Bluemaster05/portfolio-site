@@ -8,6 +8,18 @@ export interface SiteLink {
   url: string;
 }
 
+/**
+ * Which part of the avatar shows in its circle: the focus point (percent across and down the
+ * image, kept where it is) and how far to zoom in around it.
+ */
+export interface AvatarCrop {
+  x: number;
+  y: number;
+  zoom: number;
+}
+
+export const DEFAULT_AVATAR_CROP: AvatarCrop = { x: 50, y: 50, zoom: 1 };
+
 /** Singleton row (id = 1): site metadata, the owner's profile, and section toggles. */
 @Entity()
 export class SiteSettings {
@@ -39,6 +51,10 @@ export class SiteSettings {
 
   @Property({ length: 2048, nullable: true })
   avatarUrl?: string;
+
+  /** The part of the avatar shown in its circle */
+  @Property({ type: 'json' })
+  avatarCrop: AvatarCrop & Opt = { ...DEFAULT_AVATAR_CROP };
 
   /** Intro shown on the home page */
   @Property({ type: 'json' })

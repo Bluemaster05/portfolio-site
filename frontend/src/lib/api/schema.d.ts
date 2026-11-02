@@ -886,6 +886,14 @@ export interface components {
             /** @description The full token. Shown only once — store it now. */
             token: string;
         };
+        AvatarCropDto: {
+            /** @description Focus point, percent across the image (0–100) */
+            x: number;
+            /** @description Focus point, percent down the image (0–100) */
+            y: number;
+            /** @description Zoom around the focus point; 1 fills the circle with the whole image's shorter side */
+            zoom: number;
+        };
         LinkDto: {
             /** @description Text shown for the link, e.g. "GitHub" */
             label: string;
@@ -915,6 +923,7 @@ export interface components {
             location?: string;
             contactEmail?: string;
             avatarUrl?: string;
+            avatarCrop: components["schemas"]["AvatarCropDto"];
             links: components["schemas"]["LinkDto"][];
             sections: components["schemas"]["SectionTogglesDto"];
             /** Format: date-time */
@@ -949,6 +958,7 @@ export interface components {
             /** Format: email */
             contactEmail?: string;
             avatarUrl?: string;
+            avatarCrop?: components["schemas"]["AvatarCropDto"];
             links?: components["schemas"]["LinkDto"][];
             sections?: components["schemas"]["SectionTogglesDto"];
         };

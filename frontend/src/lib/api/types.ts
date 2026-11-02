@@ -5,6 +5,7 @@ type Schemas = components['schemas'];
 export type SiteSettings = Schemas['SiteSettingsResponseDto'];
 export type SectionToggles = Schemas['SectionTogglesDto'];
 export type SiteLink = Schemas['LinkDto'];
+export type AvatarCrop = Schemas['AvatarCropDto'];
 export type Project = Schemas['ProjectResponseDto'];
 export type ProjectSummary = Schemas['ProjectSummaryDto'];
 export type Experience = Schemas['ExperienceResponseDto'];

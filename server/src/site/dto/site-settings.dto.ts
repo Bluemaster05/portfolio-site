@@ -4,7 +4,10 @@ import {
   IsArray,
   IsBoolean,
   IsEmail,
+  IsNumber,
   IsOptional,
+  Max,
+  Min,
   IsString,
   Length,
   MaxLength,
@@ -17,6 +20,27 @@ import { richTextSchema } from '../../common/dto/rich-text.schema.js';
 import type { RichTextDoc } from '../../common/types/rich-text.js';
 import { IsImageSource } from '../../common/validators/is-media-source.js';
 import { EmptyToNull } from '../../common/validators/empty-to-null.js';
+
+/** Which part of the avatar shows in its circle */
+export class AvatarCropDto {
+  /** Focus point, percent across the image (0–100) */
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  x!: number;
+
+  /** Focus point, percent down the image (0–100) */
+  @IsNumber()
+  @Min(0)
+  @Max(100)
+  y!: number;
+
+  /** Zoom around the focus point; 1 fills the circle with the whole image's shorter side */
+  @IsNumber()
+  @Min(1)
+  @Max(4)
+  zoom!: number;
+}
 
 /** On/off switch for each public section */
 export class SectionTogglesDto {
@@ -54,6 +78,7 @@ export class SiteSettingsResponseDto {
   location?: string;
   contactEmail?: string;
   avatarUrl?: string;
+  avatarCrop!: AvatarCropDto;
 
   @ApiProperty(richTextSchema('Intro shown on the home page'))
   bio!: RichTextDoc;
@@ -99,6 +124,10 @@ class SiteSettingsFieldsDto {
   @IsImageSource()
   @MaxLength(2048)
   avatarUrl?: string;
+
+  @ValidateNested()
+  @Type(() => AvatarCropDto)
+  avatarCrop!: AvatarCropDto;
 
   @IsRichTextDoc('Intro shown on the home page')
   bio!: RichTextDoc;

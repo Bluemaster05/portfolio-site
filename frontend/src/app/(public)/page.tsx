@@ -11,6 +11,7 @@ import { EmptyState } from '@/components/public/PageHeader';
 import { ExperienceCard } from '@/components/public/ExperienceCard';
 import { HonorCard } from '@/components/public/HonorCard';
 import { EducationCard } from '@/components/public/EducationCard';
+import { Avatar } from '@/components/public/Avatar';
 
 export default async function HomePage() {
   const site = await getSite();
@@ -36,11 +37,11 @@ export default async function HomePage() {
       <section aria-labelledby="intro" className="animate-fade-up">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-center">
           {isImageSrc(site.avatarUrl) && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Avatar
               src={site.avatarUrl}
               alt={`Photo of ${site.ownerName}`}
-              className="size-28 shrink-0 rounded-full border border-border bg-surface object-cover sm:size-32"
+              crop={site.avatarCrop}
+              className="size-28 border border-border bg-surface sm:size-32"
             />
           )}
           <div>

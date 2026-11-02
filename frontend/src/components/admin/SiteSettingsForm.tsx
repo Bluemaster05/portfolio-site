@@ -6,6 +6,9 @@ import type { SiteSettings, SiteLink } from '@/lib/api/types';
 import { SECTIONS } from '@/lib/sections';
 import type { UploadMedia } from '@/lib/admin/media';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
+import { AvatarCropField } from './AvatarCropField';
+import { DEFAULT_AVATAR_CROP } from '@/components/public/Avatar';
+import { isImageSrc } from '@/lib/images';
 import { MediaSourceField } from './MediaSourceField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from './ui';
 
@@ -29,6 +32,7 @@ export function SiteSettingsForm({ settings, saving, saved, error, onSubmit, onU
     location: settings.location ?? '',
     contactEmail: settings.contactEmail ?? '',
     avatarUrl: settings.avatarUrl ?? '',
+    avatarCrop: settings.avatarCrop ?? DEFAULT_AVATAR_CROP,
     bio: settings.bio,
     links: settings.links,
     sections: settings.sections,
@@ -84,13 +88,26 @@ export function SiteSettingsForm({ settings, saving, saved, error, onSubmit, onU
           <TextInput id="contactEmail" type="email" value={draft.contactEmail ?? ''} onChange={(e) => set('contactEmail', e.target.value)} />
         </Field>
         <div className="sm:col-span-2">
-          <Field label="Avatar" help="A square photo works best; shown next to your name on the home page">
-            <MediaSourceField
-              label="Avatar"
-              value={draft.avatarUrl ?? ''}
-              onChange={(avatarUrl) => set('avatarUrl', avatarUrl)}
-              onUpload={onUpload}
-            />
+          <Field label="Avatar" help="Shown in a circle next to your name on the home page">
+            <div className="grid gap-4">
+              <MediaSourceField
+                label="Avatar"
+                value={draft.avatarUrl ?? ''}
+                onChange={(avatarUrl) => {
+                  set('avatarUrl', avatarUrl);
+                  // A different photo starts centered again
+                  set('avatarCrop', DEFAULT_AVATAR_CROP);
+                }}
+                onUpload={onUpload}
+              />
+              {isImageSrc(draft.avatarUrl) && (
+                <AvatarCropField
+                  src={draft.avatarUrl}
+                  value={draft.avatarCrop ?? DEFAULT_AVATAR_CROP}
+                  onChange={(crop) => set('avatarCrop', crop)}
+                />
+              )}
+            </div>
           </Field>
         </div>
         <div className="sm:col-span-2">

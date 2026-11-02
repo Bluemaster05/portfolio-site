@@ -3259,6 +3259,34 @@
           "token"
         ]
       },
+      "AvatarCropDto": {
+        "type": "object",
+        "properties": {
+          "x": {
+            "type": "number",
+            "description": "Focus point, percent across the image (0–100)",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "y": {
+            "type": "number",
+            "description": "Focus point, percent down the image (0–100)",
+            "minimum": 0,
+            "maximum": 100
+          },
+          "zoom": {
+            "type": "number",
+            "description": "Zoom around the focus point; 1 fills the circle with the whole image's shorter side",
+            "minimum": 1,
+            "maximum": 4
+          }
+        },
+        "required": [
+          "x",
+          "y",
+          "zoom"
+        ]
+      },
       "LinkDto": {
         "type": "object",
         "properties": {
@@ -3342,6 +3370,9 @@
           "avatarUrl": {
             "type": "string"
           },
+          "avatarCrop": {
+            "$ref": "#/components/schemas/AvatarCropDto"
+          },
           "links": {
             "type": "array",
             "items": {
@@ -3362,6 +3393,7 @@
           "siteDescription",
           "ownerName",
           "headline",
+          "avatarCrop",
           "links",
           "sections",
           "updatedAt"
@@ -3419,6 +3451,9 @@
           "avatarUrl": {
             "type": "string",
             "maxLength": 2048
+          },
+          "avatarCrop": {
+            "$ref": "#/components/schemas/AvatarCropDto"
           },
           "links": {
             "maxItems": 20,
