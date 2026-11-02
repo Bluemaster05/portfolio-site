@@ -33,10 +33,11 @@ import { UserResponseDto } from '../users/dto/user-response.dto.js';
 import { LoginDto } from './dto/login.dto.js';
 import { CsrfTokenResponseDto } from './dto/csrf-token-response.dto.js';
 import { generateCsrfToken } from './csrf.js';
+import { secureCookies } from './secure-cookies.js';
 
 const baseCookie: CookieOptions = {
   httpOnly: true,
-  secure: process.env.NODE_ENV === 'production',
+  secure: secureCookies,
   sameSite: 'strict',
   path: '/',
 };

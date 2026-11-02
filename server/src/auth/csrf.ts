@@ -1,4 +1,5 @@
 import { doubleCsrf } from 'csrf-csrf';
+import { secureCookies } from './secure-cookies.js';
 
 const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   getSecret: () => {
@@ -13,7 +14,7 @@ const { doubleCsrfProtection, generateCsrfToken } = doubleCsrf({
   cookieName: '__csrf',
   cookieOptions: {
     sameSite: 'strict',
-    secure: process.env.NODE_ENV === 'production',
+    secure: secureCookies,
     httpOnly: true,
     path: '/',
   },
