@@ -3,8 +3,10 @@ import { NextResponse, type NextRequest } from 'next/server';
 /**
  * Hides the admin portal from anyone outside ADMIN_ALLOWED_IPS by answering 404, so the public
  * site gives no hint that it exists. Unset means no restriction (development).
- * The client IP comes from the reverse proxy's X-Forwarded-For / X-Real-IP headers, so only trust
- * this behind a proxy that sets them. See docs/Security.md.
+ * The client IP comes from TRUSTED_CLIENT_IP_HEADER when set and present (e.g. `cf-connecting-ip`,
+ * which Cloudflare always overwrites); otherwise from X-Forwarded-For, which Next.js fills with the
+ * connection's address only when the client didn't send one. That fallback is therefore only as
+ * trustworthy as the network that can reach this server directly. See docs/Security.md.
  */
 export function proxy(request: NextRequest) {
   const allowList = process.env.ADMIN_ALLOWED_IPS?.split(',').map((entry) => entry.trim()).filter(Boolean);
@@ -21,8 +23,10 @@ export const config = {
 };
 
 function clientIp(request: NextRequest): string | undefined {
-  const forwarded = request.headers.get('x-forwarded-for')?.split(',')[0]?.trim();
-  return forwarded || request.headers.get('x-real-ip')?.trim() || undefined;
+  const headerName = process.env.TRUSTED_CLIENT_IP_HEADER?.trim();
+  const trusted = headerName ? request.headers.get(headerName)?.trim() : undefined;
+  if (trusted) return trusted;
+  return request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || undefined;
 }
 
 function matches(ip: string, entry: string): boolean {
