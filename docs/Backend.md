@@ -82,4 +82,5 @@ Each content module follows the same pattern:
 
 See `server/.env.example`. Key variables: `DB_*`, `JWT_SECRET`, `CSRF_SECRET`, `CORS_ORIGIN`,
 `ADMIN_EMAIL`, `ADMIN_PASSWORD`, `SEED_API_TOKEN`, `UPLOAD_DIR`, `MAX_UPLOAD_MB`,
-`MAX_VIDEO_UPLOAD_MB`.
+`MAX_VIDEO_UPLOAD_MB`, and for production `ADMIN_ALLOWED_IPS`, `TRUSTED_CLIENT_IP_HEADER`,
+`COOKIE_SECURE` (see [Security.md](Security.md#admin-network-restriction)).

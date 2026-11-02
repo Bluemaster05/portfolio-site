@@ -149,3 +149,5 @@ See `frontend/.env.example`:
 - `PORTFOLIO_API_TOKEN` — read-only token for public pages (server only).
 - `NEXT_PUBLIC_API_URL` — browser base URL of the API for the admin portal.
 - `ADMIN_ALLOWED_IPS` — optional allow-list for `/admin` (see [Security.md](Security.md)).
+- `TRUSTED_CLIENT_IP_HEADER` — header a proxy in front always sets to the real client IP, e.g.
+  `cf-connecting-ip`; used by the `/admin` check.

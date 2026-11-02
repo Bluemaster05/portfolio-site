@@ -63,5 +63,6 @@ your own branch and merge `main` into it for updates. See
 - [Rich content](docs/RichContent.md) — TipTap documents and custom blocks
 - [Uploads](docs/Uploads.md) — image uploads, storage, and serving
 - [Security](docs/Security.md) — auth, API tokens, CSRF, admin network restriction
+- [Deployment](docs/Deployment.md) — hosting on Linux: public site through a tunnel, admin over VPN
 - [Design guidelines](docs/DesignGuidelines.md) — readability-first styling rules
 - [Original prompt](docs/OriginalPrompt.md) — the brief this project started from

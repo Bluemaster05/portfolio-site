@@ -46,15 +46,26 @@ to anyone with the key. Details: [Uploads.md](Uploads.md).
 
 Goal: in production the public site exposes **no path** to the admin login or views.
 
-Current approach (first pass):
+With `ADMIN_ALLOWED_IPS` set (exact IPs or IPv4 CIDR ranges, comma separated; unset = allowed, for
+development), requests from outside the list get a plain 404:
 
-- `frontend/src/proxy.ts` returns 404 for `/admin/**` when `ADMIN_ALLOWED_IPS` is set and the
-  request IP is not in that list (exact IPs or IPv4 CIDR ranges, comma separated). Unset = allowed
-  (development).
+- `frontend/src/proxy.ts` hides `/admin/**`.
+- The API hides `/api/auth/*` and `/api/admin/*` (`adminNetworkMiddleware`), so signing in and
+  every admin call need an allowed address too, not just the page.
 - Public pages never link to `/admin`.
 
-Planned hardening (not done yet):
+**Which IP is checked.** `X-Forwarded-For` can't be trusted on its own: its first entry is whatever
+the client sent. So both sides use `TRUSTED_CLIENT_IP_HEADER` when it's set and present on the
+request — a header the proxy in front always overwrites, such as `cf-connecting-ip` (Cloudflare) or
+`x-real-ip` (nginx with `proxy_set_header X-Real-IP $remote_addr`). Otherwise:
 
-- Enforce the same allow-list on the server for `/api/auth/*` and `/api/admin/*`, using the real
-  client IP from a trusted reverse proxy (`trust proxy`).
-- Optionally run the admin portal on a separate internal hostname.
+- the API uses the connection's own address;
+- the frontend uses the address Next.js recorded, which a client connecting directly can fake —
+  fine when only trusted networks can reach Next.js directly, which is why the firewall matters.
+
+**Recommended production layout** ([Deployment.md](Deployment.md)): the public site goes out
+through a tunnel or proxy that never forwards `/admin` or `/api`, and the admin portal and API are
+reached only over a VPN. `ADMIN_ALLOWED_IPS` is then the VPN's subnet, the API is never public,
+and uploads go straight to it. Over a VPN the admin may be plain HTTP, which needs
+`COOKIE_SECURE=false` on the server (browsers drop `Secure` cookies set over HTTP); the VPN
+encrypts the traffic.
