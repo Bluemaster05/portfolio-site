@@ -3,9 +3,12 @@ import { DocumentBuilder, SwaggerModule, type OpenAPIObject } from '@nestjs/swag
 import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { doubleCsrfProtection } from './auth/csrf.js';
+import { adminNetworkMiddleware } from './common/middleware/admin-network.middleware.js';
 
 /** Middleware, validation and the /api prefix — shared by main.ts and tests. */
 export function configureApp(app: INestApplication) {
+  // Before anything else, so blocked admin requests look like any unknown route
+  app.use(adminNetworkMiddleware);
   app.use(cookieParser());
   app.use(helmet());
   app.enableCors({
