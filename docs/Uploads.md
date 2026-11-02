@@ -41,7 +41,7 @@ can be seeked, including through the Next.js `/media` proxy.
 
 | Place                 | Field                      | UI                                     |
 | --------------------- | -------------------------- | -------------------------------------- |
-| Site settings         | `avatarUrl`                | `MediaSourceField`                     |
+| Site settings         | `avatarUrl` + `avatarCrop` | `MediaSourceField` + `AvatarCropField` (drag/zoom inside a circle guide); `Avatar` renders it |
 | Projects              | `mediaLayout` + `media[]`  | select + `MediaListField`              |
 | Blog posts            | `coverImageUrl`            | `MediaSourceField`                     |
 | Honors                | `mediaLayout` + `media[]`  | same as projects (`mediaFields()` in `lib/admin/resources/media-fields.ts`); main image on the card, gallery on the page |
