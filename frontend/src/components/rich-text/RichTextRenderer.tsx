@@ -3,6 +3,7 @@ import { firstFrame, isImageSrc, isVideoSrc } from '@/lib/images';
 import { CodeBlock } from './CodeBlock';
 import { CodeTabs } from './CodeTabs';
 import { ImageCarousel } from '@/components/public/ImageCarousel';
+import { TopicTabs } from './TopicTabs';
 import {
   carouselImagesOf,
   childrenOf,
@@ -12,16 +13,31 @@ import {
   safeHref,
   stringAttr,
   toDoc,
+  topicsOf,
   type RichTextNode,
 } from './types';
 
 /**
  * Renders a stored TipTap document as semantic HTML on the server. Only the node and mark types
  * below are rendered; anything else is skipped, so stored content can't inject markup.
+ * A write-up split into topics renders as tabs, one panel per topic.
  * To add a block type see docs/RichContent.md.
  */
 export function RichTextRenderer({ doc, className = '' }: { doc: unknown; className?: string }) {
-  return <div className={`prose ${className}`}>{renderChildren(toDoc(doc))}</div>;
+  const topics = topicsOf(doc);
+  if (topics && topics.length > 1) {
+    return (
+      <TopicTabs
+        label="Topics"
+        tabs={topics.map((topic) => ({
+          title: topic.title,
+          panel: <div className={`prose ${className}`}>{renderChildren(topic.doc)}</div>,
+        }))}
+      />
+    );
+  }
+  // A lone topic is shown like a plain document
+  return <div className={`prose ${className}`}>{renderChildren(topics?.[0].doc ?? toDoc(doc))}</div>;
 }
 
 function renderChildren(node: RichTextNode): ReactNode[] {

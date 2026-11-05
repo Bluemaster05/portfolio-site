@@ -62,12 +62,46 @@ export function codeTabsOf(node: RichTextNode): CodeTab[] {
 
 /** True when the document has no visible content, so sections can be hidden. */
 export function isEmptyDoc(value: unknown): boolean {
-  const doc = toDoc(value);
-  const children = childrenOf(doc);
+  const topics = topicsOf(value);
+  if (topics) return topics.every((topic) => isEmptyDoc(topic.doc));
+  const children = childrenOf(toDoc(value));
   return (
     children.length === 0 ||
     children.every((child) => child.type === 'paragraph' && childrenOf(child).length === 0)
   );
+}
+
+/** One titled part of a write-up split into topics; `doc` is a plain document. */
+export interface Topic {
+  title: string;
+  doc: RichTextNode;
+}
+
+/**
+ * A write-up's topics, or undefined for a plain document. Topics are top-level `topic` nodes
+ * (`{ type: 'topic', attrs: { title }, content }`); a write-up only has them when there are two or
+ * more, and then they're shown as tabs. Anything else at the top level is ignored.
+ */
+export function topicsOf(value: unknown): Topic[] | undefined {
+  const topics = childrenOf(toDoc(value)).filter((child) => child.type === 'topic');
+  if (topics.length === 0) return undefined;
+  return topics.map((topic) => ({
+    title: stringAttr(topic, 'title') ?? '',
+    doc: { type: 'doc', content: childrenOf(topic) },
+  }));
+}
+
+/** The document for these topics; a single topic becomes a plain document (its title is dropped). */
+export function docFromTopics(topics: Topic[]): RichTextValue {
+  if (topics.length === 1) return { ...toDoc(topics[0].doc) };
+  return {
+    type: 'doc',
+    content: topics.map((topic) => ({
+      type: 'topic',
+      attrs: { title: topic.title },
+      content: childrenOf(toDoc(topic.doc)),
+    })),
+  };
 }
 
 /** Links may only point to http(s), mailto, or same-site paths. */
