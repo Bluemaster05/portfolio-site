@@ -25,9 +25,9 @@ const SLIDE_POSITION: Record<string, string> = {
 
 /**
  * Images one at a time: the selected one centered, faded copies of its neighbours to each side,
- * its description below. Arrows (buttons or keys) and clicking a neighbour move between them with a
- * short slide; the global reduced-motion rule turns the motion off. Clicking the selected image
- * opens it full size.
+ * its description below the arrows. Arrows (buttons or keys) and clicking a neighbour move between
+ * them with a short slide; the global reduced-motion rule turns the motion off. Clicking the
+ * selected image opens it full size.
  */
 export function ImageCarousel({ images, label = 'Images' }: { images: CarouselImage[]; label?: string }) {
   const [active, setActive] = useState(0);
@@ -87,13 +87,6 @@ export function ImageCarousel({ images, label = 'Images' }: { images: CarouselIm
         })}
       </div>
 
-      {hasCaptions && (
-        // The counter below announces the description, so this is for sighted readers
-        <p aria-hidden className="mx-auto min-h-5 max-w-[70ch] text-center text-sm text-muted">
-          {images[active].alt}
-        </p>
-      )}
-
       {count > 1 && (
         <div className="flex items-center justify-center gap-4">
           <button
@@ -119,6 +112,12 @@ export function ImageCarousel({ images, label = 'Images' }: { images: CarouselIm
             →
           </button>
         </div>
+      )}
+      {hasCaptions && (
+        // Below the arrows so they stay put as descriptions change length; the counter announces it
+        <p aria-hidden className="mx-auto min-h-5 max-w-[70ch] text-center text-sm text-muted">
+          {images[active].alt}
+        </p>
       )}
       <MediaLightbox
         item={zoomed ? { url: images[active].url, alt: images[active].alt } : undefined}
