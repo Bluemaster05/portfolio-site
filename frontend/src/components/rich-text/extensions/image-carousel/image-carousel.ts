@@ -10,7 +10,7 @@ export interface ImageCarouselOptions {
 
 /**
  * Images shown one at a time with arrows. Stored as
- * `{ type: 'imageCarousel', attrs: { images: { src, alt }[] } }` and rendered on the public site by
+ * `{ type: 'imageCarousel', attrs: { images: { src, alt }[], showCaptions } }` and rendered on the public site by
  * RichTextRenderer as an ImageCarousel (see docs/RichContent.md).
  */
 export const ImageCarouselExtension = Node.create<ImageCarouselOptions>({
@@ -36,6 +36,11 @@ export const ImageCarouselExtension = Node.create<ImageCarouselOptions>({
           }
         },
         renderHTML: (attributes) => ({ 'data-images': JSON.stringify(attributes.images) }),
+      },
+      showCaptions: {
+        default: true,
+        parseHTML: (element) => !element.hasAttribute('data-no-captions'),
+        renderHTML: (attributes) => (attributes.showCaptions === false ? { 'data-no-captions': '' } : {}),
       },
     };
   },

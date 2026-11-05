@@ -129,6 +129,11 @@ export interface CarouselImageAttr {
   alt: string;
 }
 
+/** Whether an imageCarousel shows the selected image's alt text below it (on for older carousels). */
+export function carouselShowsCaptions(node: { attrs?: Record<string, unknown> }): boolean {
+  return node.attrs?.showCaptions !== false;
+}
+
 /** The images of an imageCarousel node, skipping malformed entries. */
 export function carouselImagesOf(node: { attrs?: Record<string, unknown> }): CarouselImageAttr[] {
   const images = node.attrs?.images;

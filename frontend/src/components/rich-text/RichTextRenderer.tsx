@@ -7,6 +7,7 @@ import { ZoomableImage } from '@/components/public/ZoomableImage';
 import { TopicTabs } from './TopicTabs';
 import {
   carouselImagesOf,
+  carouselShowsCaptions,
   childrenOf,
   codeTabsOf,
   imageAlign,
@@ -116,7 +117,7 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
     }
     case 'imageCarousel': {
       const images = carouselImagesOf(node).flatMap(({ src, alt }) => (isImageSrc(src) ? [{ url: src, alt }] : []));
-      return <ImageCarousel key={key} images={images} />;
+      return <ImageCarousel key={key} images={images} captions={carouselShowsCaptions(node)} />;
     }
     case 'text':
       return renderText(node, key);

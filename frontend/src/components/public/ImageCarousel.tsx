@@ -29,13 +29,22 @@ const SLIDE_POSITION: Record<string, string> = {
  * them with a short slide; the global reduced-motion rule turns the motion off. Clicking the
  * selected image opens it full size.
  */
-export function ImageCarousel({ images, label = 'Images' }: { images: CarouselImage[]; label?: string }) {
+export function ImageCarousel({
+  images,
+  label = 'Images',
+  captions = true,
+}: {
+  images: CarouselImage[];
+  label?: string;
+  /** Show the selected image's alt text below the arrows (the full-size view always shows it) */
+  captions?: boolean;
+}) {
   const [active, setActive] = useState(0);
   const [zoomed, setZoomed] = useState(false);
   const id = useId();
   const count = images.length;
   if (count === 0) return null;
-  const hasCaptions = images.some((image) => image.alt);
+  const hasCaptions = captions && images.some((image) => image.alt);
 
   const go = (step: number) => setActive((current) => (current + step + count) % count);
 

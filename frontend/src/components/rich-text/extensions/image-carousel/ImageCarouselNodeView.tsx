@@ -4,7 +4,7 @@ import { NodeViewWrapper, type ReactNodeViewProps } from '@tiptap/react';
 import { useState } from 'react';
 import { MediaListField } from '@/components/admin/MediaListField';
 import type { MediaItem } from '@/lib/admin/form-values';
-import { carouselImagesOf, type CarouselImageAttr } from '../../types';
+import { carouselImagesOf, carouselShowsCaptions, type CarouselImageAttr } from '../../types';
 import { useDraft } from '../use-draft';
 import type { ImageCarouselOptions } from './image-carousel';
 
@@ -19,6 +19,7 @@ const PREVIEW_COUNT = 6;
 /**
  * Editing UI for an imageCarousel block. Compact by default (thumbnails and a count) so it doesn't
  * take over the write-up; Edit opens the list to add (upload or URL), describe, reorder, and remove.
+ * "Show descriptions" toggles the alt text under the public carousel (full size always shows it).
  */
 export function ImageCarouselNodeView({ node, updateAttributes, deleteNode, selected, extension }: ReactNodeViewProps) {
   const { onUpload } = extension.options as ImageCarouselOptions;
@@ -40,7 +41,16 @@ export function ImageCarouselNodeView({ node, updateAttributes, deleteNode, sele
         <p className="text-sm text-muted">
           {items.length === 0 ? 'No images yet' : `${items.length} image${items.length === 1 ? '' : 's'}`}
         </p>
-        <div className="ml-auto flex gap-3">
+        <div className="ml-auto flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-1.5 text-sm">
+            <input
+              type="checkbox"
+              checked={carouselShowsCaptions(node)}
+              onChange={(event) => updateAttributes({ showCaptions: event.target.checked })}
+              className="accent-accent"
+            />
+            Show descriptions
+          </label>
           <button
             type="button"
             aria-expanded={editing}
