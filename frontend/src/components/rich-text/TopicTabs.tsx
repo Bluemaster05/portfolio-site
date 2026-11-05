@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type KeyboardEvent, type ReactNode } from "react";
+import { useId, useRef, useState, type KeyboardEvent, type ReactNode } from "react";
 import { ScrollingTabRow } from "@/components/ScrollingTabRow";
 
 interface TopicTabsProps {
@@ -13,6 +13,8 @@ interface TopicTabsProps {
   onSelect?: (index: number) => void;
   /** Shown at the end of the tab row, e.g. an Add button */
   actions?: ReactNode;
+  /** Ends each panel with buttons to the previous and next topics (the public page) */
+  pager?: boolean;
 }
 
 /**
@@ -26,15 +28,35 @@ export function TopicTabs({
   active,
   onSelect,
   actions,
+  pager = false,
 }: TopicTabsProps) {
   const [ownActive, setOwnActive] = useState(0);
   const id = useId();
+  const top = useRef<HTMLDivElement>(null);
   const current = Math.min(active ?? ownActive, tabs.length - 1);
 
   function select(index: number) {
     setOwnActive(index);
     onSelect?.(index);
   }
+
+  // From the bottom of a panel: open that topic and bring its start (the tab row) back into view
+  function turnTo(index: number) {
+    select(index);
+    const row = top.current;
+    if (!row) return;
+    if (row.getBoundingClientRect().top < 0) {
+      const reduce = window.matchMedia(
+        "(prefers-reduced-motion: reduce)",
+      ).matches;
+      row.scrollIntoView({ behavior: reduce ? "auto" : "smooth" });
+    }
+    document
+      .getElementById(`${id}-tab-${index}`)
+      ?.focus({ preventScroll: true });
+  }
+
+  const titleOf = (index: number) => tabs[index].title.trim() || "Untitled";
 
   function onKeyDown(event: KeyboardEvent<HTMLButtonElement>) {
     const step =
@@ -49,7 +71,10 @@ export function TopicTabs({
   return (
     // The one column never grows past its container, so wide tabs or panel content (code, images)
     // scroll inside it instead of widening the page
-    <div className="not-prose grid min-w-0 grid-cols-[minmax(0,1fr)] gap-6">
+    <div
+      ref={top}
+      className="not-prose grid min-w-0 scroll-mt-24 grid-cols-[minmax(0,1fr)] gap-6"
+    >
       <ScrollingTabRow
         label={label}
         itemsName="topics"
@@ -73,7 +98,7 @@ export function TopicTabs({
                 : "border-transparent text-muted hover:text-foreground"
             }`}
           >
-            {tab.title.trim() || "Untitled"}
+            {titleOf(index)}
           </button>
         ))}
       </ScrollingTabRow>
@@ -86,8 +111,70 @@ export function TopicTabs({
           hidden={index !== current}
         >
           {tab.panel}
+          {pager && (
+            <nav
+              aria-label="Other topics"
+              className="mt-8 flex flex-wrap justify-between gap-3"
+            >
+              {index > 0 && (
+                <PagerButton
+                  direction={-1}
+                  title={titleOf(index - 1)}
+                  onClick={() => turnTo(index - 1)}
+                />
+              )}
+              {index < tabs.length - 1 && (
+                <PagerButton
+                  direction={1}
+                  title={titleOf(index + 1)}
+                  onClick={() => turnTo(index + 1)}
+                />
+              )}
+            </nav>
+          )}
         </div>
       ))}
     </div>
+  );
+}
+
+function PagerButton({
+  direction,
+  title,
+  onClick,
+}: {
+  direction: -1 | 1;
+  title: string;
+  onClick: () => void;
+}) {
+  const next = direction > 0;
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      // The next button stays on the right even when it is the only one
+      className={`group flex min-w-0 max-w-full items-center gap-2 rounded-card border border-border bg-surface px-3 py-1.5 transition-colors hover:border-accent ${
+        next ? "ml-auto text-right" : "text-left"
+      }`}
+    >
+      {!next && (
+        <span aria-hidden="true" className="text-muted group-hover:text-foreground">
+          ←
+        </span>
+      )}
+      <span className="min-w-0">
+        <span className="block text-xs text-muted">
+          {next ? "Next topic" : "Previous topic"}
+        </span>
+        <span className="block break-words text-sm font-medium text-foreground">
+          {title}
+        </span>
+      </span>
+      {next && (
+        <span aria-hidden="true" className="text-muted group-hover:text-foreground">
+          →
+        </span>
+      )}
+    </button>
   );
 }

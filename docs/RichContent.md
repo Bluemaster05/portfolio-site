@@ -67,7 +67,8 @@ into a plain document. In the admin, write-up fields use `kind: 'writeup'` (`Wri
 topic has its own title, editor, move left/right, and Delete; deleting down to one topic goes back
 to a single write-up without tabs. `topicsOf()` reads topics, `isEmptyDoc()` treats a document whose
 topics are all empty as empty, and `RichTextRenderer` renders topics as tabs (each panel rendered on
-the server; only the tab switching runs in the browser).
+the server; only the tab switching runs in the browser). Each public panel ends with ← previous and
+next → buttons naming the neighbouring topics; they open that topic and scroll back up to the tabs.
 
 ## Syntax colors
 

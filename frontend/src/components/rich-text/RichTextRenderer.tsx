@@ -32,6 +32,7 @@ export function RichTextRenderer({ doc, className = '' }: { doc: unknown; classN
     return (
       <TopicTabs
         label="Topics"
+        pager
         tabs={topics.map((topic) => ({
           title: topic.title,
           panel: <div className={`prose ${className}`}>{renderChildren(topic.doc)}</div>,
