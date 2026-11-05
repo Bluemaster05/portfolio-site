@@ -2,6 +2,7 @@ import type { ProjectMediaItem, ProjectMediaLayout } from '@/lib/api/types';
 import { leadIndex, renderableMedia } from '@/lib/images';
 import { LeadVideo } from './LeadVideo';
 import { ProjectGallery } from './ProjectGallery';
+import { ZoomableImage } from './ZoomableImage';
 
 interface ProjectMediaProps {
   layout: ProjectMediaLayout;
@@ -28,11 +29,9 @@ export function ProjectMedia({ layout, media, title }: ProjectMediaProps) {
           className="h-[min(48vh,28rem)] w-full rounded-card border border-border bg-black object-contain"
         />
       ) : (
-        // Uploads and external hosts both appear here, so next/image's allow-list doesn't fit
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <ZoomableImage
           src={item.url}
-          alt={item.alt ?? ''}
+          alt={item.alt}
           className="max-h-[min(52vh,30rem)] w-auto max-w-full rounded-card border border-border bg-surface object-contain"
         />
       )}

@@ -4,6 +4,7 @@ import { useState } from 'react';
 import type { ProjectMediaItem } from '@/lib/api/types';
 import { firstFrame } from '@/lib/images';
 import { LeadVideo } from './LeadVideo';
+import { ZoomableImage } from './ZoomableImage';
 
 interface ProjectGalleryProps {
   /** Images and videos in tile order */
@@ -45,8 +46,13 @@ export function ProjectGallery({ items, initialIndex, title }: ProjectGalleryPro
           className={`${mainClass} bg-black`}
         />
       ) : (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img key={main.url} src={main.url} alt={main.alt ?? ''} className={`${mainClass} bg-surface`} />
+        <ZoomableImage
+          key={main.url}
+          src={main.url}
+          alt={main.alt}
+          buttonClassName="w-full"
+          className={`${mainClass} bg-surface`}
+        />
       )}
       <ul className="grid max-w-xl grid-cols-5 gap-2">
         {items.map((item, index) => {

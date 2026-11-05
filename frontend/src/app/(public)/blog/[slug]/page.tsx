@@ -6,6 +6,7 @@ import { getBlogPost } from '@/lib/api/public-data';
 import { formatDate } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
 import { TagList } from '@/components/public/PageHeader';
+import { ZoomableImage } from '@/components/public/ZoomableImage';
 import { isImageSrc } from '@/lib/images';
 
 export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promise<Metadata> {
@@ -48,11 +49,10 @@ async function BlogPostContent({ params }: Pick<PageProps<'/blog/[slug]'>, 'para
       </header>
       {isImageSrc(post.coverImageUrl) && (
         // Decorative: the title already says what the post is about
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <ZoomableImage
           src={post.coverImageUrl}
-          alt=""
-          className="mb-8 max-h-[min(40vh,22rem)] w-full rounded-card border border-border bg-surface object-cover"
+          buttonClassName="mb-8 w-full"
+          className="max-h-[min(40vh,22rem)] w-full rounded-card border border-border bg-surface object-cover"
         />
       )}
       <RichTextRenderer doc={post.content} />

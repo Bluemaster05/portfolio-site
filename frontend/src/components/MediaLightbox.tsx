@@ -28,7 +28,7 @@ export function MediaLightbox({ item, onClose }: MediaLightboxProps) {
         if (event.target === event.currentTarget) onClose();
       }}
       aria-label={item?.alt || (item?.kind === 'video' ? 'Video preview' : 'Image preview')}
-      className="m-auto max-h-none max-w-none bg-transparent p-0 backdrop:bg-black/85"
+      className="m-auto max-h-none max-w-none bg-transparent p-0 backdrop:bg-black/80"
     >
       {item && (
         <figure className="flex flex-col items-center gap-3">
@@ -44,8 +44,8 @@ export function MediaLightbox({ item, onClose }: MediaLightboxProps) {
             // eslint-disable-next-line @next/next/no-img-element
             <img src={item.url} alt={item.alt ?? ''} className="max-h-[85vh] max-w-[94vw] rounded-md object-contain" />
           )}
-          <figcaption className="flex items-center gap-4 text-sm text-white/85">
-            {item.alt && <span>{item.alt}</span>}
+          <figcaption className="flex max-w-[94vw] items-center gap-4 text-sm text-white/85">
+            {item.alt && <span className="max-w-[70ch]">{item.alt}</span>}
             <button
               type="button"
               onClick={onClose}

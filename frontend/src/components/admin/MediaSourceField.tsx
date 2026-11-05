@@ -4,7 +4,7 @@ import { useId, useRef, useState } from 'react';
 import { IMAGE_ACCEPT, VIDEO_ACCEPT, type UploadMedia } from '@/lib/admin/media';
 import { errorMessage } from '@/lib/admin/api-error';
 import { isImageSrc, isUploadedMedia, isVideoSrc } from '@/lib/images';
-import { MediaLightbox } from './MediaLightbox';
+import { MediaLightbox } from '@/components/MediaLightbox';
 import { Button, TextInput } from './ui';
 
 export type SourceMode = 'upload' | 'url';

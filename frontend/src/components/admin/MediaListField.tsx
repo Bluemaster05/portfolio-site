@@ -5,7 +5,7 @@ import { IMAGE_ACCEPT, VIDEO_ACCEPT, type UploadMedia } from '@/lib/admin/media'
 import { errorMessage } from '@/lib/admin/api-error';
 import { firstFrame, isImageSrc, isVideoSrc, looksLikeVideo, mainIndexOf } from '@/lib/images';
 import type { MediaItem } from '@/lib/admin/form-values';
-import { MediaLightbox } from './MediaLightbox';
+import { MediaLightbox } from '@/components/MediaLightbox';
 import { SourceModeToggle, type SourceMode } from './MediaSourceField';
 import { Button, TextInput } from './ui';
 
