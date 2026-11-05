@@ -118,6 +118,11 @@ export function imageAlign(node: { attrs?: Record<string, unknown> }): ImageAlig
   return node.attrs?.align === 'center' ? 'center' : 'left';
 }
 
+/** Whether an image node shows its alt text as a caption below it (off for older images). */
+export function imageShowsCaption(node: { attrs?: Record<string, unknown> }): boolean {
+  return node.attrs?.showCaption === true;
+}
+
 /** One image in an imageCarousel block. */
 export interface CarouselImageAttr {
   src: string;

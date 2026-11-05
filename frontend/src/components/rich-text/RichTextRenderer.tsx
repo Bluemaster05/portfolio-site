@@ -3,12 +3,14 @@ import { firstFrame, isImageSrc, isVideoSrc } from '@/lib/images';
 import { CodeBlock } from './CodeBlock';
 import { CodeTabs } from './CodeTabs';
 import { ImageCarousel } from '@/components/public/ImageCarousel';
+import { ZoomableImage } from '@/components/public/ZoomableImage';
 import { TopicTabs } from './TopicTabs';
 import {
   carouselImagesOf,
   childrenOf,
   codeTabsOf,
   imageAlign,
+  imageShowsCaption,
   numberAttr,
   safeHref,
   stringAttr,
@@ -84,10 +86,15 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
     case 'image': {
       const src = stringAttr(node, 'src');
       if (!isImageSrc(src)) return null;
-      // Stored images can be uploads or live on any host, so next/image's allow-list doesn't fit
       return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img key={key} src={src} alt={stringAttr(node, 'alt') ?? ''} data-align={imageAlign(node)} loading="lazy" />
+        <ZoomableImage
+          key={key}
+          src={src}
+          alt={stringAttr(node, 'alt')}
+          align={imageAlign(node)}
+          caption={imageShowsCaption(node)}
+          loading="lazy"
+        />
       );
     }
     case 'video': {

@@ -13,7 +13,7 @@ import { HighlightedCodeBlock } from './extensions/code-block/code-block';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
 import { ImageCarouselExtension } from './extensions/image-carousel/image-carousel';
 import { VideoExtension } from './extensions/video';
-import { imageAlign, isEmptyDoc, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
+import { imageAlign, imageShowsCaption, isEmptyDoc, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
 interface RichTextEditorProps {
   value: unknown;
@@ -101,6 +101,7 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       codeBlock: e.isActive('codeBlock'),
       image: e.isActive('image'),
       imageAlign: imageAlign({ attrs: e.getAttributes('image') }),
+      imageCaption: imageShowsCaption({ attrs: e.getAttributes('image') }),
     }),
   });
 
@@ -115,9 +116,15 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
     if (href) chain().extendMarkRange('link').setLink({ href }).run();
   }
 
-  function insertImage(src: string, alt: string, align: ImageAlign) {
-    chain().insertContent({ type: 'image', attrs: { src, alt, align } }).run();
+  function insertImage(src: string, alt: string, align: ImageAlign, showCaption: boolean) {
+    chain().insertContent({ type: 'image', attrs: { src, alt, align, showCaption } }).run();
     setPanel(undefined);
+  }
+
+  function editImageDescription() {
+    const current = editor.getAttributes('image').alt;
+    const alt = window.prompt('Image description (alt text)', typeof current === 'string' ? current : '');
+    if (alt !== null) chain().updateAttributes('image', { alt: alt.trim() }).run();
   }
 
   function insertVideo(src: string, title: string) {
@@ -202,6 +209,16 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
               {label}
             </ToolButton>
           ))}
+          <ToolButton label="Edit image description" onClick={editImageDescription}>
+            Description
+          </ToolButton>
+          <ToolButton
+            label="Show description under the image"
+            active={state.imageCaption}
+            onClick={() => chain().updateAttributes('image', { showCaption: !state.imageCaption }).run()}
+          >
+            Caption
+          </ToolButton>
         </>
       )}
     </div>
@@ -253,19 +270,20 @@ const IMAGE_ALIGNS: { value: ImageAlign; label: string }[] = [
   { value: 'center', label: 'Center' },
 ];
 
-/** Choose an image (upload by default, or URL), its alt text and alignment, then insert it. */
+/** Choose an image (upload by default, or URL), its alt text, alignment and caption, then insert it. */
 function ImageInsertPanel({
   onUpload,
   onInsert,
   onCancel,
 }: {
   onUpload: UploadMedia;
-  onInsert: (src: string, alt: string, align: ImageAlign) => void;
+  onInsert: (src: string, alt: string, align: ImageAlign, showCaption: boolean) => void;
   onCancel: () => void;
 }) {
   const [src, setSrc] = useState('');
   const [alt, setAlt] = useState('');
   const [align, setAlign] = useState<ImageAlign>('left');
+  const [showCaption, setShowCaption] = useState(false);
 
   return (
     // Capped so a stuck panel never hides the write-up it's inserting into
@@ -296,8 +314,21 @@ function ImageInsertPanel({
           </label>
         ))}
       </fieldset>
+      <label className="flex items-center gap-1.5 text-sm">
+        <input
+          type="checkbox"
+          checked={showCaption}
+          onChange={(event) => setShowCaption(event.target.checked)}
+          className="accent-accent"
+        />
+        Show the description under the image
+      </label>
       <div className="flex gap-2">
-        <Button variant="primary" disabled={!isImageSrc(src)} onClick={() => onInsert(src, alt.trim(), align)}>
+        <Button
+          variant="primary"
+          disabled={!isImageSrc(src)}
+          onClick={() => onInsert(src, alt.trim(), align, showCaption)}
+        >
           Insert image
         </Button>
         <Button onClick={onCancel}>Cancel</Button>

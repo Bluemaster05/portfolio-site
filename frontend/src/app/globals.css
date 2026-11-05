@@ -208,6 +208,15 @@ body {
   margin-inline: auto;
 }
 
+/* Public write-up images sit in a click-to-zoom button (and a figure when captioned); align those */
+.prose .zoomable-image[data-align="center"] {
+  margin-inline: auto;
+}
+
+.prose .zoomable-figure[data-align="center"] {
+  text-align: center;
+}
+
 /* The selected image in the editor, so it's clear what the alignment buttons apply to */
 .rich-text-editor .ProseMirror img.ProseMirror-selectednode {
   outline: 2px solid var(--accent);
