@@ -123,6 +123,11 @@ export function imageShowsCaption(node: { attrs?: Record<string, unknown> }): bo
   return node.attrs?.showCaption === true;
 }
 
+/** Whether an image node has a thin outline, e.g. so a screenshot stands apart from the page (off for older images). */
+export function imageHasBorder(node: { attrs?: Record<string, unknown> }): boolean {
+  return node.attrs?.border === true;
+}
+
 /** One image in an imageCarousel block. */
 export interface CarouselImageAttr {
   src: string;

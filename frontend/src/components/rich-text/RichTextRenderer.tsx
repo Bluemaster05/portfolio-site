@@ -11,6 +11,7 @@ import {
   childrenOf,
   codeTabsOf,
   imageAlign,
+  imageHasBorder,
   imageShowsCaption,
   numberAttr,
   safeHref,
@@ -95,6 +96,7 @@ function renderNode(node: RichTextNode, key: number): ReactNode {
           alt={stringAttr(node, 'alt')}
           align={imageAlign(node)}
           caption={imageShowsCaption(node)}
+          border={imageHasBorder(node)}
           loading="lazy"
         />
       );

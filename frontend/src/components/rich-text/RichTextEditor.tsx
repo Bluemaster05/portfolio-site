@@ -14,7 +14,7 @@ import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/cod
 import { ImageCarouselExtension } from './extensions/image-carousel/image-carousel';
 import { VideoExtension } from './extensions/video';
 import { useDraft } from './extensions/use-draft';
-import { imageAlign, imageShowsCaption, isEmptyDoc, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
+import { imageAlign, imageHasBorder, imageShowsCaption, isEmptyDoc, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
 interface RichTextEditorProps {
   value: unknown;
@@ -103,6 +103,7 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       image: e.isActive('image'),
       imageAlign: imageAlign({ attrs: e.getAttributes('image') }),
       imageCaption: imageShowsCaption({ attrs: e.getAttributes('image') }),
+      imageBorder: imageHasBorder({ attrs: e.getAttributes('image') }),
       imageAlt: String(e.getAttributes('image').alt ?? ''),
       // Which image is selected, so the description box starts over on another image
       imagePos: e.state.selection.from,
@@ -120,8 +121,8 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
     if (href) chain().extendMarkRange('link').setLink({ href }).run();
   }
 
-  function insertImage(src: string, alt: string, align: ImageAlign, showCaption: boolean) {
-    chain().insertContent({ type: 'image', attrs: { src, alt, align, showCaption } }).run();
+  function insertImage(src: string, alt: string, align: ImageAlign, showCaption: boolean, border: boolean) {
+    chain().insertContent({ type: 'image', attrs: { src, alt, align, showCaption, border } }).run();
     setPanel(undefined);
   }
 
@@ -201,10 +202,12 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
         align={state.imageAlign}
         alt={state.imageAlt}
         showCaption={state.imageCaption}
+        border={state.imageBorder}
         onAlign={(align) => chain().updateAttributes('image', { align }).run()}
         // Not chained through focus(), so typing stays in the description box
         onAlt={(alt) => editor.chain().updateAttributes('image', { alt }).run()}
         onShowCaption={(showCaption) => chain().updateAttributes('image', { showCaption }).run()}
+        onBorder={(border) => chain().updateAttributes('image', { border }).run()}
       />
     )}
     {panel === 'image' && (
@@ -260,16 +263,20 @@ function ImageSettings({
   align,
   alt,
   showCaption,
+  border,
   onAlign,
   onAlt,
   onShowCaption,
+  onBorder,
 }: {
   align: ImageAlign;
   alt: string;
   showCaption: boolean;
+  border: boolean;
   onAlign: (align: ImageAlign) => void;
   onAlt: (alt: string) => void;
   onShowCaption: (showCaption: boolean) => void;
+  onBorder: (border: boolean) => void;
 }) {
   const [draft, setDraft] = useDraft(alt, onAlt);
 
@@ -303,24 +310,34 @@ function ImageSettings({
         />
         Show description under the image
       </label>
+      <label className="flex items-center gap-1.5">
+        <input
+          type="checkbox"
+          checked={border}
+          onChange={(event) => onBorder(event.target.checked)}
+          className="accent-accent"
+        />
+        Border
+      </label>
     </div>
   );
 }
 
-/** Choose an image (upload by default, or URL), its alt text, alignment and caption, then insert it. */
+/** Choose an image (upload by default, or URL), its alt text, alignment, caption and border, then insert it. */
 function ImageInsertPanel({
   onUpload,
   onInsert,
   onCancel,
 }: {
   onUpload: UploadMedia;
-  onInsert: (src: string, alt: string, align: ImageAlign, showCaption: boolean) => void;
+  onInsert: (src: string, alt: string, align: ImageAlign, showCaption: boolean, border: boolean) => void;
   onCancel: () => void;
 }) {
   const [src, setSrc] = useState('');
   const [alt, setAlt] = useState('');
   const [align, setAlign] = useState<ImageAlign>('left');
   const [showCaption, setShowCaption] = useState(false);
+  const [border, setBorder] = useState(false);
 
   return (
     // Capped so a stuck panel never hides the write-up it's inserting into
@@ -360,11 +377,20 @@ function ImageInsertPanel({
         />
         Show the description under the image
       </label>
+      <label className="flex items-center gap-1.5 text-sm">
+        <input
+          type="checkbox"
+          checked={border}
+          onChange={(event) => setBorder(event.target.checked)}
+          className="accent-accent"
+        />
+        Add a thin border (helps screenshots stand apart from the page)
+      </label>
       <div className="flex gap-2">
         <Button
           variant="primary"
           disabled={!isImageSrc(src)}
-          onClick={() => onInsert(src, alt.trim(), align, showCaption)}
+          onClick={() => onInsert(src, alt.trim(), align, showCaption, border)}
         >
           Insert image
         </Button>

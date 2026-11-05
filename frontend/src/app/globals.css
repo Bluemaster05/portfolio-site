@@ -213,6 +213,12 @@ body {
   margin-inline: auto;
 }
 
+/* Optional outline (image node's border attr), between --border and --muted so a screenshot with
+   the page's own background still stands apart from it without looking boxed in */
+.prose img[data-border] {
+  border: 1px solid color-mix(in srgb, var(--muted) 45%, transparent);
+}
+
 /* Public write-up images sit in a click-to-zoom button (and a figure when captioned); align those */
 .prose .zoomable-image[data-align="center"] {
   margin-inline: auto;

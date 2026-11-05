@@ -1,11 +1,12 @@
 import Image from '@tiptap/extension-image';
 import type { Node as ProseMirrorNode } from '@tiptap/pm/model';
-import { imageAlign, imageShowsCaption } from '../types';
+import { imageAlign, imageHasBorder, imageShowsCaption } from '../types';
 
 /**
  * The stock image node plus an `align` attr ('left' | 'center'), shown as data-align so the editor
- * and the public renderer share the `.prose img[data-align]` styles, and a `showCaption` flag that
- * puts the alt text under the image on the public site (and in the editor, via the node view).
+ * and the public renderer share the `.prose img[data-align]` styles, a `showCaption` flag that
+ * puts the alt text under the image on the public site (and in the editor, via the node view), and
+ * a `border` flag shown as data-border (`.prose img[data-border]`).
  */
 export const AlignedImage = Image.extend({
   addAttributes() {
@@ -20,6 +21,11 @@ export const AlignedImage = Image.extend({
         default: false,
         parseHTML: (element) => element.hasAttribute('data-caption'),
         renderHTML: (attributes) => (attributes.showCaption === true ? { 'data-caption': '' } : {}),
+      },
+      border: {
+        default: false,
+        parseHTML: (element) => element.hasAttribute('data-border'),
+        renderHTML: (attributes) => (attributes.border === true ? { 'data-border': '' } : {}),
       },
     };
   },
@@ -39,6 +45,7 @@ export const AlignedImage = Image.extend({
         img.src = typeof current.attrs.src === 'string' ? current.attrs.src : '';
         img.alt = alt;
         img.dataset.align = align;
+        img.toggleAttribute('data-border', imageHasBorder(current));
         caption.dataset.align = align;
         caption.textContent = alt;
         caption.hidden = !(imageShowsCaption(current) && alt);

@@ -14,6 +14,8 @@ interface ZoomableImageProps {
   caption?: boolean;
   /** Passed through as data-align, for the `.prose` alignment styles */
   align?: string;
+  /** Passed through as data-border, for the `.prose` thin outline */
+  border?: boolean;
   loading?: 'lazy' | 'eager';
 }
 
@@ -25,6 +27,7 @@ export function ZoomableImage({
   buttonClassName = '',
   caption = false,
   align,
+  border = false,
   loading,
 }: ZoomableImageProps) {
   const [open, setOpen] = useState(false);
@@ -40,7 +43,9 @@ export function ZoomableImage({
     >
       {/* Uploads or any http(s) host, so next/image's allow-list doesn't fit */}
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={src} alt={alt} data-align={align} loading={loading} className={className} />
+      <img src={src} alt={alt} data-align={align}
+        data-border={border ? '' : undefined}
+        loading={loading} className={className} />
     </button>
   );
 
