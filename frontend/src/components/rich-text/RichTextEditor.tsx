@@ -13,6 +13,7 @@ import { HighlightedCodeBlock } from './extensions/code-block/code-block';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
 import { ImageCarouselExtension } from './extensions/image-carousel/image-carousel';
 import { VideoExtension } from './extensions/video';
+import { useDraft } from './extensions/use-draft';
 import { imageAlign, imageShowsCaption, isEmptyDoc, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
 interface RichTextEditorProps {
@@ -102,6 +103,9 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       image: e.isActive('image'),
       imageAlign: imageAlign({ attrs: e.getAttributes('image') }),
       imageCaption: imageShowsCaption({ attrs: e.getAttributes('image') }),
+      imageAlt: String(e.getAttributes('image').alt ?? ''),
+      // Which image is selected, so the description box starts over on another image
+      imagePos: e.state.selection.from,
     }),
   });
 
@@ -119,12 +123,6 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
   function insertImage(src: string, alt: string, align: ImageAlign, showCaption: boolean) {
     chain().insertContent({ type: 'image', attrs: { src, alt, align, showCaption } }).run();
     setPanel(undefined);
-  }
-
-  function editImageDescription() {
-    const current = editor.getAttributes('image').alt;
-    const alt = window.prompt('Image description (alt text)', typeof current === 'string' ? current : '');
-    if (alt !== null) chain().updateAttributes('image', { alt: alt.trim() }).run();
   }
 
   function insertVideo(src: string, title: string) {
@@ -196,32 +194,19 @@ function Toolbar({ editor, onUpload }: { editor: Editor; onUpload: UploadMedia }
       <ToolButton label="Divider" onClick={() => chain().setHorizontalRule().run()}>
         ―
       </ToolButton>
-      {state.image && (
-        <>
-          <Divider />
-          {IMAGE_ALIGNS.map(({ value, label }) => (
-            <ToolButton
-              key={value}
-              label={`Align image ${value}`}
-              active={state.imageAlign === value}
-              onClick={() => chain().updateAttributes('image', { align: value }).run()}
-            >
-              {label}
-            </ToolButton>
-          ))}
-          <ToolButton label="Edit image description" onClick={editImageDescription}>
-            Description
-          </ToolButton>
-          <ToolButton
-            label="Show description under the image"
-            active={state.imageCaption}
-            onClick={() => chain().updateAttributes('image', { showCaption: !state.imageCaption }).run()}
-          >
-            Caption
-          </ToolButton>
-        </>
-      )}
     </div>
+    {state.image && (
+      <ImageSettings
+        key={state.imagePos}
+        align={state.imageAlign}
+        alt={state.imageAlt}
+        showCaption={state.imageCaption}
+        onAlign={(align) => chain().updateAttributes('image', { align }).run()}
+        // Not chained through focus(), so typing stays in the description box
+        onAlt={(alt) => editor.chain().updateAttributes('image', { alt }).run()}
+        onShowCaption={(showCaption) => chain().updateAttributes('image', { showCaption }).run()}
+      />
+    )}
     {panel === 'image' && (
       <ImageInsertPanel onUpload={onUpload} onInsert={insertImage} onCancel={() => setPanel(undefined)} />
     )}
@@ -269,6 +254,58 @@ const IMAGE_ALIGNS: { value: ImageAlign; label: string }[] = [
   { value: 'left', label: 'Left' },
   { value: 'center', label: 'Center' },
 ];
+
+/** The selected image's settings, on their own row under the toolbar. */
+function ImageSettings({
+  align,
+  alt,
+  showCaption,
+  onAlign,
+  onAlt,
+  onShowCaption,
+}: {
+  align: ImageAlign;
+  alt: string;
+  showCaption: boolean;
+  onAlign: (align: ImageAlign) => void;
+  onAlt: (alt: string) => void;
+  onShowCaption: (showCaption: boolean) => void;
+}) {
+  const [draft, setDraft] = useDraft(alt, onAlt);
+
+  return (
+    <div
+      role="group"
+      aria-label="Selected image"
+      className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border bg-background px-2 py-1.5 text-sm"
+    >
+      <span className="px-1 text-muted">Image</span>
+      <div className="flex gap-0.5">
+        {IMAGE_ALIGNS.map(({ value, label }) => (
+          <ToolButton key={value} label={`Align image ${value}`} active={align === value} onClick={() => onAlign(value)}>
+            {label}
+          </ToolButton>
+        ))}
+      </div>
+      <TextInput
+        aria-label="Image description"
+        placeholder="Description (alt text)"
+        value={draft}
+        onChange={(event) => setDraft(event.target.value)}
+        className="min-w-48 flex-1 py-1"
+      />
+      <label className="flex items-center gap-1.5">
+        <input
+          type="checkbox"
+          checked={showCaption}
+          onChange={(event) => onShowCaption(event.target.checked)}
+          className="accent-accent"
+        />
+        Show description under the image
+      </label>
+    </div>
+  );
+}
 
 /** Choose an image (upload by default, or URL), its alt text, alignment and caption, then insert it. */
 function ImageInsertPanel({
