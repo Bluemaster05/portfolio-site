@@ -102,10 +102,13 @@ export function ContentForm({
     const untouched = groups.filter((other) => other !== group && !isChanged(other));
     try {
       // Only this group's edits; other tabs keep their unsaved changes for their own Save
-      const next = await onSave(group ? { ...saved, ...pick(values, group.fields) } : values);
+      const sent = group ? { ...saved, ...pick(values, group.fields) } : values;
+      const next = await onSave(sent);
       setSaved(next);
+      // Only when the server changed what was sent (e.g. filled in the slug): replacing remounts
+      // the inputs, which would lose their own state, such as the selected write-up topic
       if (group) {
-        replaceGroup(group, next);
+        if (group.fields.some((field) => !sameValue(next[field.name], sent[field.name]))) replaceGroup(group, next);
         setValues((current) => ({ ...current, ...pick(next, untouched.flatMap((other) => other.fields)) }));
       }
       setStatus((current) => ({ ...current, [key]: {} }));
