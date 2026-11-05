@@ -21,6 +21,7 @@ frontend/src/
 │   ├── public/                presentational components for the public site
 │   ├── admin/                 presentational components for the admin portal
 │   ├── rich-text/             TipTap editor, custom extensions, server renderer
+│   ├── ScrollingTabRow.tsx    tab row that scrolls sideways with ‹ › buttons (topics, editor tabs)
 │   └── ThemeToggle.tsx        light/dark switch (public header + admin sidebar)
 ├── lib/
 │   ├── api/

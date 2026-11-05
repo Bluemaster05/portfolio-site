@@ -3,6 +3,7 @@
 import { useId, useState, type FormEvent, type KeyboardEvent, type ReactNode } from 'react';
 import { flushSync } from 'react-dom';
 import { RichTextEditor } from '@/components/rich-text/RichTextEditor';
+import { ScrollingTabRow } from '@/components/ScrollingTabRow';
 import { errorMessage } from '@/lib/admin/api-error';
 import { isMediaItem, type FormValue, type FormValues, type MediaItem } from '@/lib/admin/form-values';
 import type { UploadMedia } from '@/lib/admin/media';
@@ -204,13 +205,12 @@ export function ContentForm({
   const body = (
     <>
       {tabs.length > 0 && (
-        <div className="grid gap-6">
-          {/* The bottom line is an inset shadow, not a border, so the active underline can sit on it
-              without the tabs overflowing (which would add a scrollbar to this scroll container) */}
-          <div
-            role="tablist"
-            aria-label="Editor sections"
-            className="flex overflow-x-auto shadow-[inset_0_-1px_0_var(--border)]"
+        // The one column never grows past the form, so wide tabs scroll inside their row
+        <div className="grid grid-cols-[minmax(0,1fr)] gap-6">
+          <ScrollingTabRow
+            label="Editor sections"
+            itemsName="sections"
+            selected={activeTab}
           >
             {groups
               .filter((group) => group.key !== UNTABBED)
@@ -245,7 +245,7 @@ export function ContentForm({
                   </button>
                 );
               })}
-          </div>
+          </ScrollingTabRow>
           {/* Every panel stays mounted so editors keep their state when switching tabs */}
           {groups
             .filter((group) => group.key !== UNTABBED)
