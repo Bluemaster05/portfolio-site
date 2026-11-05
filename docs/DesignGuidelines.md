@@ -6,7 +6,9 @@ text harder to read, drop the idea.
 ## Principles
 
 - **Text first.** Body copy is 17–18px, line-height ~1.7, and content columns are capped at roughly
-  70 characters (`max-width: 70ch` for prose).
+  70 characters (`max-width: 70ch` for prose). Detail pages (projects, experience, education,
+  honors) are one centered `max-w-4xl` column; their write-up fills it (`prose-wide`, ~80
+  characters) so it lines up with the header and media.
 - **High contrast.** Body text meets WCAG AA (4.5:1) in light and dark modes. Muted text is still AA.
 - **Calm palette.** Neutral backgrounds, one accent color. No gradients behind text, no busy
   backgrounds, no neon.

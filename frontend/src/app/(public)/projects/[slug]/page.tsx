@@ -35,7 +35,7 @@ async function ProjectDetails({ params }: Pick<PageProps<'/projects/[slug]'>, 'p
   ].filter((link): link is { label: string; href: string } => Boolean(link));
 
   return (
-    <article className="animate-fade-up">
+    <article className="mx-auto max-w-4xl animate-fade-up">
       <Link href="/projects" className="text-sm text-muted hover:text-foreground">
         ← All projects
       </Link>
@@ -60,7 +60,7 @@ async function ProjectDetails({ params }: Pick<PageProps<'/projects/[slug]'>, 'p
         </div>
       </header>
       <ProjectMedia layout={project.mediaLayout} media={project.media} title={project.title} />
-      <RichTextRenderer doc={project.content} />
+      <RichTextRenderer doc={project.content} className="prose-wide" />
     </article>
   );
 }

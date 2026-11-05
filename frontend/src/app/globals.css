@@ -109,6 +109,11 @@ body {
   max-width: 70ch;
 }
 
+/* Write-ups fill their page's narrow centered column, lining up with the header and media */
+.prose.prose-wide {
+  max-width: none;
+}
+
 .prose > * + * {
   margin-top: 1em;
 }

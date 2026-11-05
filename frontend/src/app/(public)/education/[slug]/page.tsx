@@ -33,7 +33,7 @@ async function EntryDetails({ params }: Pick<PageProps<'/education/[slug]'>, 'pa
     .join(' · ');
 
   return (
-    <article className="animate-fade-up">
+    <article className="mx-auto max-w-4xl animate-fade-up">
       <Link href="/education" className="text-sm text-muted hover:text-foreground">
         ← All education
       </Link>
@@ -49,7 +49,7 @@ async function EntryDetails({ params }: Pick<PageProps<'/education/[slug]'>, 'pa
 
       {!isEmptyDoc(entry.writeup) && (
         <div className="mt-10 border-t border-border pt-8">
-          <RichTextRenderer doc={entry.writeup} />
+          <RichTextRenderer doc={entry.writeup} className="prose-wide" />
         </div>
       )}
     </article>

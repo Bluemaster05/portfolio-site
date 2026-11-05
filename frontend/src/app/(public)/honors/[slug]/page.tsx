@@ -32,7 +32,7 @@ async function HonorDetails({ params }: Pick<PageProps<'/honors/[slug]'>, 'param
   const meta = [honor.issuer, formatPartialDate(honor.date)].filter(Boolean).join(' · ');
 
   return (
-    <article className="animate-fade-up">
+    <article className="mx-auto max-w-4xl animate-fade-up">
       <Link href="/honors" className="text-sm text-muted hover:text-foreground">
         ← All honors &amp; awards
       </Link>
@@ -53,7 +53,7 @@ async function HonorDetails({ params }: Pick<PageProps<'/honors/[slug]'>, 'param
 
       {!isEmptyDoc(honor.writeup) && (
         <div className="mt-10 border-t border-border pt-8">
-          <RichTextRenderer doc={honor.writeup} />
+          <RichTextRenderer doc={honor.writeup} className="prose-wide" />
         </div>
       )}
     </article>
