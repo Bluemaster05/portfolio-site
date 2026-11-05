@@ -1,6 +1,7 @@
 'use client';
 
 import { useId, useState, type KeyboardEvent } from 'react';
+import { MediaLightbox } from '@/components/MediaLightbox';
 
 export interface CarouselImage {
   url: string;
@@ -23,15 +24,18 @@ const SLIDE_POSITION: Record<string, string> = {
 };
 
 /**
- * Images one at a time: the selected one centered, faded copies of its neighbours to each side.
- * Arrows (buttons or keys) and clicking a neighbour move between them with a short slide; the
- * global reduced-motion rule turns the motion off.
+ * Images one at a time: the selected one centered, faded copies of its neighbours to each side,
+ * its description below. Arrows (buttons or keys) and clicking a neighbour move between them with a
+ * short slide; the global reduced-motion rule turns the motion off. Clicking the selected image
+ * opens it full size.
  */
 export function ImageCarousel({ images, label = 'Images' }: { images: CarouselImage[]; label?: string }) {
   const [active, setActive] = useState(0);
+  const [zoomed, setZoomed] = useState(false);
   const id = useId();
   const count = images.length;
   if (count === 0) return null;
+  const hasCaptions = images.some((image) => image.alt);
 
   const go = (step: number) => setActive((current) => (current + step + count) % count);
 
@@ -62,11 +66,12 @@ export function ImageCarousel({ images, label = 'Images' }: { images: CarouselIm
               key={`${image.url}-${index}`}
               type="button"
               aria-hidden={!isActive}
-              tabIndex={-1}
-              disabled={isActive || !visible}
-              onClick={() => setActive(index)}
+              aria-label={isActive ? `View full size${image.alt ? `: ${image.alt}` : ''}` : undefined}
+              tabIndex={isActive ? 0 : -1}
+              disabled={!visible}
+              onClick={() => (isActive ? setZoomed(true) : setActive(index))}
               className={`absolute left-1/2 top-0 h-full w-[72%] transition-[translate,scale,opacity] duration-[400ms] ease-out sm:w-[64%] ${position} ${
-                isActive ? 'z-10 cursor-default' : 'z-0 cursor-pointer'
+                isActive ? 'z-10 cursor-zoom-in' : 'z-0 cursor-pointer'
               }`}
             >
               {/* Uploads or any http(s) host, so next/image's allow-list doesn't fit */}
@@ -81,6 +86,13 @@ export function ImageCarousel({ images, label = 'Images' }: { images: CarouselIm
           );
         })}
       </div>
+
+      {hasCaptions && (
+        // The counter below announces the description, so this is for sighted readers
+        <p aria-hidden className="mx-auto min-h-5 max-w-[70ch] text-center text-sm text-muted">
+          {images[active].alt}
+        </p>
+      )}
 
       {count > 1 && (
         <div className="flex items-center justify-center gap-4">
@@ -108,6 +120,10 @@ export function ImageCarousel({ images, label = 'Images' }: { images: CarouselIm
           </button>
         </div>
       )}
+      <MediaLightbox
+        item={zoomed ? { url: images[active].url, alt: images[active].alt } : undefined}
+        onClose={() => setZoomed(false)}
+      />
     </section>
   );
 }
