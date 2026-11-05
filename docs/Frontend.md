@@ -81,6 +81,9 @@ on a hidden tab blocks it, the editor switches to that tab so the browser can po
 
 Optional text fields are cleared by sending `''`; the server turns that into `null`.
 
+Write-up fields use `kind: 'writeup'`: one rich text document that can be split into titled topics,
+shown as tabs on the public page (see [RichContent.md](RichContent.md#write-up-topics)).
+
 Experience entries are **jobs**: each belongs to an **employer** (managed at `/admin/employers`:
 name, website, optional logo, order; an employer with jobs can't be deleted) and is picked in the job editor
 with `kind: 'employer'` (`EmployerSelect`, with inline "New…"). A job has free-text skills,

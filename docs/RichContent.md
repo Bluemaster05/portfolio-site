@@ -42,6 +42,32 @@ validate every node. The renderer ignores node types it does not know.
 | **video** (custom)           | `frontend/src/components/rich-text/extensions/video.ts` | `<video controls>` showing its first frame (never autoplays); `attrs.src` (upload or `http(s)` MP4/WebM) and `attrs.title` (description for screen readers); inserted from the editor's Video panel |
 | **imageCarousel** (custom)   | `frontend/src/components/rich-text/extensions/image-carousel` | `ImageCarousel`: one image at a time, centered between faded neighbours, arrows/keys to move (400ms slide, off under reduced motion); `attrs.images` = `{ src, alt }[]`. In the editor the block is compact (thumbnails + count) until Edit |
 | **codeTabs** (custom)         | `frontend/src/components/rich-text/extensions/code-tabs` | Tabs of Shiki-highlighted snippets; tab switching is the only client JS |
+| **topic** (custom, top level only) | `frontend/src/components/admin/WriteupField.tsx` (not a TipTap node) | Write-up topics shown as underlined tabs (`TopicTabs`); see below |
+
+## Write-up topics
+
+A write-up (project body, job/education/honor write-up) is either one document or two or more
+**topics**: titled parts shown as tabs on the public page. Topics are top-level nodes of the same
+stored document, so the server and API don't change:
+
+```json
+{
+  "type": "doc",
+  "content": [
+    { "type": "topic", "attrs": { "title": "Overview" }, "content": [{ "type": "paragraph" }] },
+    { "type": "topic", "attrs": { "title": "Architecture" }, "content": [] }
+  ]
+}
+```
+
+A document only has topics when there are at least two; `docFromTopics()` turns a single topic back
+into a plain document. In the admin, write-up fields use `kind: 'writeup'` (`WriteupField`):
+"Switch to topic-based write-up" (above the editor) turns the current write-up into the first topic
+("Overview") plus a new one, and "+ Add topic" at the end of the tabs adds more; each
+topic has its own title, editor, move left/right, and Delete; deleting down to one topic goes back
+to a single write-up without tabs. `topicsOf()` reads topics, `isEmptyDoc()` treats a document whose
+topics are all empty as empty, and `RichTextRenderer` renders topics as tabs (each panel rendered on
+the server; only the tab switching runs in the browser).
 
 ## Syntax colors
 
