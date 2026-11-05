@@ -49,7 +49,7 @@ export const projectsResource: ContentResource<Project> = {
       tab: 'Technologies',
     },
     ...mediaFields('project', 'the cover on cards and the home page'),
-    { name: 'content', label: 'Write-up', kind: 'richtext', tab: 'Write-up' },
+    { name: 'content', label: 'Write-up', kind: 'writeup', tab: 'Write-up' },
     { name: 'featured', label: 'Feature on the home page', kind: 'checkbox', tab: 'Details' },
     { name: 'published', label: 'Published', kind: 'checkbox', tab: 'Details' },
   ],

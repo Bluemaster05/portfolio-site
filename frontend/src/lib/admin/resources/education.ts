@@ -54,7 +54,7 @@ export const educationResource: ContentResource<Education> = {
     {
       name: 'writeup',
       label: 'Write-up',
-      kind: 'richtext',
+      kind: 'writeup',
       help: 'More detail and context, shown only on the entry’s own page.',
       tab: 'Write-up',
     },

@@ -55,7 +55,7 @@ export const honorsResource: ContentResource<Honor> = {
     {
       name: 'writeup',
       label: 'Write-up',
-      kind: 'richtext',
+      kind: 'writeup',
       help: 'More detail and context, shown only on the honor’s own page.',
       tab: 'Write-up',
     },

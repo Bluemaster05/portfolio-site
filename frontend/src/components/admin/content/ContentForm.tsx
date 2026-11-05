@@ -12,6 +12,7 @@ import { TechnologyPicker } from '../TechnologyPicker';
 import { EmployerSelect } from '../EmployerSelect';
 import type { EmployerSummary, TechnologySummary } from '@/lib/api/types';
 import { MediaSourceField } from '../MediaSourceField';
+import { WriteupField } from '../WriteupField';
 import { Button, Checkbox, ErrorBanner, Field, TextArea, TextInput } from '../ui';
 
 interface ContentFormProps {
@@ -311,7 +312,7 @@ function canonical(value: unknown): unknown {
 }
 
 function isWide(field: FieldConfig): boolean {
-  return ['richtext', 'textarea', 'tags', 'media', 'image', 'technologies'].includes(field.kind);
+  return ['richtext', 'writeup', 'textarea', 'tags', 'media', 'image', 'technologies'].includes(field.kind);
 }
 
 interface FieldInputProps {
@@ -358,6 +359,12 @@ function FieldInput({ field, help, maxItems, value, onChange, onUpload, lookups 
       return (
         <Field {...common} htmlFor={undefined}>
           <RichTextEditor label={field.label} value={value} onChange={onChange} onUpload={onUpload} />
+        </Field>
+      );
+    case 'writeup':
+      return (
+        <Field {...common} htmlFor={undefined}>
+          <WriteupField label={field.label} value={value} onChange={onChange} onUpload={onUpload} />
         </Field>
       );
     case 'image':

@@ -82,7 +82,7 @@ export const experienceResource: ContentResource<Experience> = {
     {
       name: 'writeup',
       label: 'Write-up',
-      kind: 'richtext',
+      kind: 'writeup',
       help: 'More detail and context, shown only on the job’s own page.',
       tab: 'Write-up',
     },

@@ -8,6 +8,8 @@ export type FieldKind =
   | 'slug'
   | 'tags'
   | 'richtext'
+  /** Rich text that can be split into titled topics, shown as tabs on the page */
+  | 'writeup'
   | 'checkbox'
   /** One image: upload (default) or URL, stored as a URL string */
   | 'image'
