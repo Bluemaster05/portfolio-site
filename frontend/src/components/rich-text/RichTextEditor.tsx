@@ -3,7 +3,7 @@
 import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { Placeholder } from '@tiptap/extensions';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { UploadMedia } from '@/lib/admin/media';
 import { isImageSrc, isVideoSrc } from '@/lib/images';
 import { MediaSourceField } from '@/components/admin/MediaSourceField';
@@ -13,7 +13,7 @@ import { HighlightedCodeBlock } from './extensions/code-block/code-block';
 import { CodeTabsExtension, DEFAULT_CODE_TABS } from './extensions/code-tabs/code-tabs';
 import { ImageCarouselExtension } from './extensions/image-carousel/image-carousel';
 import { VideoExtension } from './extensions/video';
-import { imageAlign, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
+import { imageAlign, isEmptyDoc, safeHref, toDoc, type ImageAlign, type RichTextValue } from './types';
 
 interface RichTextEditorProps {
   value: unknown;
@@ -27,6 +27,12 @@ interface RichTextEditorProps {
 
 /** TipTap editor for any rich text field. Emits TipTap JSON; see docs/RichContent.md. */
 export function RichTextEditor({ value, onChange, placeholder, label, onUpload }: RichTextEditorProps) {
+  // The latest value, for the update handler the editor was created with
+  const latest = useRef(value);
+  useEffect(() => {
+    latest.current = value;
+  }, [value]);
+
   const editor = useEditor({
     // Rendered on the client only, so there is no server markup to hydrate
     immediatelyRender: false,
@@ -54,7 +60,14 @@ export function RichTextEditor({ value, onChange, placeholder, label, onUpload }
         'aria-multiline': 'true',
       },
     },
-    onUpdate: ({ editor: current }) => onChange(current.getJSON()),
+    onUpdate: ({ editor: current }) => {
+      const doc = current.getJSON();
+      // An empty document opens as one empty paragraph; that isn't an edit, so a saved empty
+      // field (e.g. a new topic) doesn't show as unsaved. Emptied fields are stored as no content
+      // so they match one that was never written in.
+      if (!isEmptyDoc(doc)) onChange(doc);
+      else if (!isEmptyDoc(latest.current)) onChange({ type: 'doc', content: [] });
+    },
   });
 
   return (
