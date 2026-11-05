@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { getExperienceJob } from '@/lib/api/public-data';
 import { formatDateRange } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
+import { DetailPageSkeleton } from '@/components/public/DetailPageSkeleton';
 import { isEmptyDoc } from '@/components/rich-text/types';
 import { TagList } from '@/components/public/PageHeader';
 import { TechList } from '@/components/public/TechPill';
@@ -20,7 +21,7 @@ export async function generateMetadata(props: PageProps<'/experience/[slug]'>): 
 
 export default function ExperienceJobPage(props: PageProps<'/experience/[slug]'>) {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<DetailPageSkeleton />}>
       <JobDetails params={props.params} />
     </Suspense>
   );

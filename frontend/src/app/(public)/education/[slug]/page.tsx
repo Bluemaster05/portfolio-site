@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { getEducationEntry } from '@/lib/api/public-data';
 import { formatDateRange } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
+import { DetailPageSkeleton } from '@/components/public/DetailPageSkeleton';
 import { isEmptyDoc } from '@/components/rich-text/types';
 import { educationMeta, SchoolName } from '@/components/public/EducationCard';
 
@@ -17,7 +18,7 @@ export async function generateMetadata(props: PageProps<'/education/[slug]'>): P
 
 export default function EducationEntryPage(props: PageProps<'/education/[slug]'>) {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<DetailPageSkeleton />}>
       <EntryDetails params={props.params} />
     </Suspense>
   );

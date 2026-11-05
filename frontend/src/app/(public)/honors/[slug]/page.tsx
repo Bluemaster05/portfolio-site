@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { getHonor } from '@/lib/api/public-data';
 import { formatPartialDate } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
+import { DetailPageSkeleton } from '@/components/public/DetailPageSkeleton';
 import { isEmptyDoc } from '@/components/rich-text/types';
 import { CredentialLink } from '@/components/public/HonorCard';
 import { ProjectMedia } from '@/components/public/ProjectMedia';
@@ -18,7 +19,7 @@ export async function generateMetadata(props: PageProps<'/honors/[slug]'>): Prom
 
 export default function HonorPage(props: PageProps<'/honors/[slug]'>) {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<DetailPageSkeleton media />}>
       <HonorDetails params={props.params} />
     </Suspense>
   );

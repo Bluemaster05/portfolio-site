@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { getBlogPost } from '@/lib/api/public-data';
 import { formatDate } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
+import { DetailPageSkeleton } from '@/components/public/DetailPageSkeleton';
 import { TagList } from '@/components/public/PageHeader';
 import { ZoomableImage } from '@/components/public/ZoomableImage';
 import { isImageSrc } from '@/lib/images';
@@ -22,7 +23,7 @@ export async function generateMetadata(props: PageProps<'/blog/[slug]'>): Promis
 
 export default function BlogPostPage(props: PageProps<'/blog/[slug]'>) {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<DetailPageSkeleton className="" media />}>
       <BlogPostContent params={props.params} />
     </Suspense>
   );

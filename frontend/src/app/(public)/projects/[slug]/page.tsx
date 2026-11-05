@@ -5,6 +5,7 @@ import { Suspense } from 'react';
 import { getProject } from '@/lib/api/public-data';
 import { formatDateRange } from '@/lib/format';
 import { RichTextRenderer } from '@/components/rich-text/RichTextRenderer';
+import { DetailPageSkeleton } from '@/components/public/DetailPageSkeleton';
 import { TechList } from '@/components/public/TechPill';
 import { ProjectMedia } from '@/components/public/ProjectMedia';
 
@@ -17,7 +18,7 @@ export async function generateMetadata(props: PageProps<'/projects/[slug]'>): Pr
 
 export default function ProjectPage(props: PageProps<'/projects/[slug]'>) {
   return (
-    <Suspense fallback={<p className="text-muted">Loading…</p>}>
+    <Suspense fallback={<DetailPageSkeleton media />}>
       <ProjectDetails params={props.params} />
     </Suspense>
   );
